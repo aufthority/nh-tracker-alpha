@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6b73ff">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NeuroHabit</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- ============================================================
+     NEUROHABIT — Weighted Habit Tracker
+     Theme  : Dark matte / earthy
+     Scoring: Weighted. Foundational missing = gauge capped at 50%.
+              All habits remain clickable at all times.
+     ============================================================ -->
+
+<style>
+/* ─── DESIGN TOKENS — Dark matte earthy ──────────────────────── */
+:root {
+  /* Base palette */
+  --bg:        #1c1a17;   /* very dark warm brown */
+  --surface:   #242119;   /* card surface */
+  --surface2:  #2e2b24;   /* inset / secondary */
+  --surface3:  #383430;   /* hover / active */
+  --border:    #3d3a33;   /* subtle dividers */
+  --border2:   #4a4640;   /* stronger border */
+  --text:      #e8e3d8;   /* warm off-white */
+  --muted:     #7a7469;   /* muted text */
+  --subtle:    #504c45;   /* very faint */
+
+  /* Neurotransmitter accents — muted, earthy variants */
+  --dopamine:  #c8712a;   /* burnt amber */
+  --serotonin: #4a9e82;   /* muted teal */
+  --oxytocin:  #b85070;   /* dusty rose */
+  --endorphin: #5a82c0;   /* slate blue */
+  --coach:     #7c6ab8;   /* muted violet */
+
+  /* Layout */
+  --header-h:  88px;
+  --nav-h:     64px;
+  --safe-b:    env(safe-area-inset-bottom, 0px);
+  --radius-sm: 10px;
+  --radius:    16px;
+}
+
+/* ─── RESET ──────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+html { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 15px;
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── PERSISTENT HEADER ──────────────────────────────────────── */
+.app-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: var(--header-h);
+  display: flex; align-items: center; gap: 0;
+  backdrop-filter: blur(12px);
+}
+.header-brand { flex: 1; min-width: 0; }
+.header-brand h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 20px; font-weight: 400;
+  letter-spacing: -0.3px; line-height: 1;
+  color: var(--text);
+}
+.header-brand p {
+  font-size: 11px; color: var(--muted);
+  margin-top: 2px; letter-spacing: 0.3px;
+}
+
+/* Score pill */
+.header-score {
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.streak-badge {
+  display: flex; align-items: center; gap: 3px;
+  font-size: 12px; font-weight: 500; color: var(--muted);
+}
+.streak-badge .fire { font-size: 14px; }
+
+.score-pill {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 40px; padding: 7px 14px 7px 10px;
+}
+.score-ring-wrap {
+  position: relative; width: 36px; height: 36px; flex-shrink: 0;
+}
+.score-ring-wrap svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.ring-track { fill: none; stroke: var(--border2); stroke-width: 3; }
+.ring-fill  {
+  fill: none; stroke-width: 3; stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s cubic-bezier(.4,0,.2,1);
+}
+.score-ring-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: var(--text);
+}
+.score-pill-info .val { font-size: 14px; font-weight: 600; line-height: 1; color: var(--text); }
+.score-pill-info .lbl { font-size: 10px; color: var(--muted); margin-top: 1px; letter-spacing: 0.3px; }
+
+/* Grade chip */
+.grade-chip {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Instrument Serif', serif; font-size: 18px;
+  transition: all 0.35s; flex-shrink: 0;
+  color: var(--muted);
+}
+
+/* ─── BOTTOM NAVIGATION ──────────────────────────────────────── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: var(--safe-b);
+  height: calc(var(--nav-h) + var(--safe-b));
+}
+.nav-tabs { display: flex; width: 100%; height: var(--nav-h); }
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  cursor: pointer; border: none; background: none;
+  padding: 10px 4px; transition: all 0.2s; position: relative;
+}
+.nav-tab .tab-icon  {
+  font-size: 19px; line-height: 1;
+  transition: transform 0.2s cubic-bezier(.34,1.56,.64,1);
+}
+.nav-tab .tab-label {
+  font-size: 10px; font-weight: 500; color: var(--muted);
+  letter-spacing: 0.3px; transition: color 0.2s; line-height: 1;
+}
+.nav-tab .tab-pip {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: transparent; transition: all 0.2s; margin-top: 1px;
+}
+/* Per-tab accent */
+.nav-tab[data-page="dopamine"]  { --tab-color: var(--dopamine); }
+.nav-tab[data-page="serotonin"] { --tab-color: var(--serotonin); }
+.nav-tab[data-page="oxytocin"]  { --tab-color: var(--oxytocin); }
+.nav-tab[data-page="endorphin"] { --tab-color: var(--endorphin); }
+.nav-tab[data-page="coach"]     { --tab-color: var(--coach); }
+
+.nav-tab.active .tab-icon  { transform: translateY(-2px) scale(1.12); }
+.nav-tab.active .tab-label { color: var(--tab-color); font-weight: 600; }
+.nav-tab.active .tab-pip   { background: var(--tab-color); }
+
+/* ─── PAGE SHELL ─────────────────────────────────────────────── */
+.page-container {
+  margin-top: var(--header-h);
+  margin-bottom: calc(var(--nav-h) + var(--safe-b));
+}
+.page { display: none; padding-bottom: 40px; animation: fadeUp 0.2s ease; }
+.page.active { display: block; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── PAGE HERO ──────────────────────────────────────────────── */
+.page-hero {
+  padding: 26px 20px 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.page-hero-top {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+}
+.accent-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.page-hero h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 24px; font-weight: 400;
+  letter-spacing: -0.4px; line-height: 1.1;
+  color: var(--text);
+}
+.page-hero p {
+  font-size: 13px; color: var(--muted);
+  line-height: 1.5; margin-top: 2px;
+}
+
+/* Category gauge — dual bar: raw behind, effective on top */
+.cat-gauge { margin-top: 16px; }
+.cat-gauge-track {
+  height: 6px; border-radius: 3px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+/* Raw progress — all completed habits (faint) */
+.cat-gauge-raw {
+  position: absolute; inset: 0;
+  border-radius: 3px;
+  background: var(--accent-color);
+  opacity: 0.18;
+  transition: width 0.45s cubic-bezier(.4,0,.2,1);
+  width: 0%;
+}
+/* Effective progress — capped at 50% if foundational missing */
+.cat-gauge-fill {
+  position: absolute; inset: 0;
+  border-radius: 3px;
+  background: var(--accent-color);
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  width: 0%;
+}
+/* 50% cap marker — dashed line */
+.cat-gauge-cap-marker {
+  position: absolute; top: -2px; bottom: -2px;
+  left: 50%; width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--accent-color) 0px, var(--accent-color) 3px,
+    transparent 3px, transparent 6px
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.cat-gauge-cap-marker.show { opacity: 0.7; }
+
+/* Row below gauge: score label + cap badge */
+.cat-gauge-meta {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-top: 7px;
+}
+.cat-gauge-label {
+  font-size: 12px; font-weight: 600;
+}
+.cap-badge {
+  display: none; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 500;
+  padding: 3px 9px; border-radius: 20px;
+  background: color-mix(in srgb, var(--accent-color) 10%, var(--surface2));
+  border: 1px solid color-mix(in srgb, var(--accent-color) 25%, transparent);
+  color: var(--accent-color);
+}
+.cap-badge.show { display: flex; }
+
+/* ─── PIPS ───────────────────────────────────────────────────── */
+.pips-row { display: flex; gap: 4px; padding: 8px 20px 4px; }
+.pip-seg {
+  flex: 1; height: 3px; border-radius: 2px;
+  background: var(--border2);
+  transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+.pip-seg.lit {
+  background: var(--accent-color);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--accent-color) 40%, transparent);
+}
+/* Capped pips shown faintly */
+.pip-seg.capped-pip {
+  background: color-mix(in srgb, var(--accent-color) 22%, var(--border2));
+}
+
+/* Max achieved banner */
+.max-note {
+  display: none; align-items: center; gap: 7px;
+  margin: 4px 16px 6px;
+  padding: 8px 13px;
+  background: color-mix(in srgb, var(--serotonin) 10%, var(--surface2));
+  border: 1px solid color-mix(in srgb, var(--serotonin) 30%, transparent);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--serotonin);
+}
+.max-note.show { display: flex; }
+
+/* ─── HABIT ROWS ─────────────────────────────────────────────── */
+.habit-list {
+  padding: 4px 16px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+.habit-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 13px 14px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  position: relative; overflow: hidden;
+  user-select: none;
+}
+/* Left accent stripe on completion */
+.habit-row::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--accent-color);
+  opacity: 0; transition: opacity 0.2s;
+  border-radius: 0 2px 2px 0;
+}
+.habit-row.done::before { opacity: 1; }
+.habit-row:hover  { background: var(--surface2); border-color: var(--border2); }
+.habit-row:active { transform: scale(0.985); }
+
+/* Foundational row: subtle left tint */
+.habit-row.foundational {
+  background: color-mix(in srgb, var(--accent-color) 5%, var(--surface));
+}
+.habit-row.foundational:hover {
+  background: color-mix(in srgb, var(--accent-color) 9%, var(--surface2));
+}
+
+/* Checkbox */
+.habit-check-box {
+  width: 22px; height: 22px; border-radius: 6px;
+  border: 1.5px solid var(--border2); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface2);
+  transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
+}
+.habit-check-box svg {
+  opacity: 0; transform: scale(0);
+  transition: all 0.2s cubic-bezier(.34,1.56,.64,1);
+}
+.habit-row.done .habit-check-box {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+}
+.habit-row.done .habit-check-box svg {
+  opacity: 1; transform: scale(1);
+}
+
+/* Text content */
+.habit-row-body { flex: 1; min-width: 0; }
+.habit-row-text {
+  font-size: 14px; line-height: 1.4; color: var(--text);
+  transition: color 0.2s; display: block;
+}
+.habit-row.done .habit-row-text {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--subtle);
+}
+.habit-type-label {
+  font-size: 10px; color: var(--muted);
+  margin-top: 2px; letter-spacing: 0.3px; display: block;
+}
+.habit-row.foundational .habit-type-label {
+  color: color-mix(in srgb, var(--accent-color) 70%, var(--muted));
+}
+
+/* Weight badge */
+.weight-badge {
+  display: flex; align-items: center; gap: 3px;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--surface2); color: var(--muted);
+  flex-shrink: 0; white-space: nowrap;
+  transition: all 0.25s;
+}
+.habit-row.done .weight-badge {
+  background: color-mix(in srgb, var(--accent-color) 12%, var(--surface2));
+  border-color: color-mix(in srgb, var(--accent-color) 30%, transparent);
+  color: var(--accent-color);
+}
+
+/* ─── COACH PAGE ─────────────────────────────────────────────── */
+.coach-hero {
+  padding: 26px 20px 18px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.coach-hero h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 24px; font-weight: 400; letter-spacing: -0.4px;
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text);
+}
+.coach-hero p { font-size: 13px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+
+.insight-cards { padding: 0 16px; display: flex; flex-direction: column; gap: 9px; }
+.insight-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 15px;
+  display: flex; gap: 13px; align-items: flex-start;
+  transition: all 0.3s; position: relative; overflow: hidden;
+}
+.insight-card::after {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; border-radius: 0 2px 2px 0;
+  background: var(--ins-color, var(--muted));
+}
+.insight-card.good::after { background: var(--serotonin); }
+.insight-icon-wrap {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.insight-card.good .insight-icon-wrap {
+  background: color-mix(in srgb, var(--serotonin) 15%, var(--surface2));
+}
+.insight-body strong {
+  display: block; font-size: 13px; font-weight: 600;
+  margin-bottom: 3px; line-height: 1.3; color: var(--text);
+}
+.insight-body span { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ─── WEEKLY DOTS ────────────────────────────────────────────── */
+.week-section {
+  margin: 18px 16px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+}
+.week-section h3 {
+  font-size: 11px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted);
+  font-weight: 500; margin-bottom: 12px;
+}
+.week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.week-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.week-cell-day { font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); }
+.week-cell-dot {
+  width: 100%; aspect-ratio: 1; border-radius: 7px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600; color: var(--muted);
+  transition: all 0.3s;
+}
+.week-cell-dot.today  { border-color: var(--border2); color: var(--text); font-weight: 700; }
+.week-cell-dot.filled {
+  background: color-mix(in srgb, var(--serotonin) 18%, var(--surface2));
+  color: var(--serotonin);
+  border-color: color-mix(in srgb, var(--serotonin) 30%, transparent);
+}
+.week-cell-dot.perfect { background: var(--serotonin); color: var(--bg); border-color: var(--serotonin); }
+.week-cell-dot.future  { opacity: 0.25; }
+
+/* ─── FOOTER ─────────────────────────────────────────────────── */
+.footer-actions { padding: 16px 16px 0; display: flex; justify-content: flex-end; }
+.reset-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  font-family: 'Geist', sans-serif; font-size: 12px;
+  padding: 7px 14px; border-radius: 8px; cursor: pointer;
+  transition: all 0.2s;
+}
+.reset-btn:hover { border-color: var(--subtle); color: var(--text); }
+
+/* ─── CONFETTI ───────────────────────────────────────────────── */
+.confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
+.cp { position: absolute; animation: cpfall 1.6s forwards; opacity: 0; }
+@keyframes cpfall {
+  0%   { opacity: 1; transform: translateY(-10px) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(500px) rotate(480deg); }
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media (min-width: 520px) {
+  .app-header, .habit-list, .pips-row,
+  .insight-cards, .footer-actions { padding-left: 24px; padding-right: 24px; }
+  .max-note { margin-left: 20px; margin-right: 20px; }
+  .page-hero, .coach-hero { padding-left: 24px; padding-right: 24px; }
+  .week-section { margin-left: 20px; margin-right: 20px; }
+}
+@media (min-width: 768px) {
+  :root { --header-h: 72px; }
+  .page-container { max-width: 680px; margin-left: auto; margin-right: auto; }
+  .bottom-nav {
+    max-width: 680px; left: 50%; transform: translateX(-50%);
+    border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="confetti-wrap" id="confetti"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     PERSISTENT HEADER
+     ══════════════════════════════════════════════════════ -->
+<header class="app-header">
+  <div class="header-brand">
+    <h1>NeuroHabit</h1>
+    <p id="headerDate">Loading…</p>
+  </div>
+  <div class="header-score">
+    <div class="streak-badge">
+      <span class="fire">🔥</span>
+      <span id="streakNum">0</span>
+    </div>
+    <div class="score-pill">
+      <div class="score-ring-wrap">
+        <svg viewBox="0 0 36 36" width="36" height="36">
+          <defs>
+            <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#c8712a"/>
+              <stop offset="50%"  stop-color="#b85070"/>
+              <stop offset="100%" stop-color="#5a82c0"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-track" cx="18" cy="18" r="15"/>
+          <circle class="ring-fill" id="ringFill" cx="18" cy="18" r="15"
+            stroke="url(#rg)" stroke-dasharray="94.2" stroke-dashoffset="94.2"/>
+        </svg>
+        <div class="score-ring-num" id="headerScoreNum">0</div>
+      </div>
+      <div class="score-pill-info">
+        <div class="val" id="headerScoreOf">0 / 41</div>
+        <div class="lbl">Daily Score</div>
+      </div>
+    </div>
+    <div class="grade-chip" id="gradeChip">—</div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGES
+     ══════════════════════════════════════════════════════ -->
+<main class="page-container">
+
+  <!-- ── DOPAMINE ───────────────────────────────────────── -->
+  <div class="page active" id="page-dopamine" style="--accent-color:var(--dopamine)">
+    <div class="page-hero">
+      <div class="page-hero-top">
+        <div class="accent-dot" style="background:var(--dopamine)"></div>
+        <h2>Dopamine</h2>
+      </div>
+      <p>Motivasi, drive &amp; reward pathway — sistem effort &amp; reward otak kamu.</p>
+      <div class="cat-gauge">
+        <div class="cat-gauge-track">
+          <div class="cat-gauge-raw"  id="gauge-raw-dopamine"></div>
+          <div class="cat-gauge-fill" id="gauge-fill-dopamine"></div>
+          <div class="cat-gauge-cap-marker" id="gauge-marker-dopamine"></div>
+        </div>
+        <div class="cat-gauge-meta">
+          <div class="cat-gauge-label" id="gauge-label-dopamine" style="color:var(--dopamine)">0 / 11</div>
+          <div class="cap-badge" id="capbadge-dopamine" style="--accent-color:var(--dopamine)">🔒 Capped at 50% — complete foundational</div>
+        </div>
+      </div>
+    </div>
+    <div class="pips-row" id="pips-dopamine" style="--accent-color:var(--dopamine)"></div>
+    <div class="max-note" id="maxnote-dopamine">✅ Max Dopamine score reached!</div>
+    <div class="habit-list" id="list-dopamine"></div>
+  </div>
+
+  <!-- ── SEROTONIN ──────────────────────────────────────── -->
+  <div class="page" id="page-serotonin" style="--accent-color:var(--serotonin)">
+    <div class="page-hero">
+      <div class="page-hero-top">
+        <div class="accent-dot" style="background:var(--serotonin)"></div>
+        <h2>Serotonin</h2>
+      </div>
+      <p>Mood stabiliser &amp; keseimbangan — regulation &amp; emotional resilience.</p>
+      <div class="cat-gauge">
+        <div class="cat-gauge-track">
+          <div class="cat-gauge-raw"  id="gauge-raw-serotonin"></div>
+          <div class="cat-gauge-fill" id="gauge-fill-serotonin"></div>
+          <div class="cat-gauge-cap-marker" id="gauge-marker-serotonin"></div>
+        </div>
+        <div class="cat-gauge-meta">
+          <div class="cat-gauge-label" id="gauge-label-serotonin" style="color:var(--serotonin)">0 / 12</div>
+          <div class="cap-badge" id="capbadge-serotonin" style="--accent-color:var(--serotonin)">🔒 Capped at 50% — complete foundational</div>
+        </div>
+      </div>
+    </div>
+    <div class="pips-row" id="pips-serotonin" style="--accent-color:var(--serotonin)"></div>
+    <div class="max-note" id="maxnote-serotonin">✅ Max Serotonin score reached!</div>
+    <div class="habit-list" id="list-serotonin"></div>
+  </div>
+
+  <!-- ── OXYTOCIN ───────────────────────────────────────── -->
+  <div class="page" id="page-oxytocin" style="--accent-color:var(--oxytocin)">
+    <div class="page-hero">
+      <div class="page-hero-top">
+        <div class="accent-dot" style="background:var(--oxytocin)"></div>
+        <h2>Oxytocin</h2>
+      </div>
+      <p>Connection, trust &amp; bonding — kuat dalam hubungan manusia.</p>
+      <div class="cat-gauge">
+        <div class="cat-gauge-track">
+          <div class="cat-gauge-raw"  id="gauge-raw-oxytocin"></div>
+          <div class="cat-gauge-fill" id="gauge-fill-oxytocin"></div>
+          <div class="cat-gauge-cap-marker" id="gauge-marker-oxytocin"></div>
+        </div>
+        <div class="cat-gauge-meta">
+          <div class="cat-gauge-label" id="gauge-label-oxytocin" style="color:var(--oxytocin)">0 / 9</div>
+          <div class="cap-badge" id="capbadge-oxytocin" style="--accent-color:var(--oxytocin)">🔒 Capped at 50% — complete foundational</div>
+        </div>
+      </div>
+    </div>
+    <div class="pips-row" id="pips-oxytocin" style="--accent-color:var(--oxytocin)"></div>
+    <div class="max-note" id="maxnote-oxytocin">✅ Max Oxytocin score reached!</div>
+    <div class="habit-list" id="list-oxytocin"></div>
+  </div>
+
+  <!-- ── ENDORPHIN ─────────────────────────────────────── -->
+  <div class="page" id="page-endorphin" style="--accent-color:var(--endorphin)">
+    <div class="page-hero">
+      <div class="page-hero-top">
+        <div class="accent-dot" style="background:var(--endorphin)"></div>
+        <h2>Endorphin</h2>
+      </div>
+      <p>Kurangkan stress &amp; physical relief — penting untuk recovery badan.</p>
+      <div class="cat-gauge">
+        <div class="cat-gauge-track">
+          <div class="cat-gauge-raw"  id="gauge-raw-endorphin"></div>
+          <div class="cat-gauge-fill" id="gauge-fill-endorphin"></div>
+          <div class="cat-gauge-cap-marker" id="gauge-marker-endorphin"></div>
+        </div>
+        <div class="cat-gauge-meta">
+          <div class="cat-gauge-label" id="gauge-label-endorphin" style="color:var(--endorphin)">0 / 9</div>
+          <div class="cap-badge" id="capbadge-endorphin" style="--accent-color:var(--endorphin)">🔒 Capped at 50% — complete foundational</div>
+        </div>
+      </div>
+    </div>
+    <div class="pips-row" id="pips-endorphin" style="--accent-color:var(--endorphin)"></div>
+    <div class="max-note" id="maxnote-endorphin">✅ Max Endorphin score reached!</div>
+    <div class="habit-list" id="list-endorphin"></div>
+  </div>
+
+  <!-- ── COACH ─────────────────────────────────────────── -->
+  <div class="page" id="page-coach" style="--accent-color:var(--coach)">
+    <div class="coach-hero">
+      <h2><span>🧠</span> NeuroCoach</h2>
+      <p>Analisis real-time berdasarkan weighted score kamu hari ini.</p>
+    </div>
+    <div class="insight-cards" id="insightCards"></div>
+    <div class="week-section">
+      <h3>Minggu Ini</h3>
+      <div class="week-grid" id="weekGrid"></div>
+    </div>
+    <div class="footer-actions">
+      <button class="reset-btn" onclick="resetToday()">Reset Hari Ini</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════
+     BOTTOM NAV
+     ══════════════════════════════════════════════════════ -->
+<nav class="bottom-nav">
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-page="dopamine">
+      <span class="tab-icon">⚡</span>
+      <span class="tab-label">Dopamine</span>
+      <span class="tab-pip"></span>
+    </button>
+    <button class="nav-tab" data-page="serotonin">
+      <span class="tab-icon">☀️</span>
+      <span class="tab-label">Serotonin</span>
+      <span class="tab-pip"></span>
+    </button>
+    <button class="nav-tab" data-page="oxytocin">
+      <span class="tab-icon">🤝</span>
+      <span class="tab-label">Oxytocin</span>
+      <span class="tab-pip"></span>
+    </button>
+    <button class="nav-tab" data-page="endorphin">
+      <span class="tab-icon">💪</span>
+      <span class="tab-label">Endorphin</span>
+      <span class="tab-pip"></span>
+    </button>
+    <button class="nav-tab" data-page="coach">
+      <span class="tab-icon">🧠</span>
+      <span class="tab-label">Coach</span>
+      <span class="tab-pip"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════════════════ -->
+<script>
+<script>
+/* ─── UPDATED HABITS SYSTEM (REPEATABLE + WEIGHTED) ───────────── */
+
+const HABITS = {
+  dopamine: {
+    habits: [
+      { label: 'Complete one meaningful task', weight: 3, foundational: true, type: 'foundational', repeatable: false, maxCount: 1 },
+      { label: 'Check off planned tasks / to-do', weight: 2, foundational: false, type: 'secondary', repeatable: true, maxCount: 2 },
+      { label: 'Baca buku / kitab 1 page', weight: 2, foundational: false, type: 'secondary', repeatable: true, maxCount: 2 },
+      { label: 'Learn something new / skill', weight: 1, foundational: false, type: 'bonus', repeatable: true, maxCount: 3 },
+      { label: 'Morning sunlight / light exposure', weight: 2, foundational: false, type: 'secondary', repeatable: true, maxCount: 2 },
+      { label: 'Journaling / reflection', weight: 1, foundational: false, type: 'bonus', repeatable: true, maxCount: 3 }
+    ]
+  },
+  serotonin: {
+    habits: [
+      { label: 'Adequate sleep (7–9 hrs)', weight: 3, foundational: true, type: 'foundational', repeatable: false, maxCount: 1 },
+      { label: 'Eat protein & fiber rich meals', weight: 2, foundational: false, type: 'secondary', repeatable: true, maxCount: 2 },
+      { label: 'Gratitude practice', weight: 1, foundational: false, type: 'bonus', repeatable: true, maxCount: 3 },
+      { label: 'Outdoor walk / nature exposure', weight: 2, foundational: false, type: 'secondary', repeatable: true, maxCount: 2 },
+      { label: 'Deep breathing / solat sunat', weight: 1, foundational: false, type: 'bonus', repeatable: true, maxCount: 3 },
+      { label: 'Solat 5 waktu / Meditation', weight: 3, foundational: true, type: 'foundational', repeatable: false, maxCount: 1 }
+    ]
+  },
+  oxytocin: {
+    habits: [
+      { label: 'Meaningful social interaction', weight: 3, foundational: true, type: 'foundational', repeatable: false, maxCount: 1 },
+      { label: 'Express appreciation / gratitude to someone', weight: 2, foundational: false, type: 'secondary', repeatable: true, maxCount: 2 },
+      { label: 'Physical touch (hug, handshake, pet)', weight: 2, foundational: false, type: 'secondary', repeatable: true, maxCount: 2 },
+      { label: 'Community contribution / help someone', weight: 1, foundational: false, type: 'bonus', repeatable: true, maxCount: 3 },
+      { label: 'Virtual social check-in', weight: 1, foundational: false, type: 'bonus', repeatable: true, maxCount: 3 }
+    ]
+  },
+  endorphin: {
+    habits: [
+      { label: 'Exercise / movement (30+ min)', weight: 3, foundational: true, type: 'foundational', repeatable: false, maxCount: 1 },
+      { label: 'Laugh / enjoy humor', weight: 1, foundational: false, type: 'bonus', repeatable: true, maxCount: 3 },
+      { label: 'Cold shower / contrast therapy', weight: 2, foundational: false, type: 'secondary', repeatable: true, maxCount: 2 },
+      { label: 'Dance / physical play', weight: 2, foundational: false, type: 'secondary', repeatable: true, maxCount: 2 },
+      { label: 'Stretching / mobility routine', weight: 1, foundational: false, type: 'bonus', repeatable: true, maxCount: 3 }
+    ]
+  }
+};
+
+/* Auto compute max */
+Object.keys(HABITS).forEach(t => {
+  HABITS[t].maxPts = HABITS[t].habits.reduce((s, h) => s + h.weight, 0);
+});
+const GRAND_MAX = Object.values(HABITS).reduce((s, c) => s + c.maxPts, 0);
+
+/* ─── STORAGE ───────────────────────────────────────── */
+const SK = 'nh_v5_state';
+const ld = k => JSON.parse(localStorage.getItem(k) || '{}');
+const sv = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+
+let appState = ld(SK);
+const today = new Date().toISOString().slice(0,10);
+if (!appState[today]) appState[today] = {};
+
+/* ─── SCORING (DIMINISHING RETURNS) ─────────────────── */
+function getEffect(count){
+  if(count === 1) return 1;
+  if(count === 2) return 1.5;
+  if(count >= 3) return 1.75;
+  return 0;
+}
+
+function catRawScore(type){
+  return HABITS[type].habits.reduce((sum,h,i)=>{
+    const c = appState[today][`${type}_${i}`] || 0;
+    return sum + (h.weight * getEffect(c));
+  },0);
+}
+
+function foundationDone(type){
+  return HABITS[type].habits.every((h,i)=>{
+    if(!h.foundational) return true;
+    return (appState[today][`${type}_${i}`]||0) > 0;
+  });
+}
+
+function catCapScore(type){
+  const raw = catRawScore(type);
+  const max = HABITS[type].maxPts;
+  if(foundationDone(type)) return Math.min(raw,max);
+  return Math.min(raw, Math.floor(max*0.5));
+}
+
+function grandTotal(){
+  return Object.keys(HABITS).reduce((s,t)=>s+catCapScore(t),0);
+}
+
+/* ─── TOGGLE WITH COUNT ─────────────────────────────── */
+function toggle(key,type,habit){
+  let c = appState[today][key] || 0;
+
+  if(!habit.repeatable){
+    appState[today][key] = c ? 0 : 1;
+  } else {
+    c++;
+    if(c > habit.maxCount) c = 0;
+    appState[today][key] = c;
+  }
+
+  sv(SK,appState);
+  renderSection(type);
+  updateHeader();
+}
+
+/* ─── RENDER ───────────────────────────────────────── */
+function renderSection(type){
+  const list = document.getElementById(`list-${type}`);
+  list.innerHTML = '';
+
+  HABITS[type].habits.forEach((h,i)=>{
+    const key = `${type}_${i}`;
+    const count = appState[today][key] || 0;
+    const done = count > 0;
+
+    const row = document.createElement('div');
+    row.className = `habit-row ${done?'done':''}`;
+    row.style.setProperty('--accent-color',`var(--${type})`);
+
+    row.innerHTML = `
+      <div class="habit-check-box"></div>
+      <div class="habit-row-body">
+        <span class="habit-row-text">${h.label}</span>
+      </div>
+      <div class="weight-badge">
+        ⭐ ${h.weight}${h.repeatable ? ` ×${count}`:''}
+      </div>
+    `;
+
+    row.onclick = ()=>toggle(key,type,h);
+    list.appendChild(row);
+  });
+}
+
+/* ─── HEADER ───────────────────────────────────────── */
+function updateHeader(){
+  const total = Math.round(grandTotal());
+  document.getElementById('headerScoreNum').textContent = total;
+}
+
+/* ─── INIT ───────────────────────────────────────── */
+function initAll(){
+  Object.keys(HABITS).forEach(renderSection);
+  updateHeader();
+}
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log('Service Worker Registered'));
+}
+</script>
+
+initAll();
+</script>
+</body>
+</html>
