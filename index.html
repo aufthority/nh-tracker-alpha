@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="NeuroHabit">
 <meta name="description" content="Neuroscience-based daily habit tracker by The Aufthority">
 <link rel="manifest" href="/neurohabit/manifest.json">
-<link rel="apple-touch-icon" href="/neurohabit/icon-192.png">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%231c1a17'/><text y='128' x='90' text-anchor='middle' font-size='100'>🧠</text></svg>">
 <title>NeuroHabit</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -487,6 +487,15 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .profile-row-chevron { color: var(--muted); flex-shrink: 0; }
 .profile-row.danger strong { color: #c0445a; }
 .profile-row.danger .profile-row-icon { background: color-mix(in srgb, #c0445a 10%, var(--surface2)); }
+
+/* Feedback row — explicit colours, no inline color-mix() */
+.profile-row.feedback {
+  border-left: 3px solid var(--serotonin);
+  background: #253830; /* serotonin 5% over surface — hardcoded for max compat */
+}
+.profile-row.feedback:hover { background: #2c4038; }
+.profile-row.feedback .profile-row-icon { background: #2e4f42; }
+.profile-row.feedback strong { color: var(--serotonin); }
 
 /* Premium card */
 .premium-card {
@@ -1212,10 +1221,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
         <!-- Feedback section -->
         <div class="profile-section-label">Beta Feedback</div>
         <div class="profile-rows">
-          <div class="profile-row" style="border-left: 3px solid var(--serotonin); background: color-mix(in srgb, var(--serotonin) 5%, var(--surface));" onclick="window.open('https://forms.gle/oYkxx8B898Ur4JtV9', '_blank')">
-            <div class="profile-row-icon" style="background: color-mix(in srgb, var(--serotonin) 15%, var(--surface2));">💬</div>
+          <div class="profile-row feedback" onclick="window.open('https://forms.gle/oYkxx8B898Ur4JtV9', '_blank')">
+            <div class="profile-row-icon">💬</div>
             <div class="profile-row-body">
-              <strong style="color: var(--serotonin);">Share Your Feedback</strong>
+              <strong>Share Your Feedback</strong>
               <span>Help shape NeuroHabit — takes 2 min</span>
             </div>
             <svg class="profile-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1368,13 +1377,15 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
   <button class="install-dismiss" onclick="dismissInstall()">✕</button>
 </div>
 
-<!-- Universal manual install instruction sheet (content swapped by JS per browser) -->
+<!-- iOS manual instructions sheet -->
 <div class="ios-install-sheet" id="iosInstallSheet" style="display:none">
   <div class="ios-install-card">
     <div class="ios-install-handle"></div>
-    <div class="ios-install-title" id="installSheetTitle">Add to Home Screen</div>
-    <div class="ios-install-steps" id="installSheetSteps">
-      <!-- Populated by JS based on detected browser -->
+    <div class="ios-install-title">Add to Home Screen</div>
+    <div class="ios-install-steps">
+      <div class="ios-step"><span class="ios-step-num">1</span><span>Tap the <strong>Share</strong> button <span class="ios-share-icon">⬆</span> in your browser toolbar</span></div>
+      <div class="ios-step"><span class="ios-step-num">2</span><span>Scroll down and tap <strong>"Add to Home Screen"</strong></span></div>
+      <div class="ios-step"><span class="ios-step-num">3</span><span>Tap <strong>Add</strong> — NeuroHabit will appear on your home screen</span></div>
     </div>
     <button class="ios-install-close" onclick="dismissIosSheet()">Got it</button>
   </div>
@@ -3338,8 +3349,8 @@ function confirmNewDay() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SERVICE WORKER — register immediately (before load event)
-   so Chrome can evaluate PWA installability on this visit
+   SERVICE WORKER — register first so Chrome can evaluate
+   PWA installability criteria on this page load
    ═══════════════════════════════════════════════════════════ */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/neurohabit/sw.js', { scope: '/neurohabit/' })
@@ -3348,234 +3359,89 @@ if ('serviceWorker' in navigator) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PWA INSTALL — full cross-browser support
-   ┌─────────────────────┬──────────────────────────────────┐
-   │ Chrome / Edge /     │ beforeinstallprompt → native     │
-   │ Brave (Android +    │ prompt. Banner shown, Install    │
-   │ Desktop)            │ button fires it directly.        │
-   ├─────────────────────┼──────────────────────────────────┤
-   │ Safari iOS          │ No API. Banner shown with        │
-   │                     │ Share → Add to Home Screen steps │
-   ├─────────────────────┼──────────────────────────────────┤
-   │ Firefox Android     │ beforeinstallprompt supported    │
-   │                     │ since FF 58. Works like Chrome.  │
-   ├─────────────────────┼──────────────────────────────────┤
-   │ Samsung Internet    │ beforeinstallprompt supported.   │
-   │                     │ Works like Chrome.               │
-   ├─────────────────────┼──────────────────────────────────┤
-   │ Safari macOS        │ No API, no install concept.      │
-   │                     │ Banner hidden — not applicable.  │
-   ├─────────────────────┼──────────────────────────────────┤
-   │ Firefox Desktop     │ No PWA install support.          │
-   │                     │ Banner hidden — not applicable.  │
-   └─────────────────────┴──────────────────────────────────┘
+   PWA INSTALL — Android (native prompt) + iOS (manual sheet)
    ═══════════════════════════════════════════════════════════ */
-
-const INSTALL_DISMISSED_KEY = 'nh_install_nodisplay';
+const INSTALL_DISMISSED_KEY = 'nh_install_dismissed';
 let deferredPrompt = null;
-let _bannerDismissedThisSession = false;
 
-/* ── Browser / platform detection ──────────────────────────── */
-function isIosSafari() {
-  const ua = navigator.userAgent;
-  return /iphone|ipad|ipod/i.test(ua) &&
-    /safari/i.test(ua) &&
-    !/chrome|crios|fxios|edgios/i.test(ua) &&
-    !window.MSStream;
-}
-function isIosChrome() {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent) && /crios/i.test(navigator.userAgent);
-}
-function isIosFirefox() {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent) && /fxios/i.test(navigator.userAgent);
-}
-function isIosEdge() {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent) && /edgios/i.test(navigator.userAgent);
-}
-function isAndroid() {
-  return /android/i.test(navigator.userAgent);
-}
-function isSamsungBrowser() {
-  return /samsungbrowser/i.test(navigator.userAgent);
-}
-function isEdge() {
-  return /edg\//i.test(navigator.userAgent) && !isIosEdge();
-}
-function isBrave() {
-  // Brave exposes navigator.brave; fall back to UA sniff
-  return (navigator.brave && typeof navigator.brave.isBrave === 'function') ||
-    /brave/i.test(navigator.userAgent);
-}
-function isFirefoxDesktop() {
-  return /firefox/i.test(navigator.userAgent) && !/android/i.test(navigator.userAgent) &&
-    !/iphone|ipad|ipod/i.test(navigator.userAgent);
-}
-function isMacSafari() {
-  return /macintosh/i.test(navigator.userAgent) &&
-    /safari/i.test(navigator.userAgent) &&
-    !/chrome|chromium/i.test(navigator.userAgent);
+function isIos() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
 }
 function isInStandaloneMode() {
   return (window.navigator.standalone === true) ||
     window.matchMedia('(display-mode: standalone)').matches;
 }
-function isPermanentlyDismissed() {
+function wasRecentlyDismissed() {
   try {
     const d = JSON.parse(localStorage.getItem(INSTALL_DISMISSED_KEY));
     if (!d) return false;
-    return (Date.now() - d) < 30 * 24 * 60 * 60 * 1000;
+    return (Date.now() - d) < 7 * 24 * 60 * 60 * 1000; // 7-day cooldown
   } catch { return false; }
 }
-function canShowBanner() {
-  return !isInStandaloneMode() && !_bannerDismissedThisSession && !isPermanentlyDismissed();
-}
-
-/* ── Manual install instructions per browser/OS ─────────────── */
-const INSTALL_INSTRUCTIONS = {
-  iosSafari: {
-    title: 'Add to Home Screen',
-    steps: [
-      { n:1, html: 'Tap the <strong>Share</strong> button <span class="ios-share-icon">⬆</span> at the bottom of your screen' },
-      { n:2, html: 'Scroll down and tap <strong>"Add to Home Screen"</strong>' },
-      { n:3, html: 'Tap <strong>Add</strong> — NeuroHabit will appear on your home screen' },
-    ]
-  },
-  iosChrome: {
-    title: 'Add to Home Screen',
-    steps: [
-      { n:1, html: 'Tap the <strong>⋯</strong> menu button in the bottom-right corner' },
-      { n:2, html: 'Tap <strong>"Add to Home Screen"</strong>' },
-      { n:3, html: 'Tap <strong>Add</strong> to confirm' },
-    ]
-  },
-  iosFirefox: {
-    title: 'Add to Home Screen',
-    steps: [
-      { n:1, html: 'Tap the <strong>⋯</strong> menu button at the bottom of the screen' },
-      { n:2, html: 'Tap <strong>"Share"</strong>, then tap <strong>"Add to Home Screen"</strong>' },
-      { n:3, html: 'Tap <strong>Add</strong> to confirm' },
-    ]
-  },
-  iosEdge: {
-    title: 'Add to Home Screen',
-    steps: [
-      { n:1, html: 'Tap the <strong>⋯</strong> menu at the bottom of the screen' },
-      { n:2, html: 'Tap <strong>"Add to Phone"</strong>' },
-      { n:3, html: 'Tap <strong>Add</strong> to confirm' },
-    ]
-  },
-  samsungAndroid: {
-    title: 'Install NeuroHabit',
-    steps: [
-      { n:1, html: 'Tap the <strong>⋮</strong> menu in the top-right corner' },
-      { n:2, html: 'Tap <strong>"Add page to"</strong> → <strong>"Home screen"</strong>' },
-      { n:3, html: 'Tap <strong>Add</strong> to confirm' },
-    ]
-  },
-  firefoxAndroid: {
-    title: 'Install NeuroHabit',
-    steps: [
-      { n:1, html: 'Tap the <strong>⋮</strong> menu in the top-right corner' },
-      { n:2, html: 'Tap <strong>"Install"</strong>' },
-      { n:3, html: 'Tap <strong>Add</strong> to confirm — NeuroHabit will appear on your home screen' },
-    ]
-  },
-};
-
-function showManualInstructions() {
-  let key = null;
-  if (isIosSafari())        key = 'iosSafari';
-  else if (isIosChrome())   key = 'iosChrome';
-  else if (isIosFirefox())  key = 'iosFirefox';
-  else if (isIosEdge())     key = 'iosEdge';
-  else if (isSamsungBrowser() && isAndroid()) key = 'samsungAndroid';
-  else if (/firefox/i.test(navigator.userAgent) && isAndroid()) key = 'firefoxAndroid';
-
-  if (!key) return; // no known manual flow for this browser
-
-  const inst = INSTALL_INSTRUCTIONS[key];
-  document.getElementById('installSheetTitle').textContent = inst.title;
-  document.getElementById('installSheetSteps').innerHTML = inst.steps.map(s =>
-    `<div class="ios-step"><span class="ios-step-num">${s.n}</span><span>${s.html}</span></div>`
-  ).join('');
-  document.getElementById('iosInstallSheet').style.display = 'flex';
-}
-
-/* ── Event listeners ─────────────────────────────────────────── */
 
 /*
- * beforeinstallprompt — fires on Chrome, Edge, Brave, Samsung Internet,
- * Firefox Android. Must be top-level (not inside load handler).
+ * beforeinstallprompt MUST be listened for at the top level (not inside
+ * a load handler) — the browser can fire it before 'load' in some cases.
+ * We capture and suppress it here; showing it is deferred to our own timing.
  */
 window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
+  e.preventDefault(); // suppress browser's auto-prompt
   deferredPrompt = e;
-  console.log('[PWA] beforeinstallprompt captured ✓');
-  if (canShowBanner()) {
-    document.getElementById('installBannerSub').textContent = 'Add to home screen for offline access';
+  console.log('[PWA] beforeinstallprompt captured');
+  if (!isInStandaloneMode() && !wasRecentlyDismissed()) {
+    document.getElementById('installBannerSub').textContent = 'Add to home screen for the best experience';
     document.getElementById('installBtn').textContent = 'Install';
-    setTimeout(() => document.getElementById('installBanner').classList.add('show'), 1500);
+    setTimeout(() => {
+      document.getElementById('installBanner').classList.add('show');
+    }, 2000);
   }
 });
 
 window.addEventListener('appinstalled', () => {
-  console.log('[PWA] installed ✓');
-  _hideInstallBanner(true);
+  console.log('[PWA] app installed');
+  _hideInstallBanner();
   deferredPrompt = null;
 });
 
+/* Show iOS banner on load — Safari never fires beforeinstallprompt */
 window.addEventListener('load', () => {
-  if (isInStandaloneMode() || !canShowBanner()) return;
-
-  // iOS Safari / Chrome / Firefox / Edge — no beforeinstallprompt, show manual banner
-  if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-    const isKnownIosBrowser = isIosSafari() || isIosChrome() || isIosFirefox() || isIosEdge();
-    if (isKnownIosBrowser) {
-      document.getElementById('installBannerSub').textContent = 'Add to your Home Screen';
-      document.getElementById('installBtn').textContent = 'How to Install';
-      setTimeout(() => document.getElementById('installBanner').classList.add('show'), 1500);
-    }
-    return;
+  if (isIos() && !isInStandaloneMode() && !wasRecentlyDismissed()) {
+    document.getElementById('installBannerSub').textContent = 'Tap here to add to your Home Screen';
+    document.getElementById('installBtn').textContent = 'How to Install';
+    setTimeout(() => {
+      document.getElementById('installBanner').classList.add('show');
+    }, 2000);
   }
-
-  // macOS Safari and Firefox Desktop — PWA install not supported, don't show banner
-  if (isMacSafari() || isFirefoxDesktop()) return;
 });
 
-/* ── Public functions ────────────────────────────────────────── */
 function triggerInstall() {
   if (deferredPrompt) {
-    // Chrome / Edge / Brave / Samsung / Firefox Android — native prompt
+    // Android/Chrome — fire the native install prompt
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(choice => {
       console.log('[PWA] user choice:', choice.outcome);
-      _hideInstallBanner(choice.outcome === 'accepted');
+      _hideInstallBanner();
       deferredPrompt = null;
     });
-  } else {
-    // No native prompt available — show manual instructions for this browser
-    _hideInstallBanner(false);
-    showManualInstructions();
+  } else if (isIos()) {
+    // iOS — show step-by-step manual instructions
+    _hideInstallBanner();
+    document.getElementById('iosInstallSheet').style.display = 'flex';
   }
 }
 
 function dismissInstall() {
-  // ✕ tap is session-only — banner returns on next visit
-  _bannerDismissedThisSession = true;
-  document.getElementById('installBanner').classList.remove('show');
+  _hideInstallBanner();
 }
 
 function dismissIosSheet() {
   document.getElementById('iosInstallSheet').style.display = 'none';
+  try { localStorage.setItem(INSTALL_DISMISSED_KEY, JSON.stringify(Date.now())); } catch {}
 }
 
-function _hideInstallBanner(permanent) {
+function _hideInstallBanner() {
   document.getElementById('installBanner').classList.remove('show');
-  if (permanent) {
-    try { localStorage.setItem(INSTALL_DISMISSED_KEY, JSON.stringify(Date.now())); } catch {}
-  } else {
-    _bannerDismissedThisSession = true;
-  }
+  try { localStorage.setItem(INSTALL_DISMISSED_KEY, JSON.stringify(Date.now())); } catch {}
 }
 
 /* ═══════════════════════════════════════════════════════════
