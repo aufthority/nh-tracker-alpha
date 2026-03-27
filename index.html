@@ -153,7 +153,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 
 /* ═══ PAGE CONTAINER ═════════════════════════════════════════ */
 .page-container { position: absolute; inset: 0; top: calc(var(--safe-t) + var(--header-h)); bottom: calc(var(--safe-b) + var(--nav-h)); overflow: hidden; }
-.page { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 32px; opacity: 0; pointer-events: none; transform: translateX(20px); transition: opacity 0.2s, transform 0.2s; }
+.page { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)); opacity: 0; pointer-events: none; transform: translateX(20px); transition: opacity 0.2s, transform 0.2s; }
 .page.page-active { opacity: 1; pointer-events: all; transform: translateX(0); }
 
 /* ═══ PAGE HERO ══════════════════════════════════════════════ */
@@ -423,7 +423,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-6px); } }
 
 /* ═══ PROFILE PAGE ═══════════════════════════════════════════ */
-.profile-page-inner { padding: 20px 18px 40px; }
+.profile-page-inner { padding: 20px 18px calc(40px + env(safe-area-inset-bottom, 0px)); }
 
 /* Avatar block */
 .profile-avatar-block {
