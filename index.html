@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NeuroHabit">
 <meta name="description" content="Neuroscience-based daily habit tracker by The Aufthority">
-<link rel="manifest" href="/neurohabit/manifest.json">
+<link rel="manifest" href="/nh-tracker-alpha/manifest.json">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%231c1a17'/><text y='128' x='90' text-anchor='middle' font-size='100'>🧠</text></svg>">
 <title>NeuroHabit</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -17,13 +17,15 @@
 
 <!-- ============================================================
      NEUROHABIT PWA — by The Aufthority
-     Revisions:
-       1. Brand subtitle "By The Aufthority"
-       2. Serotonin: OR-gate for foundational (any 1 unlocks cap)
-       3. Social Laughter → ⭐⭐ (weight 2)
-       4. Info icon → 2-sentence habit-info modal
-       5. Commit/lock with 60-min edit window
-       6. Share score card + brain balance feedback
+     Revisions v2:
+       1. Habit masterlist fully revised (7 Dopamine, 10 Serotonin,
+          8 Oxytocin, 5 Endorphin) based on meta-analysis literature
+       2. Dopamine: OR-gate (Deep Work OR Sunlight unlocks gauge)
+       3. Serotonin: sleepOrPrayer gate + Sleep flex tiers for shift workers
+       4. Oxytocin: OR-gate (Socialising OR Appreciation unlocks gauge)
+       5. Endorphin: Exercise OR Active Day (mutually exclusive, OR-gate)
+       6. Scoring: Multiplicative gate (Method A) + sqrt dampening (Method B)
+       7. Grade thresholds revised: S≥90, A≥75, B≥55, C≥35, D≥15
      ============================================================ -->
 
 <style>
@@ -1415,32 +1417,31 @@ const gprov = new firebase.auth.GoogleAuthProvider();
 const HABITS = {
   dopamine: {
     color: '#c8712a',
-    /* gate: 'all' = ALL foundational needed (default) */
-    gate: 'all',
+    /* OR-gate: ANY ONE foundational unlocks cap */
+    gate: 'any',
     habits: [
       {
         label: 'Deep Work / Main Goal',
         weight: 3, foundational: true, type: 'foundational',
-        /* Multi-session flex: cycle through session tiers */
         flex: { multiSession: true, tiers: [
           { label: 'Deep Work — 1 session (45 min)',   weight: 1, sessions: 1 },
-          { label: 'Deep Work — 3+ sessions (2+ hrs)', weight: 2, sessions: 3 },
-          { label: 'Deep Work — 5+ sessions (4+ hrs)', weight: 3, sessions: 5 },
+          { label: 'Deep Work — 2 sessions (90 min)',  weight: 2, sessions: 2 },
+          { label: 'Deep Work — 3+ sessions (135+ min)', weight: 3, sessions: 3 },
         ]},
-        info: { body: 'Dedicated, distraction-free work on your most important goal. Track sessions of 45+ minutes each — each session is a complete deep work block.', examples: ['1 session (45 min) = ⭐ — getting focused work done', '3+ sessions (2+ hrs total) = ⭐⭐ — a strong productive day', '5+ sessions (4+ hrs total) = ⭐⭐⭐ — elite deep work output'] },
-        tooltip: { icon: '⚡', title: 'Deep Work activates Dopamine', body: 'Sustained focused effort on a meaningful goal is the strongest natural dopamine trigger. More sessions compound the reward signal.' }
+        info: { body: 'Dedicated, distraction-free work on your most important goal. Each session is 45+ minutes of uninterrupted focus. Use the session cycler to log how many blocks you completed today.', examples: ['1 session (45 min) = ⭐ — a focused start', '2 sessions (90 min) = ⭐⭐ — a strong productive day', '3+ sessions (135+ min) = ⭐⭐⭐ — deep work elite output'] },
+        tooltip: { icon: '⚡', title: 'Deep Work activates Dopamine', body: 'Sustained focused effort on a meaningful goal is the strongest natural dopamine trigger. Each session compounds the reward signal.' }
       },
       {
         label: 'Morning Sunlight (10–15 min)',
-        weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Direct outdoor light exposure within 60 minutes of waking — no sunglasses, no glass in the way.', examples: ['Walking outside barefoot or on a balcony', 'Eating breakfast on a patio or near an open window', 'A short walk to a coffee shop without sunglasses'] },
+        weight: 2, foundational: true, type: 'foundational', flex: null,
+        info: { body: 'Direct outdoor light exposure within 60 minutes of waking — no sunglasses, no glass in the way. Either foundational habit (Deep Work or Sunlight) unlocks your full Dopamine gauge.', examples: ['Walking outside barefoot or on a balcony', 'Eating breakfast near an open window', 'A short walk to a coffee shop without sunglasses'] },
         tooltip: { icon: '🌅', title: 'Sunlight primes Dopamine', body: 'Morning light increases dopamine receptor sensitivity — setting the motivational tone for the entire day. Do this within 30–60 mins of waking.' }
       },
       {
         label: 'Task List Completion (Admin/To-dos)',
-        weight: 2, foundational: false, type: 'secondary', flex: null,
+        weight: 1, foundational: false, type: 'secondary', flex: null,
         info: { body: 'Clearing short, planned tasks from your list — emails, admin, errands — that create mental "open loops" if left undone.', examples: ['Replying to all pending emails', 'Paying a bill or filing a form', 'Scheduling next week\'s appointments'] },
-        tooltip: { icon: '✅', title: 'Checkmarks trigger Dopamine', body: 'Each completed task releases a small dopamine hit. Breaking big goals into smaller tasks creates a cascade of micro-rewards that build momentum.' }
+        tooltip: { icon: '✅', title: 'Checkmarks trigger Dopamine', body: 'Each completed task releases a small dopamine hit. Breaking big goals into smaller tasks creates a cascade of micro-rewards.' }
       },
       {
         label: 'Active Skill Practice (20+ min)',
@@ -1454,13 +1455,25 @@ const HABITS = {
         info: { body: 'Writing specifically about your goals, priorities, or progress — not general diary writing.', examples: ['Reviewing your 3 priorities for the day', 'Reflecting on what worked and why', 'Writing out a problem you\'re trying to solve'] },
         tooltip: { icon: '📓', title: 'Journaling clarifies the reward target', body: 'Writing goals activates the prefrontal cortex and reinforces your brain\'s directional focus, increasing anticipatory dopamine.' }
       },
+      {
+        label: 'Screen-Free Block (2+ hrs)',
+        weight: 1, foundational: false, type: 'bonus', flex: null,
+        info: { body: 'Protecting at least 2 continuous hours from passive scrolling or social media. This is a removal habit — the absence of dopamine-depleting behaviour is itself a neurochemical act.', examples: ['Phone in another room during a meal and the hour after', 'No social media before completing your deep work session', 'A screen-free evening from dinner onwards'] },
+        tooltip: { icon: '📵', title: 'Protect your Dopamine baseline', body: 'Passive scrolling exploits the same dopamine reward loops as substance dependence, causing receptor desensitisation. Protecting 2+ hours daily restores baseline sensitivity.' }
+      },
+      {
+        label: 'Tyrosine-Rich Meal',
+        weight: 1, foundational: false, type: 'bonus', flex: null,
+        info: { body: 'Eating a meal containing tyrosine-rich foods — the dietary precursor to dopamine. Mirrors the Serotonin/tryptophan logic: your brain needs raw materials.', examples: ['Eggs with a protein source at breakfast', 'Chicken or beef with lunch or dinner', 'A handful of almonds, pumpkin seeds, or walnuts as a snack'] },
+        tooltip: { icon: '🥚', title: 'Feed your Dopamine system', body: 'Tyrosine is the amino acid your brain converts into dopamine. Without adequate dietary tyrosine, your brain lacks the raw material to sustain motivation and drive.' }
+      },
     ]
   },
 
   serotonin: {
     color: '#4a9e82',
-    /* REVISION 2: gate 'any' = ANY ONE foundational habit unlocks cap */
-    gate: 'any',
+    /* gate 'sleepOrPrayer': Sleep OR Prayer must be done to unlock cap */
+    gate: 'sleepOrPrayer',
     habits: [
       {
         label: 'Solat 5 Waktu / Daily Prayer',
@@ -1468,31 +1481,35 @@ const HABITS = {
         flex: { multiSession: true, tiers: [
           { label: 'Prayer — 1 session',     weight: 1, sessions: 1 },
           { label: 'Prayer — 3 sessions',    weight: 2, sessions: 3 },
-          { label: 'Prayer — 5 sessions ✓',  weight: 3, sessions: 5 },
+          { label: 'Prayer — 5 sessions ✓',  weight: 2, sessions: 5 },
         ]},
-        info: { body: 'Track each prayer or structured devotional session individually. Use the session cycler to record how many you completed — 5 sessions represents completing all obligatory prayers on time.', examples: ['1 session = ⭐ — at least one prayer completed', '3 sessions = ⭐⭐ — Fajr, Dhuhr, Asar done', '5 sessions = ⭐⭐⭐ — all 5 on time (Fajr, Dhuhr, Asar, Maghrib, Isyak)'] },
+        info: { body: 'Track each prayer or structured devotional session individually. Completing Sleep or Prayer unlocks your full Serotonin gauge — both foundationals completing earns maximum points.', examples: ['1 session = ⭐ — at least one prayer completed', '3 sessions = ⭐⭐ — Fajr, Dhuhr, Asar done', '5 sessions = ⭐⭐ — all 5 on time (Fajr, Dhuhr, Asar, Maghrib, Isyak)'] },
         tooltip: { icon: '🕌', title: 'Prayer stabilises Serotonin', body: 'Structured prayer combines breathwork, body movement, rhythmic repetition, and gratitude — all independently proven to upregulate serotonin and support circadian rhythm.' }
       },
       {
-        label: 'Sleep Duration (7–9 hrs)',
-        weight: 3, foundational: true, type: 'foundational',
-        flex: { label: 'Restful sleep — under 6 hrs (Flex)', weight: 2 },
-        info: { body: 'A full night of uninterrupted sleep lasting 7 to 9 hours, waking feeling genuinely rested.', examples: ['In bed by 10:30pm, up at 6:30am', 'No phone after 10pm + dark room + fan/white noise', 'Napping is not a substitute — night sleep is what counts'] },
+        label: 'Sleep (7–9 hrs)',
+        weight: 2, foundational: true, type: 'foundational',
+        flex: { multiSession: true, tiers: [
+          { label: 'Restful sleep — any duration',  weight: 1, sessions: 1 },
+          { label: 'Sleep hygiene done',             weight: 1, sessions: 2 },
+          { label: '7–9 hrs restful sleep ✓',        weight: 2, sessions: 3 },
+        ]},
+        info: { body: 'A full night of restful sleep. For shift workers or those with disrupted sleep: tier 1 (restful any duration) and tier 2 (sleep hygiene: no screens 1hr before, consistent bedtime) still earn points. You are not penalised for circumstances outside your control.', examples: ['Restful any hrs = ⭐ — did what you could', 'Sleep hygiene done = ⭐ — protected the conditions for sleep', '7–9 hrs restful = ⭐⭐ — full recovery sleep'] },
         tooltip: { icon: '😴', title: 'Sleep is the master regulator', body: 'During deep sleep, tryptophan converts to serotonin and melatonin. Chronic sleep deprivation depletes serotonin reserves faster than anything else.' }
       },
       {
         label: '5-a-Day (Veg & Fruit)',
-        weight: 3, foundational: true, type: 'foundational',
+        weight: 2, foundational: true, type: 'foundational',
         flex: { multiSession: true, tiers: [
-          { label: '1 cup-sized fibre serving',      weight: 1, sessions: 1 },
-          { label: '2 cup-sized fibre servings',     weight: 2, sessions: 2 },
-          { label: '3+ cup-sized fibre servings ✓',  weight: 3, sessions: 3 },
+          { label: '1–2 servings',      weight: 1, sessions: 1 },
+          { label: '3–4 servings',      weight: 2, sessions: 2 },
+          { label: '5+ servings ✓',     weight: 2, sessions: 3 },
         ]},
-        info: { body: 'A "cup-sized serving" is roughly one cupped hand of vegetables or fruit — the standard portion measure used in nutrition. Use the cycler to track how many whole-food plant servings you consumed today. Juice does not count; whole or cooked food only.', examples: ['1 cup = ⭐ — e.g. a handful of spinach or one banana', '2 cups = ⭐⭐ — e.g. salad + an apple', '3+ cups = ⭐⭐⭐ — e.g. veg at lunch + fruit snack + veg at dinner (goal: 3 veg + 2 fruit)'] },
-        tooltip: { icon: '🥦', title: 'Gut-brain axis & Serotonin', body: '95% of serotonin is produced in the gut. Fibre-rich vegetables and fruit feed beneficial gut bacteria that synthesise serotonin precursors — making plant diversity one of the strongest long-term mood regulators.' }
+        info: { body: 'Track whole-food plant servings. A serving is roughly one cupped hand of vegetables or fruit. Juice does not count. 95% of serotonin is produced in the gut — plant diversity directly fuels it.', examples: ['1–2 servings = ⭐ — a start', '3–4 servings = ⭐⭐ — good gut input', '5+ servings = ⭐⭐ — full 5-a-day achieved'] },
+        tooltip: { icon: '🥦', title: 'Gut-brain axis & Serotonin', body: '95% of serotonin is produced in the gut. Fibre-rich vegetables and fruit feed beneficial gut bacteria that synthesise serotonin precursors.' }
       },
       {
-        label: 'Nature Walk / Vitamin D (20+ min)',
+        label: 'Nature Walk (20+ min)',
         weight: 2, foundational: false, type: 'secondary', flex: null,
         info: { body: 'An outdoor walk in a natural or semi-natural environment for at least 20 minutes — not treadmill, not indoors.', examples: ['A park walk or trail during lunch break', 'Morning walk around a green neighbourhood', 'Beach or riverside walk without headphones'] },
         tooltip: { icon: '🌿', title: 'Nature walks boost Serotonin', body: 'Outdoor walking combines three powerful serotonin activators: sunlight, rhythmic movement, and exposure to natural environments.' }
@@ -1503,10 +1520,10 @@ const HABITS = {
         flex: { multiSession: true, tiers: [
           { label: '1 palm-sized protein',       weight: 1, sessions: 1 },
           { label: '2 palm-sized proteins',       weight: 2, sessions: 2 },
-          { label: '3+ palm-sized proteins ✓',   weight: 3, sessions: 3 },
+          { label: '3+ palm-sized proteins ✓',   weight: 2, sessions: 3 },
         ]},
-        info: { body: 'A "palm-sized protein" is a portion of protein roughly the size and thickness of your palm — the practical measure used in precision nutrition. Use the session cycler to track how many palm-sized servings you consumed across the day.', examples: ['1 palm = ⭐ — e.g. one chicken breast at lunch', '2 palms = ⭐⭐ — e.g. eggs at breakfast + fish at dinner', '3+ palms = ⭐⭐⭐ — protein at every main meal (e.g. eggs + chicken + beef/fish)'] },
-        tooltip: { icon: '🥩', title: 'Protein provides tryptophan', body: 'Serotonin is synthesised from tryptophan — an amino acid found only in protein. Without adequate dietary protein, your brain literally lacks the raw material to produce serotonin.' }
+        info: { body: 'A "palm-sized protein" is a portion of protein roughly the size and thickness of your palm. Tryptophan — the amino acid your brain converts to serotonin — is found only in protein. Track palm-sized servings across the day.', examples: ['1 palm = ⭐ — e.g. one chicken breast at lunch', '2 palms = ⭐⭐ — e.g. eggs at breakfast + fish at dinner', '3+ palms = ⭐⭐ — protein at every main meal'] },
+        tooltip: { icon: '🥩', title: 'Protein provides tryptophan', body: 'Serotonin is synthesised from tryptophan — an amino acid found only in protein. Without adequate dietary protein, your brain lacks the raw material to produce serotonin.' }
       },
       {
         label: 'Gratitude / Muhasabah',
@@ -1517,90 +1534,135 @@ const HABITS = {
       {
         label: 'Breathwork / Meditation / Dhikr',
         weight: 1, foundational: false, type: 'bonus',
-        /* Multi-session flex: more sessions = more weight */
         flex: { multiSession: true, tiers: [
           { label: 'Mindfulness — 1 session (5+ min)',  weight: 1, sessions: 1 },
           { label: 'Mindfulness — 3+ sessions',         weight: 2, sessions: 3 },
-          { label: 'Mindfulness — 5+ sessions',         weight: 3, sessions: 5 },
+          { label: 'Mindfulness — 5+ sessions',         weight: 2, sessions: 5 },
         ]},
-        info: { body: 'Any intentional practice of breathwork, meditation, dhikr (remembrance of Allah), or contemplative prayer. Single sessions of 5+ minutes count — more sessions throughout the day earn higher weight. Dhikr (subhanallah, alhamdulillah, tasbih) and silent meditation are equally valid.', examples: ['1 session: 5-min box breathing or morning dhikr — ⭐', '3 sessions: breathwork + midday dhikr + night reflection — ⭐⭐', '5 sessions: structured dhikr after each solat — ⭐⭐⭐ (includes solat sunat intention)'] },
-        tooltip: { icon: '🧘', title: 'Mindfulness & Dhikr calm the nervous system', body: 'Breathwork activates the parasympathetic nervous system and reduces cortisol. Dhikr adds a layer of spiritual grounding — both upregulate serotonin through rhythmic, repetitive calming practice.' }
+        info: { body: 'Any intentional practice of breathwork, meditation, dhikr (remembrance of Allah), or contemplative prayer. Single sessions of 5+ minutes count. Dhikr and silent meditation are equally valid.', examples: ['1 session: 5-min box breathing or morning dhikr — ⭐', '3 sessions: breathwork + midday dhikr + night reflection — ⭐⭐', '5 sessions: structured dhikr after each solat — ⭐⭐'] },
+        tooltip: { icon: '🧘', title: 'Mindfulness & Dhikr calm the nervous system', body: 'Breathwork activates the parasympathetic nervous system and reduces cortisol. Dhikr adds spiritual grounding — both upregulate serotonin through rhythmic, repetitive calming practice.' }
+      },
+      {
+        label: 'Power Nap / Qailullah (10–25 min)',
+        weight: 1, foundational: false, type: 'bonus', flex: null,
+        info: { body: 'A short midday rest of 10–25 minutes. Any longer risks sleep inertia. This is a supplement to night sleep, not a replacement — it does not satisfy the Sleep foundational habit.', examples: ['A 15-min rest after Dhuhr prayer (Qailullah — Sunnah)', 'Eyes closed for 20 min during lunch break', 'A quiet rest in a dark room mid-afternoon'] },
+        tooltip: { icon: '💤', title: 'Qailullah resets alertness', body: 'A 10–20 min nap improves alertness and working memory. It aligns with the natural circadian dip at 1–3pm. The Prophet (s.a.w.) recommended Qailullah — modern sleep science agrees.' }
+      },
+      {
+        label: 'Restorative Hobby (20+ min)',
+        weight: 1, foundational: false, type: 'bonus', flex: null,
+        info: { body: 'A non-digital hobby that genuinely restores you — reading physical books, gardening, craft, drawing, or cooking for joy. Self-selected: you know what counts as restorative for you. Gaming does not qualify.', examples: ['Reading a physical book for 20+ min', 'Gardening or tending plants', 'Cooking a meal mindfully, without rushing'] },
+        tooltip: { icon: '📖', title: 'Restorative hobbies boost Serotonin', body: 'Reading reduces cortisol by up to 68% in 6 minutes (Sussex, 2009). Soil bacteria in gardening (M. vaccae) directly upregulate serotonin. Non-digital rest is a genuine neurochemical intervention.' }
+      },
+      {
+        label: 'No Added Sugar Today',
+        weight: 1, foundational: false, type: 'bonus', flex: null,
+        info: { body: 'No added sugar in food or drinks today. Natural sugars in whole fruit are fine — this targets ultra-processed foods, sugary drinks, and desserts with added sugar. Frame this as an achievement, not a restriction.', examples: ['No sugary drinks, juice, or energy drinks', 'No biscuits, cakes, or confectionery', 'Chose water, teh o kosong, or black coffee instead'] },
+        tooltip: { icon: '🍬', title: 'Stable blood sugar = stable Serotonin', body: 'Added sugar spikes then crashes dopamine, directly destabilising your serotonin baseline. Multiple longitudinal studies associate high sugar intake with depression and anxiety.' }
       },
     ]
   },
 
   oxytocin: {
     color: '#b85070',
-    gate: 'all',
+    /* OR-gate: Active Socialising OR Sincere Appreciation unlocks cap */
+    gate: 'any',
     habits: [
       {
         label: 'Active Socialising (20+ min)',
         weight: 3, foundational: true, type: 'foundational', flex: null,
-        info: { body: 'A real, focused in-person or voice conversation lasting at least 20 minutes — phone in pocket, full presence.', examples: ['Lunch with a friend or colleague without phones', 'A genuine catch-up call (voice, not texting)', 'Family dinner with real conversation, no screens'] },
+        info: { body: 'A real, focused in-person or voice conversation lasting at least 20 minutes — phone in pocket, full presence. Either foundational habit (Socialising or Appreciation) unlocks your full Oxytocin gauge.', examples: ['Lunch with a friend or colleague without phones', 'A genuine catch-up call (voice, not texting)', 'Family dinner with real conversation, no screens'] },
         tooltip: { icon: '🤝', title: 'Face-to-face is irreplaceable', body: 'In-person social interaction is the gold standard for oxytocin release. Eye contact, body language, and vocal tone trigger oxytocin in ways digital communication cannot replicate.' }
       },
       {
         label: 'Sincere Appreciation (Express to someone)',
-        weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Telling someone — clearly and specifically — what you appreciate about them. It must be genuine, not formulaic.', examples: ['Thanking a colleague for their specific help today', 'Texting a friend to say what they mean to you', 'Expressing gratitude to a family member directly'] },
+        weight: 2, foundational: true, type: 'foundational', flex: null,
+        info: { body: 'Telling someone — clearly and specifically — what you appreciate about them. Genuine appreciation activates oxytocin in both giver and receiver. Achievable even on isolated days. Either foundational unlocks the gauge.', examples: ['Thanking a colleague for their specific help today', 'Texting a friend to say what they mean to you', 'Expressing gratitude to a family member directly'] },
         tooltip: { icon: '💛', title: 'Appreciation is a bonding signal', body: 'Genuine appreciation activates oxytocin in both giver and receiver. Sincerity creates stronger neurochemical responses than generic praise.' }
       },
       {
-        label: 'Oxytocin Anchor (Hug / Pet >20s)',
+        label: 'Shared Meal (Eat Together)',
         weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Physical touch that lasts long enough to trigger oxytocin — at least 20 seconds of genuine, non-rushed contact.', examples: ['A long hug with a family member or partner', 'Petting or stroking an animal for 20+ seconds', 'A hand on the shoulder during a difficult conversation'] },
-        tooltip: { icon: '🫂', title: 'Physical touch is the fastest route', body: 'A hug lasting more than 20 seconds triggers a significant oxytocin surge. Physical touch — with people or animals — is one of the fastest ways to activate the bonding system.' }
+        info: { body: 'Eating a meal with at least one other person, with genuine conversation — not side-by-side screens. Communal eating is one of the most reliably documented daily oxytocin habits across cultures.', examples: ['Lunch with a colleague without phones on the table', 'Family dinner with conversation', 'Breakfast with a housemate or partner'] },
+        tooltip: { icon: '🍽️', title: 'Shared meals bond the brain', body: 'Communal eating predicts social network strength more than almost any other daily behaviour (Dunbar et al. 2017). Food + presence = oxytocin.' }
+      },
+      {
+        label: 'Oxytocin Anchor (Hug / Pet)',
+        weight: 2, foundational: false, type: 'secondary', flex: null,
+        info: { body: 'Physical touch that is sustained and genuine — a hug, petting an animal, or a hand on the shoulder during a difficult conversation. Sustained contact (not rushed) is what triggers the oxytocin response.', examples: ['A long hug with a family member or partner', 'Petting or stroking an animal', 'A genuine hand on the shoulder during a difficult conversation'] },
+        tooltip: { icon: '🫂', title: 'Physical touch is the fastest route', body: 'Sustained physical contact triggers a significant oxytocin surge. Touch — with people or animals — is one of the fastest ways to activate the bonding system.' }
+      },
+      {
+        label: 'Receive Care / Be Vulnerable',
+        weight: 1, foundational: false, type: 'bonus', flex: null,
+        info: { body: 'Asking for help, accepting support, or sharing something real with someone you trust. Oxytocin flows in both directions — receiving care activates it as strongly as giving it.', examples: ['Asking a friend or colleague for help with something', 'Sharing how you\'re feeling with someone you trust', 'Accepting an offer of help without deflecting it'] },
+        tooltip: { icon: '🙏', title: 'Receiving care activates Oxytocin', body: 'Inagaki et al. 2020 confirmed that receiving social support triggers oxytocin as strongly as giving it. Vulnerability is a neurological act of bonding, not weakness.' }
+      },
+      {
+        label: 'Group Singing / Shared Music',
+        weight: 1, foundational: false, type: 'bonus', flex: null,
+        info: { body: 'Singing together with others, or playing or listening to music in a genuinely shared social context — not alone with headphones. The group element is what triggers the neurochemical response.', examples: ['Singing nasheeds or hymns in a group', 'Playing music with others (jam, class, or practice)', 'Attending a live concert or communal musical event'] },
+        tooltip: { icon: '🎵', title: 'Group singing releases Oxytocin', body: 'Weinstein et al. 2016 confirmed that group singing triggers oxytocin and endorphin release simultaneously. The mechanism is interpersonal synchrony — the shared rhythm of voice and breath.' }
       },
       {
         label: 'Community Help / Act of Kindness',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'Doing something for someone without expecting anything in return — it must be voluntary and without obligation.', examples: ['Helping a neighbour carry something', 'Paying for someone\'s coffee anonymously', 'Volunteering time at a community event or mosque'] },
-        tooltip: { icon: '🌱', title: 'Giving is neurologically rewarding', body: 'Acts of genuine kindness trigger oxytocin release. The "helper\'s high" is real — prosocial behaviour is one of the most sustainable sources of wellbeing.' }
+        info: { body: 'Doing something for someone without expecting anything in return — voluntary and without obligation. The helper\'s high is neurologically real.', examples: ['Helping a neighbour carry something', 'Paying for someone\'s coffee anonymously', 'Volunteering time at a community event or mosque'] },
+        tooltip: { icon: '🌱', title: 'Giving is neurologically rewarding', body: 'Acts of genuine kindness trigger oxytocin release and lower cortisol. The "helper\'s high" is mesolimbic activation confirmed by fMRI (Moll et al. 2006).' }
       },
       {
-        label: 'Virtual Social Check-In',
+        label: 'Social Laughter / Humor',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'A meaningful digital connection — video or voice preferred — that genuinely maintains a social bond.', examples: ['A voice note to someone you haven\'t spoken to in a while', 'A video call with a long-distance friend or family member', 'Sending a personal (non-generic) message to someone you care about'] },
-        tooltip: { icon: '📱', title: 'Even digital connection counts', body: 'Meaningful virtual connection — especially voice and video — still activates oxytocin pathways and maintains social bonds when physical presence isn\'t possible.' }
+        info: { body: 'Genuine, sustained laughter shared with another person — not scrolling memes alone, but real social humour. The social element is what makes laughter a bonding habit.', examples: ['A genuinely funny conversation with a friend or colleague', 'Watching a comedy together and laughing', 'Playing a silly game with someone'] },
+        tooltip: { icon: '😂', title: 'Laughter bonds the brain', body: 'Laughter\'s primary neurochemical effect is social bonding via oxytocin and endorphin — it is a bonding behaviour first, a physical one second.' }
       },
     ]
   },
 
   endorphin: {
     color: '#5a82c0',
-    gate: 'all',
+    /* OR-gate: Exercise OR Active Day unlocks cap */
+    gate: 'any',
     habits: [
       {
-        label: 'Exercise / High Movement (30+ min)',
+        label: 'Exercise (Dedicated Session)',
         weight: 3, foundational: true, type: 'foundational',
-        flex: { label: 'Low Movement — 10+ min (Flex)', weight: 1 },
-        info: { body: 'Sustained moderate-to-high intensity physical activity lasting at least 30 minutes — enough to raise heart rate and induce some breathlessness.', examples: ['Running, cycling, or swimming for 30+ min', 'HIIT session, CrossFit, or gym weights', 'Brisk walking uphill or a martial arts class'] },
-        tooltip: { icon: '🏃', title: 'Exercise is the endorphin king', body: 'Sustained exercise triggers the largest natural endorphin release. The "runner\'s high" is a real neurochemical event that also reduces cortisol and inflammation.' }
+        flex: { multiSession: true, tiers: [
+          { label: 'Light — 15–20 min (walk, yoga)',   weight: 1, sessions: 1 },
+          { label: 'Moderate — 30 min sustained',       weight: 2, sessions: 2 },
+          { label: 'Vigorous — 45+ min / HIIT / weights', weight: 3, sessions: 3 },
+        ]},
+        info: { body: 'A dedicated exercise session — intentional, with elevated heart rate. Use the intensity cycler to log your level. Either Exercise or Active Day unlocks your Endorphin gauge. If you log Exercise, the Active Day habit locks automatically (steps from your workout already count).', examples: ['Light = ⭐: 15–20 min walk, yoga, or easy swim', 'Moderate = ⭐⭐: 30 min jog, cycling, or brisk swim', 'Vigorous = ⭐⭐⭐: 45+ min HIIT, weights, or intense sport'] },
+        tooltip: { icon: '🏃', title: 'Exercise is the endorphin king', body: 'Sustained exercise triggers the largest natural endorphin release. It also produces BDNF, reduces cortisol, and improves both depression (SMD -0.43) and anxiety (Singh et al. BJSM 2023).' }
+      },
+      {
+        label: 'Active Day (No Workout Today)',
+        weight: 3, foundational: true, type: 'foundational',
+        flex: { multiSession: true, tiers: [
+          { label: '3,000–4,999 incidental steps',  weight: 1, sessions: 1 },
+          { label: '5,000–7,499 incidental steps',  weight: 2, sessions: 2 },
+          { label: '7,500–10,000+ incidental steps', weight: 3, sessions: 3 },
+        ]},
+        info: { body: 'For days when a dedicated workout is not possible. Log incidental steps from daily life only — stairs, walking errands, standing — NOT steps from your exercise session. If you logged Exercise today, this habit is automatically locked.', examples: ['3k–5k steps = ⭐: took stairs, parked further away', '5k–7.5k steps = ⭐⭐: walked to meetings, active errands', '7.5k–10k+ steps = ⭐⭐⭐: consistently active all day without a workout'] },
+        tooltip: { icon: '🚶', title: 'Movement is medicine, any amount', body: 'Paluch et al. JAMA 2022 (n=47,471): step count has a clear dose-response mortality benefit, with most of the gain captured at 7,000–8,000 daily steps — even without a formal exercise session.' }
       },
       {
         label: 'Cold Shower / Contrast Therapy',
         weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Deliberate cold water exposure — at minimum a cold shower, ideally ending on cold after a hot shower.', examples: ['2-minute cold shower at the end of your normal shower', 'Alternating hot and cold in 1-min intervals (3 rounds)', 'Cold plunge or outdoor swim in cool water'] },
-        tooltip: { icon: '🚿', title: 'Cold triggers an endorphin spike', body: 'Cold water immersion floods the system with noradrenaline and endorphins. Within minutes of getting out, you feel calmer, sharper, and more resilient.' }
+        info: { body: 'Deliberate cold water exposure — at minimum a cold shower, ideally ending on cold after a hot shower. The noradrenaline surge is the primary mechanism; endorphin is a secondary effect.', examples: ['2-minute cold shower at the end of your normal shower', 'Alternating hot and cold in 1-min intervals (3 rounds)', 'Cold plunge or outdoor swim in cool water'] },
+        tooltip: { icon: '🚿', title: 'Cold triggers a noradrenaline surge', body: 'Cold water immersion triggers a significant noradrenaline response and secondary endorphin release. Within minutes of getting out, you feel calmer, sharper, and more resilient.' }
       },
       {
         label: 'Creative Play / Dancing',
         weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Physical creative expression — dancing, movement arts, or active play — that combines joy with motion.', examples: ['Dancing to music for 10+ minutes', 'Improv or drama class', 'Playing a physically active game with children or friends'] },
-        tooltip: { icon: '💃', title: 'Dance triggers multiple pathways', body: 'Dancing combines rhythmic movement, social bonding, music, and creativity — each independently triggering endorphin and dopamine release.' }
+        info: { body: 'Physical creative expression — dancing, movement arts, or active play — that combines joy with motion. The rhythm, music, and social elements are all neurochemically active.', examples: ['Dancing to music for 10+ minutes', 'Improv or drama class', 'Playing a physically active game with children or friends'] },
+        tooltip: { icon: '💃', title: 'Dance triggers multiple pathways', body: 'Dancing combines rhythmic movement, social bonding, music, and creativity — each independently triggering endorphin and dopamine release. DMN suppression during flow is neuroimaging-confirmed.' }
       },
       {
-        /* REVISION 3: weight changed from 1 → 2, type secondary */
-        label: 'Social Laughter / Humor',
-        weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Genuine, sustained laughter shared with another person — not scrolling memes alone, but real social humor.', examples: ['Watching a comedy with friends and genuinely laughing', 'A funny conversation or banter with colleagues', 'Playing a silly game or watching stand-up together'] },
-        tooltip: { icon: '😂', title: 'Laughter is real medicine', body: 'Genuine shared laughter triggers significant endorphin release. Studies show it raises pain thresholds, reduces cortisol, and strengthens immune function.' }
-      },
-      {
-        label: 'Mobility / Stretching Routine',
+        label: 'Yoga / Mobility / Stretching (10+ min)',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'A dedicated stretching, yoga, or mobility session — not just a quick stretch after sitting.', examples: ['10-min morning yoga or sun salutation', 'Post-workout static stretching (hold 30s each)', 'Foam rolling + hip flexor and hamstring work'] },
-        tooltip: { icon: '🧘', title: 'Stretching releases tension and endorphins', body: 'Deliberate stretching triggers mild endorphin release while activating the parasympathetic nervous system — effective at reducing physical stress stored in muscles.' }
+        info: { body: 'A dedicated yoga, tai chi, mobility, or stretching session — not just a quick stretch after sitting. Yoga and tai chi have strong RCT evidence for mental health; static stretching adds musculoskeletal benefit. Self-select what counts.', examples: ['10-min morning yoga or sun salutation', 'A tai chi or qi gong session', 'Post-workout static stretching (hold 30s each)'] },
+        tooltip: { icon: '🧘', title: 'Yoga and mobility calm the system', body: 'Yoga and tai chi reduce cortisol, improve vagal tone, and trigger mild endorphin release. RCTs show efficacy for both anxiety and depression (Frontiers Psychology 2025).' }
       },
     ]
   }
@@ -1626,9 +1688,10 @@ const today = new Date().toISOString().slice(0, 10);
 if (!appState[today]) appState[today] = {};
 
 /* ═══════════════════════════════════════════════════════════
-   SCORING ENGINE
-   ── REVISION 2: foundationDone uses category gate type
-   ── REVISION 3: Social Laughter weight now 2 in HABITS obj
+   SCORING ENGINE v2
+   ── Method A: Multiplicative gate (foundation rate × raw score)
+   ── Method B: Square-root dampening on Hero Score (balance incentive)
+   ── isHabitLocked: Exercise/Active Day mutual exclusion
    ═══════════════════════════════════════════════════════════ */
 
 function habitWeight(type, i) {
@@ -1663,8 +1726,14 @@ function catRawPts(type) {
 }
 
 /**
- * REVISION 2: Serotonin uses 'any' gate — ANY foundational unlocks cap.
- * All other categories use 'all' — ALL foundationals must be done.
+ * foundationDone — gate logic per category:
+ *   'any'            — ANY ONE foundational done (dopamine, oxytocin, endorphin)
+ *   'sleepOrPrayer'  — Sleep (index 1) OR Prayer (index 0) done (serotonin)
+ *   'all'            — ALL foundationals done (fallback)
+ *
+ * Endorphin special case: Exercise (index 0) and Active Day (index 1)
+ * are mutually exclusive. Active Day is locked when Exercise is done.
+ * Either one satisfies the gate.
  */
 function foundationDone(type) {
   const gate = HABITS[type].gate || 'all';
@@ -1672,19 +1741,57 @@ function foundationDone(type) {
     .map((h, i) => ({ h, i }))
     .filter(({ h }) => h.foundational);
 
-  if (gate === 'any') {
-    // At least ONE foundational done
-    return fdns.some(({ h, i }) => !!appState[today][`${type}_${i}`]);
+  if (type === 'endorphin') {
+    // Exercise OR Active Day — either satisfies gate
+    const exDone   = !!appState[today]['endorphin_0'];
+    const neatDone = !!appState[today]['endorphin_1'];
+    return exDone || neatDone;
   }
+
+  if (gate === 'sleepOrPrayer') {
+    // Serotonin: Prayer (idx 0) OR Sleep (idx 1) must be done
+    const prayerDone = !!appState[today]['serotonin_0'];
+    const sleepDone  = !!appState[today]['serotonin_1'];
+    return prayerDone || sleepDone;
+  }
+
+  if (gate === 'any') {
+    return fdns.some(({ i }) => !!appState[today][`${type}_${i}`]);
+  }
+
   // 'all': every foundational done
-  return fdns.every(({ h, i }) => !!appState[today][`${type}_${i}`]);
+  return fdns.every(({ i }) => !!appState[today][`${type}_${i}`]);
+}
+
+/**
+ * isHabitLocked — returns true when a habit should be non-interactive.
+ * Active Day (endorphin index 1) locks when Exercise (index 0) is done.
+ */
+function isHabitLocked(type, i) {
+  if (type === 'endorphin' && i === 1) {
+    return !!appState[today]['endorphin_0'];
+  }
+  return false;
 }
 
 function catEffectivePct(type) {
   const max = catMaxPts(type);
   if (max === 0) return 0;
   const rawPct = (catRawPts(type) / max) * 100;
-  return foundationDone(type) ? Math.min(rawPct, 100) : Math.min(rawPct, 50);
+  const fdns = HABITS[type].habits.filter(h => h.foundational);
+  let fdnMax = 0, fdnEarned = 0;
+  fdns.forEach(h => {
+    const ri = HABITS[type].habits.indexOf(h);
+    if (h.flex && h.flex.multiSession) {
+      fdnMax += h.flex.tiers[h.flex.tiers.length - 1].weight;
+    } else {
+      fdnMax += h.weight;
+    }
+    fdnEarned += appState[today][type + '_' + ri] ? habitWeight(type, ri) : 0;
+  });
+  const foundationRate = fdnMax > 0 ? Math.min(fdnEarned / fdnMax, 1) : 0;
+  const multiplier     = 0.5 + 0.5 * foundationRate;
+  return Math.min(rawPct * multiplier, 100);
 }
 
 function catRawPct(type) {
@@ -1694,7 +1801,11 @@ function catRawPct(type) {
 
 function heroScore() {
   const types = Object.keys(HABITS);
-  return types.reduce((s, t) => s + catEffectivePct(t), 0) / types.length;
+  // Square-root dampening: rewards balance across categories naturally
+  // without subtracting points. A category at 0% costs more than
+  // raising a strong category further.
+  const avg = types.reduce((s, t) => s + Math.sqrt(catEffectivePct(t) / 100), 0) / types.length;
+  return avg * avg * 100;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1717,10 +1828,14 @@ function renderSection(type) {
     const typeMap  = { foundational: 'Foundational', secondary: 'Secondary', bonus: 'Bonus' };
     const stars    = '⭐'.repeat(Math.max(1, Math.min(3, w)));
 
+    // Active Day (endorphin index 1) locks when Exercise (index 0) is done
+    const locked = isHabitLocked(type, i);
+
     // Derive display label — swap when flex is active
     let displayLabel = h.label;
     if (isMulti && tierIdx > 0) displayLabel = h.flex.tiers[tierIdx - 1].label;
     else if (!isMulti && isFlex && h.flex?.label) displayLabel = h.flex.label;
+    if (locked) displayLabel = h.label + ' — exercise logged today ✓';
 
     // Multi-session flex button label
     let flexBtnLabel = '';
@@ -1735,15 +1850,21 @@ function renderSection(type) {
       'habit-row',
       h.foundational ? 'foundational' : '',
       isDone ? 'done' : '',
-      isFlex ? 'flex-active' : ''
+      isFlex ? 'flex-active' : '',
+      locked ? 'habit-locked-row' : ''
     ].filter(Boolean).join(' ');
     row.style.setProperty('--ac', `var(--${type})`);
+    if (locked) {
+      row.style.opacity = '0.45';
+      row.style.pointerEvents = 'none';
+    }
     /* UX-05: Keyboard & screen reader accessibility */
     row.setAttribute('role', 'checkbox');
     row.setAttribute('aria-checked', isDone ? 'true' : 'false');
     row.setAttribute('aria-label', displayLabel);
-    row.setAttribute('tabindex', '0');
+    row.setAttribute('tabindex', locked ? '-1' : '0');
     row.addEventListener('keydown', (e) => {
+      if (locked) return;
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         toggleHabit(key, type, i);
@@ -1893,6 +2014,7 @@ function showHabitInfo(h) {
    TOGGLE
    ═══════════════════════════════════════════════════════════ */
 function toggleHabit(key, type, idx) {
+  if (isHabitLocked(type, idx)) return;
   appState[today][key] = !appState[today][key];
   sv(SK, appState);
   // Fix 1: immediately lock today's score to weekData on every toggle
@@ -1990,7 +2112,7 @@ function updateHeader() {
   document.getElementById('ringNum').textContent        = Math.round(score) + '%';
   document.getElementById('headerScoreVal').textContent  = Math.round(score) + '%';
 
-  const grades = [[100,'S','#4a9e82'],[80,'A','#4a9e82'],[60,'B','#5a82c0'],[40,'C','#c8712a'],[20,'D','#b85070'],[0,'—','#7a7469']];
+  const grades = [[90,'S','#4a9e82'],[75,'A','#4a9e82'],[55,'B','#5a82c0'],[35,'C','#c8712a'],[15,'D','#b85070'],[0,'—','#7a7469']];
   const [, g, c] = grades.find(([min]) => score >= min) || grades[5];
   const chip = document.getElementById('gradeChip');
   chip.textContent = g;
@@ -2078,10 +2200,10 @@ const BRAINVATAR_CONTENT = {
 };
 
 function getBrainvatarTier(score) {
-  if (score >= 80) return 'elite';
-  if (score >= 60) return 'good';
-  if (score >= 40) return 'mid';
-  if (score >= 20) return 'low';
+  if (score >= 75) return 'elite';
+  if (score >= 55) return 'good';
+  if (score >= 35) return 'mid';
+  if (score >= 15) return 'low';
   return 'zero';
 }
 
@@ -2274,12 +2396,12 @@ function renderCoach() {
   checkRecoveryBonus();
 
   const titles = [
-    [100, 'Perfect Day',   'All four neurochemicals fully activated. Outstanding.'],
-    [80,  'Excellent',     'Strong across the board. Keep it up.'],
-    [60,  'Good enough ✓', 'You\'ve hit your target. Anything else is a bonus.'],
-    [40,  'Making progress','Pick one more habit — you\'re closer than you think.'],
-    [20,  'Small start',   'One habit done is better than zero. Keep going.'],
-    [0,   'Fresh start',   'Pick just one habit to begin. That\'s all.']
+    [90,  'Thriving',      'All four neurochemical systems fully active. Outstanding day.'],
+    [75,  'Strong',        'Strong across the board. Foundation complete.'],
+    [55,  'Building',      'Good foundation. Everything else is a bonus.'],
+    [35,  'Moving',        'Pick one more habit — you\'re closer than you think.'],
+    [15,  'Starting',      'One habit done is better than zero. Keep going.'],
+    [0,   'Rest day',      'Pick just one habit to begin. That\'s all.']
   ];
   const [, t, s] = titles.find(([min]) => score >= min) || titles[5];
 
@@ -2291,10 +2413,10 @@ function renderCoach() {
     { type:'endorphin', name:'Endorphin', color:'#5a82c0' },
   ];
   const catActions = {
-    dopamine:  { capped: 'Complete Deep Work to unlock full gauge', 0: 'Start with 45+ min of focused work', low: 'Add another deep work session', high: 'One more habit to max out', max: 'Fully activated' },
-    serotonin: { capped: 'Complete a foundational habit to unlock', 0: 'Prioritise prayer or sleep tonight', low: 'Add a nature walk or breathwork', high: 'One more to reach full balance', max: 'Fully activated' },
-    oxytocin:  { capped: 'Complete Active Socialising to unlock', 0: 'Have one real 20-min conversation', low: 'Add a hug or act of appreciation', high: 'One small act of kindness to finish', max: 'Fully activated' },
-    endorphin: { capped: 'Complete Exercise to unlock full gauge', 0: 'Move your body — 30+ min today', low: 'Add cold shower or dancing', high: 'One more habit for full recovery', max: 'Fully activated' },
+    dopamine:  { capped: 'Complete Deep Work or Morning Sunlight to unlock', 0: 'Start with 45+ min of focused work or get outside for sunlight', low: 'Add another deep work session or skill practice', high: 'One more habit to max out', max: 'Fully activated' },
+    serotonin: { capped: 'Complete Prayer or Sleep to unlock gauge', 0: 'Prioritise prayer or sleep hygiene tonight', low: 'Add a nature walk or breathwork', high: 'One more to reach full balance', max: 'Fully activated' },
+    oxytocin:  { capped: 'Complete Active Socialising or Appreciation to unlock', 0: 'Have one real 20-min conversation or express appreciation', low: 'Add a shared meal or a hug', high: 'One small act of kindness to finish', max: 'Fully activated' },
+    endorphin: { capped: 'Complete Exercise or log your Active Day steps to unlock', 0: 'Move your body — any intensity counts', low: 'Add cold shower or dancing', high: 'One more habit for full endorphin activation', max: 'Fully activated' },
   };
 
   const rows = catMeta.map(c => {
@@ -2329,7 +2451,7 @@ function renderCoach() {
   document.getElementById('coachGreeting').textContent = `${greeting}${name} 🧠`;
 
   // Good enough banner
-  document.getElementById('goodEnoughBanner').classList.toggle('show', score >= 60);
+  document.getElementById('goodEnoughBanner').classList.toggle('show', score >= 55);
 
   // Daily Focus Mode — top 3 incomplete foundational habits across all categories
   const focusList = document.getElementById('focusHabitList');
@@ -2714,7 +2836,7 @@ function openShareModal() {
   const now    = new Date();
   const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const grades = [[100,'S','#4a9e82'],[80,'A','#4a9e82'],[60,'B','#5a82c0'],[40,'C','#c8712a'],[20,'D','#b85070'],[0,'—','#7a7469']];
+  const grades = [[90,'S','#4a9e82'],[75,'A','#4a9e82'],[55,'B','#5a82c0'],[35,'C','#c8712a'],[15,'D','#b85070'],[0,'—','#7a7469']];
   const [, g, c] = grades.find(([min]) => score >= min) || grades[5];
 
   document.getElementById('shareDate').textContent    = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
@@ -2749,13 +2871,13 @@ function openShareModal() {
 }
 
 function gradeLabel(g) {
-  const map = { 'S': 'Perfect Day', 'A': 'Excellent', 'B': 'Good', 'C': 'Okay', 'D': 'Low', '—': 'Just Starting' };
+  const map = { 'S': 'Thriving', 'A': 'Strong', 'B': 'Building', 'C': 'Moving', 'D': 'Starting', '—': 'Rest day' };
   return map[g] || '';
 }
 
 function buildShareText() {
   const score = Math.round(heroScore());
-  const grades = [[100,'S'],[80,'A'],[60,'B'],[40,'C'],[20,'D'],[0,'—']];
+  const grades = [[90,'S'],[75,'A'],[55,'B'],[35,'C'],[15,'D'],[0,'—']];
   const [, g] = grades.find(([min]) => score >= min) || grades[5];
   const now   = new Date();
   const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -2793,7 +2915,7 @@ async function generateShareImage() {
   const months    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dateStr   = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
 
-  const grades     = [[100,'S','#4a9e82'],[80,'A','#4a9e82'],[60,'B','#5a82c0'],[40,'C','#c8712a'],[20,'D','#b85070'],[0,'—','#7a7469']];
+  const grades     = [[90,'S','#4a9e82'],[75,'A','#4a9e82'],[55,'B','#5a82c0'],[35,'C','#c8712a'],[15,'D','#b85070'],[0,'—','#7a7469']];
   const [, grade, gradeColor] = grades.find(([min]) => score >= min) || grades[5];
   const gradeText  = { 'S':'Perfect Day','A':'Excellent','B':'Good','C':'Okay','D':'Low','—':'Just Starting' }[grade];
 
@@ -3263,7 +3385,7 @@ function renderProfile() {
   const email  = userData.skipAuth ? 'No account — guest session' : (userData.email || userData.name || '—');
   const initials = name.slice(0, 2).toUpperCase();
   const score  = Math.round(heroScore());
-  const grades = [[100,'S'],[80,'A'],[60,'B'],[40,'C'],[20,'D'],[0,'—']];
+  const grades = [[90,'S'],[75,'A'],[55,'B'],[35,'C'],[15,'D'],[0,'—']];
   const [, g]  = grades.find(([min]) => score >= min) || grades[5];
 
   document.getElementById('profileAvatar').textContent = initials;
@@ -3363,7 +3485,7 @@ function confirmNewDay() {
    PWA installability criteria on this page load
    ═══════════════════════════════════════════════════════════ */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/neurohabit/sw.js', { scope: '/neurohabit/' })
+  navigator.serviceWorker.register('/nh-tracker-alpha/sw.js', { scope: '/nh-tracker-alpha/' })
     .then(r => console.log('[SW] registered', r.scope))
     .catch(e => console.warn('[SW] registration failed', e));
 }
