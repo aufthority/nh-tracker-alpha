@@ -1221,7 +1221,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
         <!-- Feedback section -->
         <div class="profile-section-label">Beta Feedback</div>
         <div class="profile-rows">
-          <div class="profile-row feedback" onclick="window.open('https://forms.gle/oYkxx8B898Ur4JtV9', '_blank')">
+          <div class="profile-row feedback" onclick="openFeedback()">
             <div class="profile-row-icon">💬</div>
             <div class="profile-row-body">
               <strong>Share Your Feedback</strong>
@@ -3483,6 +3483,20 @@ function togglePremiumPanel() {
 /* ═══════════════════════════════════════════════════════════
    EXPOSE FUNCTIONS GLOBALLY (required for onclick handlers)
    ═══════════════════════════════════════════════════════════ */
+
+/* openFeedback — works in both browser and standalone PWA mode */
+function openFeedback() {
+  const url = 'https://forms.gle/oYkxx8B898Ur4JtV9';
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+window.openFeedback        = openFeedback;
 window.togglePremiumPanel  = togglePremiumPanel;
 window.showToast          = showToast;
 window.signInWithGoogle   = signInWithGoogle;
