@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NeuroHabit">
 <meta name="description" content="Neuroscience-based daily habit tracker by The Aufthority">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="/neurohabit/manifest.json">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%231c1a17'/><text y='128' x='90' text-anchor='middle' font-size='100'>🧠</text></svg>">
 <title>NeuroHabit</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -343,15 +343,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .share-score-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
 .share-score-btn:hover { background: var(--surface2); }
 
-/* Insight cards */
-.insight-cards { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
-.insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; display: flex; gap: 11px; align-items: flex-start; position: relative; overflow: hidden; }
-.insight-card::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 0 2px 2px 0; background: var(--ins-color, var(--muted)); }
-.insight-card.good::after { background: var(--serotonin); }
-.insight-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-.insight-card.good .insight-icon { background: color-mix(in srgb, var(--serotonin) 14%, var(--surface2)); }
-.insight-text strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 2px; line-height: 1.3; }
-.insight-text span { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+/* Next-up improvement summary */
+.improve-summary { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; margin-bottom: 14px; }
+.improve-summary-head { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 9px; }
+.improve-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.improve-row:last-child { border-bottom: none; padding-bottom: 0; }
+.improve-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.improve-body { flex: 1; min-width: 0; }
+.improve-body strong { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.improve-body span { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+.improve-pct { font-family: 'Instrument Serif', serif; font-size: 16px; font-weight: 400; flex-shrink: 0; }
+.improve-done { opacity: 0.45; }
+.improve-done .improve-body strong { text-decoration: line-through; text-decoration-color: var(--subtle); }
 
 /* Week dots */
 .week-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; margin-bottom: 14px; }
@@ -389,11 +392,23 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 /* ═══ PWA INSTALL BANNER ══════════════════════════════════════ */
 .install-banner { display: none; position: fixed; bottom: calc(var(--safe-b) + var(--nav-h) + 10px); left: 14px; right: 14px; z-index: 300; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); padding: 12px 13px; flex-direction: row; align-items: center; gap: 11px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); animation: slideUp 0.25s cubic-bezier(.4,0,.2,1); }
 .install-banner.show { display: flex; }
+.install-banner-icon { font-size: 22px; flex-shrink: 0; }
 .install-banner-text { flex: 1; }
 .install-banner-text strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 1px; }
 .install-banner-text span { font-size: 11px; color: var(--muted); }
 .install-btn { padding: 8px 13px; border-radius: 8px; background: var(--coach); border: none; color: var(--text); font-family: 'Geist', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .install-dismiss { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px; }
+
+/* iOS install instruction sheet */
+.ios-install-sheet { position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,0.6); display: flex; align-items: flex-end; justify-content: center; padding-bottom: var(--safe-b); animation: fadeIn 0.18s ease; }
+.ios-install-card { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm) var(--radius-sm); padding: 20px 20px 24px; width: 100%; max-width: 480px; animation: slideUp 0.22s cubic-bezier(.4,0,.2,1); }
+.ios-install-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 18px; }
+.ios-install-title { font-family: 'Instrument Serif', serif; font-size: 20px; font-weight: 400; margin-bottom: 16px; }
+.ios-install-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.ios-step { display: flex; align-items: flex-start; gap: 12px; font-size: 13.5px; color: var(--text); line-height: 1.5; }
+.ios-step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--coach); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.ios-share-icon { display: inline-block; background: var(--surface2); border: 1px solid var(--border2); border-radius: 5px; padding: 1px 5px; font-size: 12px; margin: 0 2px; }
+.ios-install-close { width: 100%; padding: 13px; border-radius: var(--radius-sm); background: var(--coach); border: none; color: var(--text); font-family: 'Geist', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
 
 /* ═══ TOAST NOTIFICATIONS ════════════════════════════════════ */
 #toast-container { position: fixed; top: calc(var(--safe-t) + 90px); left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; width: 90%; max-width: 360px; }
@@ -472,6 +487,15 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .profile-row-chevron { color: var(--muted); flex-shrink: 0; }
 .profile-row.danger strong { color: #c0445a; }
 .profile-row.danger .profile-row-icon { background: color-mix(in srgb, #c0445a 10%, var(--surface2)); }
+
+/* Feedback row — explicit colours, no inline color-mix() */
+.profile-row.feedback {
+  border-left: 3px solid var(--serotonin);
+  background: #253830; /* serotonin 5% over surface — hardcoded for max compat */
+}
+.profile-row.feedback:hover { background: #2c4038; }
+.profile-row.feedback .profile-row-icon { background: #2e4f42; }
+.profile-row.feedback strong { color: var(--serotonin); }
 
 /* Premium card */
 .premium-card {
@@ -723,27 +747,95 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
   border-radius: 20px; padding: 1px 7px; margin-left: 4px;
 }
 
-/* ═══ ONBOARDING SCREEN ══════════════════════════════════════ */
-#screen-onboarding { align-items: center; justify-content: flex-start; padding: 48px 24px 40px; overflow-y: auto; }
-.onboard-title { font-family: 'Instrument Serif', serif; font-size: 28px; font-weight: 400; text-align: center; letter-spacing: -0.4px; margin-bottom: 6px; }
-.onboard-sub { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.6; margin-bottom: 28px; max-width: 280px; }
-.onboard-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; align-self: flex-start; width: 100%; max-width: 340px; }
-.onboard-name-input { width: 100%; max-width: 340px; padding: 13px 15px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'Geist', sans-serif; font-size: 15px; outline: none; transition: border-color 0.2s; margin-bottom: 28px; }
-.onboard-name-input:focus { border-color: var(--coach); }
-.onboard-name-input::placeholder { color: var(--muted); }
-.avatar-grid { display: flex; gap: 12px; width: 100%; max-width: 340px; margin-bottom: 32px; }
-.avatar-card {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;
-  padding: 14px 8px; background: var(--surface); border: 2px solid var(--border);
-  border-radius: var(--radius); cursor: pointer; transition: all 0.2s;
-  user-select: none; -webkit-user-select: none;
+/* ═══ BRAINVATAR ══════════════════════════════════════════════ */
+.brainvatar-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 16px 14px;
+  margin-bottom: 14px; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
 }
-.avatar-card:hover { border-color: var(--border2); background: var(--surface2); }
-.avatar-card.selected { border-color: var(--coach); background: color-mix(in srgb, var(--coach) 8%, var(--surface)); }
-.avatar-card svg { width: 72px; height: 72px; }
-.onboard-btn { width: 100%; max-width: 340px; padding: 14px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-family: 'Geist', sans-serif; font-size: 15px; font-weight: 600; background: var(--coach); color: var(--text); transition: all 0.2s; opacity: 0.4; pointer-events: none; }
-.onboard-btn.ready { opacity: 1; pointer-events: auto; }
-.onboard-btn.ready:active { transform: scale(0.97); }
+.brainvatar-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--dopamine), var(--oxytocin), var(--serotonin), var(--endorphin));
+}
+.brainvatar-svg-wrap {
+  position: relative; display: flex; align-items: center; justify-content: center;
+}
+.brainvatar-svg { display: block; transition: all 0.6s cubic-bezier(.4,0,.2,1); }
+.brainvatar-score-overlay {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; pointer-events: none;
+}
+.brainvatar-score-num {
+  font-family: 'Instrument Serif', serif; font-size: 28px; font-weight: 400;
+  line-height: 1; letter-spacing: -1px; color: var(--text);
+}
+.brainvatar-score-num span { font-size: 13px; color: var(--muted); }
+.brainvatar-state-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); margin-top: 2px;
+}
+.brainvatar-quote {
+  font-size: 12.5px; color: var(--muted); text-align: center; line-height: 1.55;
+  font-style: italic; padding: 0 4px;
+  border-top: 1px solid var(--border); width: 100%; padding-top: 10px; margin-top: 2px;
+}
+.brainvatar-quote strong {
+  display: block; font-style: normal; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--subtle); margin-bottom: 4px;
+}
+
+/* ═══ RECOVERY BONUS BANNER ═══════════════════════════════════ */
+.recovery-bonus-banner {
+  display: none; margin-bottom: 12px;
+  padding: 13px 16px; border-radius: var(--radius);
+  background: color-mix(in srgb, var(--coach) 9%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--coach) 28%, transparent);
+  animation: fadeIn 0.4s ease;
+}
+.recovery-bonus-banner.show { display: flex; align-items: flex-start; gap: 11px; }
+.recovery-bonus-icon {
+  font-size: 22px; flex-shrink: 0; line-height: 1;
+  animation: bouncePop 0.5s cubic-bezier(.34,1.56,.64,1) 0.2s both;
+}
+@keyframes bouncePop { from { transform: scale(0); } to { transform: scale(1); } }
+.recovery-bonus-body { flex: 1; }
+.recovery-bonus-body strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 3px; color: var(--text); }
+.recovery-bonus-body span { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.recovery-boost-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: color-mix(in srgb, var(--serotonin) 14%, var(--surface2));
+  border: 1px solid color-mix(in srgb, var(--serotonin) 30%, transparent);
+  color: var(--serotonin); font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px; margin-top: 5px;
+  animation: fadeIn 0.4s ease 0.4s both;
+}
+
+/* ═══ PREMIUM COLLAPSIBLE ════════════════════════════════════ */
+.premium-collapse-wrap { margin-bottom: 10px; }
+.premium-collapse-btn {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border2); background: var(--surface2);
+  color: var(--muted); font-family: 'Geist', sans-serif;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 0;
+}
+.premium-collapse-btn:hover { color: var(--text); border-color: var(--border); }
+.premium-collapse-btn.open { color: var(--text); border-color: var(--border); border-radius: var(--radius-sm) var(--radius-sm) 0 0; margin-bottom: 0; }
+.premium-collapse-chevron { font-size: 14px; transition: transform 0.25s; }
+.premium-collapse-btn.open .premium-collapse-chevron { transform: rotate(180deg); }
+.premium-collapse-body {
+  border: 1px solid var(--border2); border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  overflow: hidden;
+}
+.premium-collapse-body .premium-preview-block {
+  margin-bottom: 0; border-radius: 0; border-left: none; border-right: none; border-bottom: none;
+}
+.premium-collapse-body .premium-preview-block:first-child { border-top: none; }
+.premium-collapse-body .premium-preview-block + .premium-preview-block { border-top: 1px solid var(--border); }
 
 /* ═══ RESPONSIVE ═════════════════════════════════════════════ */
 @media (min-width: 520px) {
@@ -775,123 +867,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
     </button>
   </div>
   <div class="login-skip" id="loginBtn-skip" onclick="skipLogin()">Continue without account →</div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     ONBOARDING — avatar + brain name (shown once after first login)
-     ══════════════════════════════════════════════════════════ -->
-<div class="screen" id="screen-onboarding">
-
-  <div class="onboard-title">Meet your Brainvatar 🧠</div>
-  <div class="onboard-sub">Give your brain a name and pick the one that feels most like you.</div>
-
-  <div class="onboard-label">Name your brain</div>
-  <input class="onboard-name-input" id="brainNameInput" type="text" maxlength="20" placeholder="e.g. Ziggy, Sparky, Nova…" oninput="onboardCheck()">
-
-  <div class="onboard-label">Choose your Brainvatar</div>
-  <div class="avatar-grid">
-
-    <!-- ADHD high-functioning — energetic, wired, slightly chaotic -->
-    <div class="avatar-card" id="avatar-axel" onclick="selectAvatar('axel')">
-      <svg viewBox="0 0 80 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Body — slightly lopsided blob, Calvin-style wobbly outline -->
-        <path d="M18 52 C14 44 14 34 20 28 C24 22 30 18 40 18 C50 18 57 22 61 28 C67 34 67 44 62 52 C58 60 50 66 40 66 C30 66 22 60 18 52Z" fill="#fde8d0" stroke="#2a1a0a" stroke-width="2.5" stroke-linejoin="round"/>
-        <!-- Brain folds — loose ink lines -->
-        <path d="M24 38 Q30 31 36 38 Q42 45 48 38 Q54 31 58 36" stroke="#c8712a" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <path d="M22 48 Q28 42 34 48 Q40 54 46 48 Q52 42 57 46" stroke="#c8712a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <!-- Eyes — huge, wide, slightly different sizes (ADHD chaos) -->
-        <ellipse cx="31" cy="44" rx="6" ry="6.5" fill="white" stroke="#2a1a0a" stroke-width="2"/>
-        <ellipse cx="49" cy="44" rx="5.5" ry="6" fill="white" stroke="#2a1a0a" stroke-width="2"/>
-        <circle cx="32" cy="44" r="3" fill="#2a1a0a"/>
-        <circle cx="50" cy="44" r="2.8" fill="#2a1a0a"/>
-        <circle cx="33" cy="43" r="1.2" fill="white"/>
-        <circle cx="51" cy="43" r="1.2" fill="white"/>
-        <!-- Eyebrows — one raised higher, manic energy -->
-        <path d="M26 37 Q31 34 36 36" stroke="#2a1a0a" stroke-width="2" stroke-linecap="round"/>
-        <path d="M43 35 Q48 31 54 34" stroke="#2a1a0a" stroke-width="2" stroke-linecap="round"/>
-        <!-- Zigzag grin — Calvin trademark -->
-        <path d="M30 55 L33 52 L36 55 L39 52 L42 55 L45 52 L48 55" stroke="#2a1a0a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <!-- Spark lines — energy radiating out -->
-        <line x1="12" y1="28" x2="17" y2="33" stroke="#c8712a" stroke-width="2" stroke-linecap="round"/>
-        <line x1="10" y1="36" x2="16" y2="38" stroke="#c8712a" stroke-width="2" stroke-linecap="round"/>
-        <line x1="68" y1="28" x2="63" y2="33" stroke="#c8712a" stroke-width="2" stroke-linecap="round"/>
-        <line x1="70" y1="36" x2="64" y2="38" stroke="#c8712a" stroke-width="2" stroke-linecap="round"/>
-        <line x1="40" y1="12" x2="40" y2="6" stroke="#c8712a" stroke-width="2" stroke-linecap="round"/>
-        <line x1="35" y1="13" x2="32" y2="7" stroke="#c8712a" stroke-width="2" stroke-linecap="round"/>
-        <line x1="45" y1="13" x2="48" y2="7" stroke="#c8712a" stroke-width="2" stroke-linecap="round"/>
-        <!-- ADHD label — tiny scribble star -->
-        <path d="M40 3 L41 5 L43 5 L41.5 6.5 L42 8.5 L40 7 L38 8.5 L38.5 6.5 L37 5 L39 5Z" fill="#c8712a"/>
-      </svg>
-    </div>
-
-    <!-- Busy mother — warm, multitasking, heart on sleeve -->
-    <div class="avatar-card" id="avatar-maya" onclick="selectAvatar('maya')">
-      <svg viewBox="0 0 80 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Body — rounder, warmer blob -->
-        <path d="M16 54 C12 46 13 35 19 28 C24 21 31 17 40 17 C49 17 56 21 61 28 C67 35 68 46 64 54 C60 62 51 68 40 68 C29 68 20 62 16 54Z" fill="#fce8ee" stroke="#2a1a0a" stroke-width="2.5" stroke-linejoin="round"/>
-        <!-- Brain folds -->
-        <path d="M22 38 Q28 31 34 38 Q40 45 46 38 Q52 31 58 36" stroke="#b85070" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <path d="M20 50 Q26 44 32 50 Q38 56 44 50 Q50 44 58 48" stroke="#b85070" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <!-- Eyes — warm, kind, slightly tired -->
-        <ellipse cx="31" cy="45" rx="6" ry="5.5" fill="white" stroke="#2a1a0a" stroke-width="2"/>
-        <ellipse cx="49" cy="45" rx="6" ry="5.5" fill="white" stroke="#2a1a0a" stroke-width="2"/>
-        <circle cx="31" cy="46" r="3" fill="#2a1a0a"/>
-        <circle cx="49" cy="46" r="3" fill="#2a1a0a"/>
-        <circle cx="32" cy="45" r="1.2" fill="white"/>
-        <circle cx="50" cy="45" r="1.2" fill="white"/>
-        <!-- Eyelashes — feminine Watterson style -->
-        <line x1="26" y1="41" x2="24" y2="39" stroke="#2a1a0a" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="29" y1="40" x2="28" y2="37" stroke="#2a1a0a" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="44" y1="41" x2="42" y2="39" stroke="#2a1a0a" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="47" y1="40" x2="46" y2="37" stroke="#2a1a0a" stroke-width="1.5" stroke-linecap="round"/>
-        <!-- Eyebrows — gentle arch -->
-        <path d="M26 39 Q31 36 36 38" stroke="#2a1a0a" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M44 38 Q49 36 54 38" stroke="#2a1a0a" stroke-width="1.8" stroke-linecap="round"/>
-        <!-- Warm wide smile -->
-        <path d="M30 57 Q40 64 50 57" stroke="#2a1a0a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-        <!-- Bow on top — Calvin-style simple shapes -->
-        <path d="M33 20 Q37 15 40 20 Q43 15 47 20 Q44 25 40 21 Q36 25 33 20Z" fill="#b85070" stroke="#2a1a0a" stroke-width="1.5"/>
-        <!-- Floating hearts -->
-        <path d="M14 32 C14 30 16 29 17 31 C18 29 20 30 20 32 C20 34 17 36 17 36 C17 36 14 34 14 32Z" fill="#b85070" stroke="#2a1a0a" stroke-width="1"/>
-        <path d="M61 30 C61 28 63 27 64 29 C65 27 67 28 67 30 C67 32 64 34 64 34 C64 34 61 32 61 30Z" fill="#b85070" stroke="#2a1a0a" stroke-width="1"/>
-      </svg>
-    </div>
-
-    <!-- Shy millennial — thoughtful, introverted, headphones -->
-    <div class="avatar-card" id="avatar-kai" onclick="selectAvatar('kai')">
-      <svg viewBox="0 0 80 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Body — slightly hunched, narrower -->
-        <path d="M19 53 C15 45 16 34 22 27 C27 21 33 17 40 17 C47 17 53 21 58 27 C64 34 65 45 61 53 C57 61 50 67 40 67 C30 67 23 61 19 53Z" fill="#e8eef8" stroke="#2a1a0a" stroke-width="2.5" stroke-linejoin="round"/>
-        <!-- Brain folds -->
-        <path d="M24 38 Q30 31 36 38 Q42 45 48 38 Q54 31 58 36" stroke="#5a82c0" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <path d="M22 49 Q28 43 34 49 Q40 55 46 49 Q52 43 57 47" stroke="#5a82c0" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <!-- Eyes — half-lidded, droopy, thoughtful -->
-        <ellipse cx="31" cy="45" rx="6" ry="5" fill="white" stroke="#2a1a0a" stroke-width="2"/>
-        <ellipse cx="49" cy="45" rx="6" ry="5" fill="white" stroke="#2a1a0a" stroke-width="2"/>
-        <circle cx="31" cy="46" r="3" fill="#2a1a0a"/>
-        <circle cx="49" cy="46" r="3" fill="#2a1a0a"/>
-        <circle cx="32" cy="45" r="1.2" fill="white"/>
-        <circle cx="50" cy="45" r="1.2" fill="white"/>
-        <!-- Heavy droopy eyelids — Watterson tired look -->
-        <path d="M25 42 Q31 39 37 42" stroke="#2a1a0a" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M43 42 Q49 39 55 42" stroke="#2a1a0a" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- Flat line mouth — classic understated expression -->
-        <path d="M34 57 Q40 59 46 57" stroke="#2a1a0a" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <!-- Headphones — bold simple shapes -->
-        <path d="M15 46 Q15 24 40 24 Q65 24 65 46" stroke="#2a1a0a" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <rect x="11" y="43" width="8" height="11" rx="4" fill="#5a82c0" stroke="#2a1a0a" stroke-width="1.5"/>
-        <rect x="61" y="43" width="8" height="11" rx="4" fill="#5a82c0" stroke="#2a1a0a" stroke-width="1.5"/>
-        <!-- Music note floating -->
-        <path d="M58 18 L58 12 L62 11 L62 17" stroke="#5a82c0" stroke-width="1.8" stroke-linecap="round"/>
-        <circle cx="57" cy="18" r="2" fill="#5a82c0"/>
-        <circle cx="61" cy="17" r="2" fill="#5a82c0"/>
-      </svg>
-    </div>
-
-  </div>
-
-  <button class="onboard-btn" id="onboardBtn" onclick="finishOnboarding()">Let's go →</button>
-
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -944,22 +919,38 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
           <h2 id="coachGreeting">Good morning 🧠</h2>
           <p>Your neuroscience-based performance snapshot.</p>
         </div>
-        <div class="coach-hero-card">
-          <div class="coach-hero-top">
-            <div class="coach-big-score" id="coachBigScore">0<span>%</span></div>
-            <div class="coach-score-info">
-              <strong id="coachScoreTitle">Start your day</strong>
-              <em id="coachScoreSub">Complete habits to activate your neurochemistry.</em>
+        <!-- Recovery Bonus Banner -->
+        <div class="recovery-bonus-banner" id="recoveryBonusBanner">
+          <div class="recovery-bonus-icon">🔄</div>
+          <div class="recovery-bonus-body">
+            <strong>Welcome back — no shame, just action.</strong>
+            <span id="recoveryBonusMsg">You missed a few days, but every streak starts with returning. The brain rewards re-engagement just as much as consistency.</span>
+            <div class="recovery-boost-chip">⚡ +5% Re-engagement Boost</div>
+          </div>
+        </div>
+
+        <!-- Brainvatar Card -->
+        <div class="brainvatar-card" id="brainvatarCard">
+          <div class="brainvatar-svg-wrap">
+            <svg id="brainvatarSvg" class="brainvatar-svg" width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+              <!-- Rendered dynamically by renderBrainvatar() -->
+            </svg>
+            <div class="brainvatar-score-overlay">
+              <div class="brainvatar-score-num" id="brainvatarScore">0<span>%</span></div>
+              <div class="brainvatar-state-label" id="brainvatarLabel">Starting up</div>
             </div>
           </div>
-          <div class="coach-cat-bars" id="coachCatBars"></div>
+          <div class="brainvatar-quote" id="brainvatarQuote">
+            <strong id="brainvatarQuoteType">Today's nudge</strong>
+            <span id="brainvatarQuoteText">Complete your first habit to activate your brain.</span>
+          </div>
         </div>
         <!-- REVISION 6: Share button -->
         <button class="share-score-btn" onclick="openShareModal()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           Share Today's Score
         </button>
-        <div class="insight-cards" id="insightCards"></div>
+        <div class="improve-summary" id="improveSummary"></div>
         <!-- ADHD: Daily Focus Mode -->
         <div class="focus-mode-banner" id="focusModeBanner">
           <h3>⚡ Today's Focus — Top 3 Habits</h3>
@@ -975,65 +966,69 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
         </div>
         <button class="new-day-btn" onclick="confirmNewDay()">🌅 New Day — Reset Today</button>
 
-        <!-- ── PREMIUM FEATURES — BETA (unlocked for testing) ── -->
+        <!-- ── PREMIUM FEATURES — collapsible ── -->
+        <div class="premium-collapse-wrap">
+          <button class="premium-collapse-btn" id="premiumToggleBtn" onclick="togglePremiumPanel()">
+            <span>⭐ Premium Insights</span>
+            <span class="premium-collapse-chevron" id="premiumChevron">▾</span>
+          </button>
+          <div class="premium-collapse-body" id="premiumCollapseBody" style="display:none">
 
-        <!-- 1. Weekly trend chart — real data from weekData -->
-        <div class="premium-preview-block">
-          <div class="premium-preview-header">
-            <span class="premium-preview-title">📈 Weekly Score Trend</span>
-            <span class="beta-tag">⭐ Premium</span>
-          </div>
-          <div class="premium-chart-live" id="weeklyTrendChart"></div>
-          <p class="premium-preview-desc">Your Hero Score across this week. Spot patterns, protect your streak, and understand what a strong day looks like for your brain.</p>
-          <button class="beta-feedback-btn" onclick="alert('Thanks for testing! Share feedback: what would make this chart more useful?')">💬 Give Feedback</button>
-        </div>
+            <!-- 1. Weekly trend chart -->
+            <div class="premium-preview-block">
+              <div class="premium-preview-header">
+                <span class="premium-preview-title">📈 Weekly Score Trend</span>
+                <span class="beta-tag">⭐ Premium</span>
+              </div>
+              <div class="premium-chart-live" id="weeklyTrendChart"></div>
+              <p class="premium-preview-desc">Your Hero Score across this week. Spot patterns, protect your streak, and understand what a strong day looks like for your brain.</p>
+            </div>
 
-        <!-- 2. Per-category streaks — live computed -->
-        <div class="premium-preview-block">
-          <div class="premium-preview-header">
-            <span class="premium-preview-title">🔥 Category Streaks</span>
-            <span class="beta-tag">⭐ Premium</span>
-          </div>
-          <div class="premium-cat-streaks" id="catStreaksPanel"></div>
-          <p class="premium-preview-desc">Consecutive days you hit each neurochemical category (≥50% score). See where you're consistent and where you need more focus.</p>
-          <button class="beta-feedback-btn" onclick="alert('Thanks for testing! Share feedback: what streak milestone would motivate you most?')">💬 Give Feedback</button>
-        </div>
+            <!-- 2. Per-category streaks -->
+            <div class="premium-preview-block">
+              <div class="premium-preview-header">
+                <span class="premium-preview-title">🔥 Category Streaks</span>
+                <span class="beta-tag">⭐ Premium</span>
+              </div>
+              <div class="premium-cat-streaks" id="catStreaksPanel"></div>
+              <p class="premium-preview-desc">Consecutive days you hit each neurochemical category (≥50% score). See where you're consistent and where you need more focus.</p>
+            </div>
 
-        <!-- 3. Personal bests & milestones — live computed -->
-        <div class="premium-preview-block">
-          <div class="premium-preview-header">
-            <span class="premium-preview-title">🏅 Personal Bests</span>
-            <span class="beta-tag">⭐ Premium</span>
-          </div>
-          <div class="premium-milestones-live" id="milestonesPanel"></div>
-          <p class="premium-preview-desc">Your best recorded moments — tracked automatically as you use the app each day.</p>
-          <button class="beta-feedback-btn" onclick="alert('Thanks for testing! Share feedback: which milestone badge would you most want to earn?')">💬 Give Feedback</button>
-        </div>
+            <!-- 3. Personal bests & milestones -->
+            <div class="premium-preview-block">
+              <div class="premium-preview-header">
+                <span class="premium-preview-title">🏅 Personal Bests</span>
+                <span class="beta-tag">⭐ Premium</span>
+              </div>
+              <div class="premium-milestones-live" id="milestonesPanel"></div>
+              <p class="premium-preview-desc">Your best recorded moments — tracked automatically as you use the app each day.</p>
+            </div>
 
-        <!-- 4. Brain Balance Radar — live SVG -->
-        <div class="premium-preview-block">
-          <div class="premium-preview-header">
-            <span class="premium-preview-title">🕸 Brain Balance Radar</span>
-            <span class="beta-tag">⭐ Premium</span>
-          </div>
-          <div class="premium-radar-wrap">
-            <svg id="radarChart" viewBox="0 0 220 200" width="220" height="200"></svg>
-            <div class="radar-legend" id="radarLegend"></div>
-          </div>
-          <p class="premium-preview-desc">Today's neurochemical shape at a glance. A balanced brain shows an even polygon — lopsided shapes reveal which systems need attention.</p>
-          <button class="beta-feedback-btn" onclick="alert('Thanks for testing! Share feedback: is the radar chart easy to read and interpret?')">💬 Give Feedback</button>
-        </div>
+            <!-- 4. Brain Balance Radar -->
+            <div class="premium-preview-block">
+              <div class="premium-preview-header">
+                <span class="premium-preview-title">🕸 Brain Balance Radar</span>
+                <span class="beta-tag">⭐ Premium</span>
+              </div>
+              <div class="premium-radar-wrap">
+                <svg id="radarChart" viewBox="0 0 220 200" width="220" height="200"></svg>
+                <div class="radar-legend" id="radarLegend"></div>
+              </div>
+              <p class="premium-preview-desc">Today's neurochemical shape at a glance. A balanced brain shows an even polygon — lopsided shapes reveal which systems need attention.</p>
+            </div>
 
-        <!-- 5. Advanced NeuroCoach — live generated insights -->
-        <div class="premium-preview-block">
-          <div class="premium-preview-header">
-            <span class="premium-preview-title">🧠 Advanced NeuroCoach</span>
-            <span class="beta-tag">⭐ Premium</span>
-          </div>
-          <div class="premium-adv-insights" id="advInsightsPanel"></div>
-          <p class="premium-preview-desc">Pattern analysis, habit correlations, and proactive nudges based on your actual data — not generic advice.</p>
-          <button class="beta-feedback-btn" onclick="alert('Thanks for testing! Share feedback: which insight type was most useful or surprising?')">💬 Give Feedback</button>
-        </div>
+            <!-- 5. Advanced NeuroCoach -->
+            <div class="premium-preview-block">
+              <div class="premium-preview-header">
+                <span class="premium-preview-title">🧠 Advanced NeuroCoach</span>
+                <span class="beta-tag">⭐ Premium</span>
+              </div>
+              <div class="premium-adv-insights" id="advInsightsPanel"></div>
+              <p class="premium-preview-desc">Pattern analysis, habit correlations, and proactive nudges based on your actual data — not generic advice.</p>
+            </div>
+
+          </div><!-- /premium-collapse-body -->
+        </div><!-- /premium-collapse-wrap -->
 
       </div>
     </div>
@@ -1132,11 +1127,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 
         <!-- Avatar + name -->
         <div class="profile-avatar-block">
-          <div class="profile-avatar" id="profileAvatar" style="background:none;border:none;width:60px;height:60px;">?</div>
+          <div class="profile-avatar" id="profileAvatar">?</div>
           <div style="flex:1;min-width:0;overflow:hidden;">
             <div class="profile-name" id="profileName">Guest</div>
             <div class="profile-email" id="profileEmail">Not signed in</div>
-            <div id="profileBrainName" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
           </div>
           <div class="profile-badge" id="profilePlanBadge">Free</div>
         </div>
@@ -1185,14 +1179,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
             </div>
             <svg class="profile-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
-          <div class="profile-row" onclick="changeBrain()">
-            <div class="profile-row-icon">🧠</div>
-            <div class="profile-row-body">
-              <strong>Change Brain Avatar</strong>
-              <span id="currentBrainLabel">Choose your brain character</span>
-            </div>
-            <svg class="profile-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
           <div class="profile-row" onclick="changePassword()">
             <div class="profile-row-icon">🔑</div>
             <div class="profile-row-body">
@@ -1230,11 +1216,16 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
             </div>
             <svg class="profile-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
-          <div class="profile-row" id="installAppRow" onclick="triggerInstall()" style="display:none">
-            <div class="profile-row-icon">📲</div>
+        </div>
+
+        <!-- Feedback section -->
+        <div class="profile-section-label">Beta Feedback</div>
+        <div class="profile-rows">
+          <div class="profile-row feedback" onclick="window.open('https://forms.gle/oYkxx8B898Ur4JtV9', '_blank')">
+            <div class="profile-row-icon">💬</div>
             <div class="profile-row-body">
-              <strong>Install App</strong>
-              <span>Add NeuroHabit to your home screen</span>
+              <strong>Share Your Feedback</strong>
+              <span>Help shape NeuroHabit — takes 2 min</span>
             </div>
             <svg class="profile-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
@@ -1375,10 +1366,29 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 <!-- PWA Install Banner -->
 <div id="toast-container"></div>
 
+<!-- Install Banner — shown for Android (native prompt) or iOS (manual instructions) -->
 <div class="install-banner" id="installBanner">
-  <div class="install-banner-text"><strong>Install NeuroHabit</strong><span>Add to home screen for offline access</span></div>
-  <button class="install-btn" onclick="triggerInstall()">Install</button>
+  <div class="install-banner-icon">📲</div>
+  <div class="install-banner-text">
+    <strong>Install NeuroHabit</strong>
+    <span id="installBannerSub">Add to home screen for offline access</span>
+  </div>
+  <button class="install-btn" id="installBtn" onclick="triggerInstall()">Install</button>
   <button class="install-dismiss" onclick="dismissInstall()">✕</button>
+</div>
+
+<!-- iOS manual instructions sheet -->
+<div class="ios-install-sheet" id="iosInstallSheet" style="display:none">
+  <div class="ios-install-card">
+    <div class="ios-install-handle"></div>
+    <div class="ios-install-title">Add to Home Screen</div>
+    <div class="ios-install-steps">
+      <div class="ios-step"><span class="ios-step-num">1</span><span>Tap the <strong>Share</strong> button <span class="ios-share-icon">⬆</span> in your browser toolbar</span></div>
+      <div class="ios-step"><span class="ios-step-num">2</span><span>Scroll down and tap <strong>"Add to Home Screen"</strong></span></div>
+      <div class="ios-step"><span class="ios-step-num">3</span><span>Tap <strong>Add</strong> — NeuroHabit will appear on your home screen</span></div>
+    </div>
+    <button class="ios-install-close" onclick="dismissIosSheet()">Got it</button>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -1608,7 +1618,6 @@ const SK  = 'nh_pwa_state';
 const STK = 'nh_pwa_streak';
 const WK  = 'nh_pwa_week';
 const UK  = 'nh_pwa_user';
-const AK  = 'nh_pwa_avatar'; /* avatar + brain name onboarding */
 
 const ld = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
 const sv = (k, v) => localStorage.setItem(k, JSON.stringify(v));
@@ -1617,7 +1626,6 @@ let appState  = ld(SK)  || {};
 let streak    = ld(STK) || { count: 0, lastDate: null };
 let weekData  = ld(WK)  || {};
 let userData  = ld(UK)  || { name: null, skipAuth: false };
-let avatarData = ld(AK) || { done: false, avatar: null, brainName: '' };
 
 const today = new Date().toISOString().slice(0, 10);
 if (!appState[today]) appState[today] = {};
@@ -1997,6 +2005,261 @@ function updateHeader() {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   BRAINVATAR — SVG brain character that changes by score
+   ═══════════════════════════════════════════════════════════ */
+
+/* Daily content pool — indexed by dayOfYear % pool.length for rotation */
+const BRAINVATAR_CONTENT = {
+  /* Score ≥ 80 — S/A tier: Glowing, peak state */
+  elite: {
+    label: 'Glowing Brain',
+    stateText: 'Peak State',
+    quotes: [
+      { type: '🧠 Neuro Fact',   text: 'Your prefrontal cortex is most active during high-dopamine states — this is when strategic thinking feels effortless.' },
+      { type: '⚡ Stoic Reminder', text: '"You have power over your mind — not outside events. Realize this, and you will find strength." — Marcus Aurelius' },
+      { type: '🧠 Neuro Fact',   text: 'High serotonin days correlate with better impulse control and emotional regulation — your decisions right now are your best.' },
+      { type: '⚡ Stoic Reminder', text: '"Waste no more time arguing about what a good person should be. Be one." — Marcus Aurelius' },
+      { type: '🧠 Neuro Fact',   text: 'Neuroplasticity peaks after exercise — whatever you learn or practice on a movement day sticks harder.' },
+      { type: '⚡ Stoic Reminder', text: '"He who lives in harmony with himself lives in harmony with the universe." — Marcus Aurelius' },
+      { type: '🧠 Neuro Fact',   text: 'Oxytocin released through genuine social connection also reduces cortisol — connection is literally stress medicine.' },
+    ]
+  },
+  /* Score 60–79 — B tier: Energised, doing well */
+  good: {
+    label: 'Energised Brain',
+    stateText: 'On Track',
+    quotes: [
+      { type: '🧠 Neuro Fact',   text: 'At 60%+ your dopamine and serotonin systems are co-activated — this is the neurological state associated with flow.' },
+      { type: '⚡ Stoic Reminder', text: '"It is not that I am so smart, it is just that I stay with problems longer." — inspired by consistent effort' },
+      { type: '🧠 Neuro Fact',   text: 'Habit completion triggers a dopamine hit that is 40% stronger when tied to identity ("I am someone who...") than to goal.' },
+      { type: '⚡ Stoic Reminder', text: '"Do not explain your philosophy. Embody it." — Epictetus' },
+      { type: '🧠 Neuro Fact',   text: 'Your streak activates the brain\'s reward anticipation circuit — breaking it costs 3× the energy to rebuild.' },
+      { type: '⚡ Stoic Reminder', text: '"Make the best use of what is in your power, and take the rest as it happens." — Epictetus' },
+      { type: '🧠 Neuro Fact',   text: 'Good enough is neurologically real — 60% activation across all systems is a stable, functional mood state.' },
+    ]
+  },
+  /* Score 40–59 — C tier: Waking up, some activity */
+  mid: {
+    label: 'Warming Up',
+    stateText: 'Building Up',
+    quotes: [
+      { type: '🧠 Neuro Fact',   text: 'Each completed habit releases a micro-dose of dopamine — these small signals compound into sustained motivation across the day.' },
+      { type: '⚡ Stoic Reminder', text: '"Begin at once to live, and count each separate day as a separate life." — Seneca' },
+      { type: '🧠 Neuro Fact',   text: 'The hardest part of any habit is the initiation — the brain\'s inertia cost drops 80% after you start.' },
+      { type: '⚡ Stoic Reminder', text: '"No man is free who is not master of himself." — Epictetus' },
+      { type: '🧠 Neuro Fact',   text: 'Mid-range serotonin states make you more open to trying new things — this is the perfect time to attempt a harder habit.' },
+      { type: '⚡ Stoic Reminder', text: '"How long are you going to wait before you demand the best for yourself?" — Epictetus' },
+      { type: '🧠 Neuro Fact',   text: 'Momentum compounds. Three habits done makes the fourth feel automatic — your brain is building a pattern right now.' },
+    ]
+  },
+  /* Score 20–39 — D tier: Tired, sluggish */
+  low: {
+    label: 'Tired Brain',
+    stateText: 'Low Energy',
+    quotes: [
+      { type: '🧠 Neuro Fact',   text: 'Low dopamine doesn\'t mean you lack willpower — it means your brain is under-stimulated. One action changes the chemistry.' },
+      { type: '⚡ Stoic Reminder', text: '"Every new beginning comes from some other beginning\'s end." — Seneca' },
+      { type: '🧠 Neuro Fact',   text: 'Sleep deprivation reduces dopamine receptor sensitivity by up to 20% — rest is not laziness, it is neurological maintenance.' },
+      { type: '⚡ Stoic Reminder', text: '"Difficulties strengthen the mind, as labour does the body." — Seneca' },
+      { type: '🧠 Neuro Fact',   text: 'Even 10 minutes of sunlight exposure raises serotonin production — step outside before doing anything else.' },
+      { type: '⚡ Stoic Reminder', text: '"We suffer more often in imagination than in reality." — Seneca' },
+      { type: '🧠 Neuro Fact',   text: 'The best antidepressant the brain knows is physical movement — it raises endorphins, serotonin, and BDNF simultaneously.' },
+    ]
+  },
+  /* Score 0–19 — Not started */
+  zero: {
+    label: 'Sleeping Brain',
+    stateText: 'Just Waking',
+    quotes: [
+      { type: '🧠 Neuro Fact',   text: 'The first habit of the day is the keystone — it sets off a cascade of neurochemical signals that raise baseline motivation for hours.' },
+      { type: '⚡ Stoic Reminder', text: '"The secret of getting ahead is getting started." — traced to ancient Stoic thought on action over deliberation' },
+      { type: '🧠 Neuro Fact',   text: 'Starting is the hardest neurological task — your brain treats new actions as threats. Push through the first 60 seconds.' },
+      { type: '⚡ Stoic Reminder', text: '"He who has a why to live can bear almost any how." — Nietzsche (echoing Stoic purpose)' },
+      { type: '🧠 Neuro Fact',   text: 'The act of deciding "I will do X now" is itself a dopamine event — commitment activates the same pathway as reward.' },
+      { type: '⚡ Stoic Reminder', text: '"Perfection is the enemy of done. A brain in motion stays in motion." — applied Stoic principle' },
+      { type: '🧠 Neuro Fact',   text: 'Your circadian rhythm peaks for motivation 1–4 hours after waking — this window is the most neurologically efficient.' },
+    ]
+  }
+};
+
+function getBrainvatarTier(score) {
+  if (score >= 80) return 'elite';
+  if (score >= 60) return 'good';
+  if (score >= 40) return 'mid';
+  if (score >= 20) return 'low';
+  return 'zero';
+}
+
+function getDailyQuote(tier) {
+  const pool = BRAINVATAR_CONTENT[tier].quotes;
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  return pool[dayOfYear % pool.length];
+}
+
+function renderBrainvatar(score) {
+  const tier  = getBrainvatarTier(score);
+  const data  = BRAINVATAR_CONTENT[tier];
+  const quote = getDailyQuote(tier);
+  const pct   = Math.round(score);
+
+  /* Score label */
+  document.getElementById('brainvatarScore').innerHTML = `${pct}<span>%</span>`;
+  document.getElementById('brainvatarLabel').textContent = data.stateText;
+
+  /* Quote */
+  document.getElementById('brainvatarQuoteType').textContent = quote.type;
+  document.getElementById('brainvatarQuoteText').textContent  = quote.text;
+
+  /* SVG brain character */
+  const svg = document.getElementById('brainvatarSvg');
+  const cx = 80, cy = 72; // brain centre
+
+  /* Colour palette per tier */
+  const palettes = {
+    elite: { primary: '#4a9e82', secondary: '#5a82c0', glow: 'rgba(74,158,130,0.35)', face: '#e8e3d8', eye: '#1c1a17', aura: true  },
+    good:  { primary: '#c8712a', secondary: '#7c6ab8', glow: 'rgba(200,113,42,0.2)',  face: '#e8e3d8', eye: '#1c1a17', aura: false },
+    mid:   { primary: '#7c6ab8', secondary: '#5a82c0', glow: 'rgba(124,106,184,0.12)',face: '#e8e3d8', eye: '#1c1a17', aura: false },
+    low:   { primary: '#4a4640', secondary: '#3d3a33', glow: 'rgba(90,80,70,0.1)',    face: '#7a7469', eye: '#504c45', aura: false },
+    zero:  { primary: '#383430', secondary: '#2e2b24', glow: 'rgba(0,0,0,0)',         face: '#504c45', eye: '#3d3a33', aura: false },
+  };
+  const p = palettes[tier];
+
+  /* Expression configs */
+  const expressions = {
+    elite: { leftEye: 'M62,88 Q65,84 68,88', rightEye: 'M92,88 Q95,84 98,88', mouth: 'M68,102 Q80,114 92,102', mouthFill: 'none', blush: true, sparkles: true },
+    good:  { leftEye: 'M63,89 Q66,85 69,89', rightEye: 'M91,89 Q94,85 97,89', mouth: 'M70,104 Q80,112 90,104', mouthFill: 'none', blush: false, sparkles: false },
+    mid:   { leftEye: 'M64,90 A4,4 0 1,1 72,90', rightEye: 'M88,90 A4,4 0 1,1 96,90', mouth: 'M70,106 Q80,110 90,106', mouthFill: 'none', blush: false, sparkles: false },
+    low:   { leftEye: 'M64,90 Q68,95 72,90', rightEye: 'M88,90 Q92,95 96,90', mouth: 'M70,108 Q80,104 90,108', mouthFill: 'none', blush: false, sparkles: false },
+    zero:  { leftEye: 'M65,90 Q68,94 71,90', rightEye: 'M89,90 Q92,94 95,90', mouth: 'M72,108 Q80,105 88,108', mouthFill: 'none', blush: false, sparkles: false },
+  };
+  const ex = expressions[tier];
+
+  /* Brain wrinkle activity — more = higher score */
+  const wrinkleOpacity = { elite: 0.7, good: 0.5, mid: 0.3, low: 0.15, zero: 0.08 }[tier];
+  const pulseAnim = tier === 'elite' ? `<animateTransform attributeName="transform" type="scale" values="1;1.018;1" dur="2.2s" repeatCount="indefinite" additive="sum"/>` : '';
+
+  /* Aura ring for elite */
+  const auraHTML = p.aura ? `
+    <circle cx="${cx}" cy="${cy}" r="74" fill="none" stroke="${p.primary}" stroke-width="2" opacity="0.18">
+      <animate attributeName="r" values="72;76;72" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.18;0.06;0.18" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="${cx}" cy="${cy}" r="68" fill="none" stroke="${p.secondary}" stroke-width="1" opacity="0.12">
+      <animate attributeName="r" values="66;70;66" dur="3s" repeatCount="indefinite"/>
+    </circle>` : '';
+
+  /* Sparkles for elite */
+  const sparkleHTML = ex.sparkles ? `
+    <text x="22" y="28" font-size="11" opacity="0.9">✨</text>
+    <text x="126" y="32" font-size="9" opacity="0.8">⭐</text>
+    <text x="14" y="56" font-size="7" opacity="0.7">✦</text>
+    <text x="136" y="54" font-size="8" opacity="0.6">✦</text>` : '';
+
+  /* Blush dots for elite/good */
+  const blushHTML = ex.blush ? `
+    <ellipse cx="58" cy="100" rx="8" ry="5" fill="${p.primary}" opacity="0.3"/>
+    <ellipse cx="102" cy="100" rx="8" ry="5" fill="${p.primary}" opacity="0.3"/>` : '';
+
+  /* Z indicators for sleeping */
+  const zzHTML = tier === 'zero' ? `
+    <text x="108" y="42" fill="${p.face}" font-size="9" opacity="0.4" font-family="Geist,sans-serif">z</text>
+    <text x="116" y="32" fill="${p.face}" font-size="12" opacity="0.3" font-family="Geist,sans-serif">z</text>
+    <text x="125" y="20" fill="${p.face}" font-size="14" opacity="0.2" font-family="Geist,sans-serif">z</text>` : '';
+
+  svg.innerHTML = `
+    <defs>
+      <radialGradient id="bvGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="${p.glow}"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+      <radialGradient id="bvBrainGrad" cx="40%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="${p.primary}" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="${p.secondary}" stop-opacity="0.08"/>
+      </radialGradient>
+    </defs>
+
+    <!-- Glow background -->
+    <circle cx="${cx}" cy="${cy}" r="72" fill="url(#bvGlow)" opacity="${tier === 'elite' ? 1 : 0.6}"/>
+    ${auraHTML}
+
+    <!-- Brain body group with optional pulse -->
+    <g transform-origin="${cx} ${cy}">
+      ${pulseAnim ? `<animateTransform attributeName="transform" type="scale" values="1;1.012;1" dur="2.4s" repeatCount="indefinite" additive="sum"/>` : ''}
+
+      <!-- Main brain shape -->
+      <path d="M${cx},30
+        C55,30 38,40 36,56 C32,58 26,64 28,74
+        C24,80 26,92 34,96 C34,108 42,118 54,120
+        C58,128 66,132 74,130 C76,134 80,136 80,136
+        C80,136 84,134 86,130 C94,132 102,128 106,120
+        C118,118 126,108 126,96 C134,92 136,80 132,74
+        C134,64 128,58 124,56 C122,40 105,30 ${cx},30 Z"
+        fill="url(#bvBrainGrad)" stroke="${p.primary}" stroke-width="2" stroke-linejoin="round"/>
+
+      <!-- Brain wrinkle lines — activity indicator -->
+      <path d="M52,52 Q58,46 66,50 Q72,44 80,48" fill="none" stroke="${p.primary}" stroke-width="1.5" stroke-linecap="round" opacity="${wrinkleOpacity}"/>
+      <path d="M94,50 Q100,44 108,50 Q112,56 106,62" fill="none" stroke="${p.secondary}" stroke-width="1.5" stroke-linecap="round" opacity="${wrinkleOpacity}"/>
+      <path d="M42,70 Q48,64 54,70 Q58,76 52,80" fill="none" stroke="${p.primary}" stroke-width="1.2" stroke-linecap="round" opacity="${wrinkleOpacity * 0.8}"/>
+      <path d="M110,68 Q116,62 120,70 Q122,78 116,82" fill="none" stroke="${p.secondary}" stroke-width="1.2" stroke-linecap="round" opacity="${wrinkleOpacity * 0.8}"/>
+      <path d="M62,56 Q68,52 74,56 Q78,62 72,66 Q66,70 62,64" fill="none" stroke="${p.primary}" stroke-width="1" stroke-linecap="round" opacity="${wrinkleOpacity * 0.7}"/>
+
+      <!-- Face area (lighter oval) -->
+      <ellipse cx="${cx}" cy="98" rx="24" ry="20" fill="${p.face}" opacity="0.08"/>
+
+      <!-- Eyes -->
+      <path d="${ex.leftEye}" fill="none" stroke="${p.eye === '#1c1a17' ? p.primary : p.eye}" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="${ex.rightEye}" fill="none" stroke="${p.eye === '#1c1a17' ? p.primary : p.eye}" stroke-width="2.5" stroke-linecap="round"/>
+
+      <!-- Mouth -->
+      <path d="${ex.mouth}" fill="${ex.mouthFill}" stroke="${p.primary}" stroke-width="2.2" stroke-linecap="round"/>
+
+      ${blushHTML}
+    </g>
+
+    ${sparkleHTML}
+    ${zzHTML}
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RECOVERY BONUS — shown if user missed 2+ days
+   ═══════════════════════════════════════════════════════════ */
+const RBK = 'nh_recovery_seen'; // key: date when bonus was last shown
+
+function checkRecoveryBonus() {
+  const banner  = document.getElementById('recoveryBonusBanner');
+  if (!banner) return;
+
+  const seenData = ld(RBK) || { date: null };
+  // Only show once per day
+  if (seenData.date === today) { banner.classList.add('show'); return; }
+
+  // Find last active day before today (has any habit completed)
+  const pastDays = Object.keys(appState)
+    .filter(d => d < today && Object.keys(appState[d] || {}).some(k => appState[d][k] === true))
+    .sort();
+
+  if (pastDays.length === 0) { banner.classList.remove('show'); return; }
+
+  const lastActive = pastDays[pastDays.length - 1];
+  const daysDiff   = Math.round((new Date(today) - new Date(lastActive)) / 86400000);
+
+  if (daysDiff >= 2) {
+    const msgs = [
+      `You were away for ${daysDiff} days. Every comeback is a data point, not a failure — your brain's neuroplasticity resets with your next action.`,
+      `${daysDiff} days off. Returning is the hard part — you've already done it. Research shows re-engagement restores habit circuits within 3 days.`,
+      `Gap of ${daysDiff} days. No shame. The prefrontal cortex doesn't punish pauses — it rewards re-activation. Start one habit and the system wakes up.`,
+    ];
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    document.getElementById('recoveryBonusMsg').textContent = msgs[dayOfYear % msgs.length];
+    banner.classList.add('show');
+    sv(RBK, { date: today });
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
    COACH RENDER
    ═══════════════════════════════════════════════════════════ */
 const COACH_TEXT = {
@@ -2008,7 +2271,12 @@ const COACH_TEXT = {
 
 function renderCoach() {
   const score = heroScore();
-  document.getElementById('coachBigScore').innerHTML = `${Math.round(score)}<span>%</span>`;
+
+  // ── Brainvatar ──────────────────────────────────────────────
+  renderBrainvatar(score);
+
+  // ── Recovery bonus check ────────────────────────────────────
+  checkRecoveryBonus();
 
   const titles = [
     [100, 'Perfect Day',   'All four neurochemicals fully activated. Outstanding.'],
@@ -2019,41 +2287,51 @@ function renderCoach() {
     [0,   'Fresh start',   'Pick just one habit to begin. That\'s all.']
   ];
   const [, t, s] = titles.find(([min]) => score >= min) || titles[5];
-  document.getElementById('coachScoreTitle').textContent = t;
-  document.getElementById('coachScoreSub').textContent   = s;
 
-  document.getElementById('coachCatBars').innerHTML = Object.keys(HABITS).map(type => {
-    const pct  = catEffectivePct(type);
-    const name = { dopamine:'Dopamine', serotonin:'Serotonin', oxytocin:'Oxytocin', endorphin:'Endorphin' }[type];
-    return `<div class="coach-cat-bar-item"><div class="coach-cat-bar-label"><span>${name}</span><span style="color:var(--${type})">${Math.round(pct)}%</span></div><div class="coach-cat-bar-track"><div class="coach-cat-bar-fill" style="width:${pct}%;background:var(--${type})"></div></div></div>`;
-  }).join('');
+  // ── Improvement summary ──────────────────────────────────────
+  const catMeta = [
+    { type:'dopamine',  name:'Dopamine',  color:'#c8712a' },
+    { type:'serotonin', name:'Serotonin', color:'#4a9e82' },
+    { type:'oxytocin',  name:'Oxytocin',  color:'#b85070' },
+    { type:'endorphin', name:'Endorphin', color:'#5a82c0' },
+  ];
+  const catActions = {
+    dopamine:  { capped: 'Complete Deep Work to unlock full gauge', 0: 'Start with 45+ min of focused work', low: 'Add another deep work session', high: 'One more habit to max out', max: 'Fully activated' },
+    serotonin: { capped: 'Complete a foundational habit to unlock', 0: 'Prioritise prayer or sleep tonight', low: 'Add a nature walk or breathwork', high: 'One more to reach full balance', max: 'Fully activated' },
+    oxytocin:  { capped: 'Complete Active Socialising to unlock', 0: 'Have one real 20-min conversation', low: 'Add a hug or act of appreciation', high: 'One small act of kindness to finish', max: 'Fully activated' },
+    endorphin: { capped: 'Complete Exercise to unlock full gauge', 0: 'Move your body — 30+ min today', low: 'Add cold shower or dancing', high: 'One more habit for full recovery', max: 'Fully activated' },
+  };
 
-  const items = [];
-  if (score >= 100) {
-    items.push({ icon:'🏆', title:'Perfect Day — 100%!', body:'Every neurochemical system fired today. This is peak performance.', good: true });
-  } else {
-    items.push({ icon:'📊', title:`${Math.round(score)}% Hero Score`, body:`${100 - Math.round(score)}% to perfect day. Complete foundational habits first.`, good: score >= 65 });
-  }
-  Object.keys(HABITS).forEach(type => {
-    const eff   = catEffectivePct(type);
-    const raw   = catRawPct(type);
-    const fdnOk = foundationDone(type);
-    const tier  = !fdnOk && raw > 0 ? 'capped' : eff >= 100 ? 'max' : eff >= 60 ? 'high' : eff > 0 ? 'low' : '0';
-    const [icon, title, body] = COACH_TEXT[type][tier];
-    items.push({ icon, title, body, good: tier === 'max', type });
-  });
+  const rows = catMeta.map(c => {
+    const eff    = catEffectivePct(c.type);
+    const raw    = catRawPct(c.type);
+    const fdnOk  = foundationDone(c.type);
+    const tier   = !fdnOk && raw > 0 ? 'capped' : eff >= 100 ? 'max' : eff >= 60 ? 'high' : eff > 0 ? 'low' : '0';
+    const action = catActions[c.type][tier];
+    const isDone = tier === 'max';
+    return { ...c, eff: Math.round(eff), action, isDone };
+  }).sort((a, b) => a.eff - b.eff); // weakest first
 
-  document.getElementById('insightCards').innerHTML = items.map(ins => `
-    <div class="insight-card ${ins.good ? 'good' : ''}" style="--ins-color:${ins.type ? `var(--${ins.type})` : 'var(--muted)'}">
-      <div class="insight-icon">${ins.icon}</div>
-      <div class="insight-text"><strong>${ins.title}</strong><span>${ins.body}</span></div>
-    </div>`).join('');
+  const allDone = rows.every(r => r.isDone);
+  const headText = allDone ? '🏆 Perfect day — all systems maxed' : `Next up — focus here`;
+
+  document.getElementById('improveSummary').innerHTML = `
+    <div class="improve-summary-head">${headText}</div>
+    ${rows.map(r => `
+      <div class="improve-row ${r.isDone ? 'improve-done' : ''}">
+        <div class="improve-dot" style="background:${r.color}"></div>
+        <div class="improve-body">
+          <strong>${r.name}</strong>
+          <span>${r.action}</span>
+        </div>
+        <div class="improve-pct" style="color:${r.isDone ? 'var(--serotonin)' : r.color}">${r.isDone ? '✓' : r.eff + '%'}</div>
+      </div>`).join('')}
+  `;
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const brainName = avatarData?.brainName || (userData.name ? userData.name.split(' ')[0] : '');
-  const nameStr = brainName ? `, ${brainName}` : '';
-  document.getElementById('coachGreeting').textContent = `${greeting}${nameStr} 🧠`;
+  const name = userData.name ? `, ${userData.name.split(' ')[0]}` : '';
+  document.getElementById('coachGreeting').textContent = `${greeting}${name} 🧠`;
 
   // Good enough banner
   document.getElementById('goodEnoughBanner').classList.toggle('show', score >= 60);
@@ -2081,12 +2359,15 @@ function renderCoach() {
     </div>`
   ).join('');
 
-  // Render all beta premium panels
-  renderWeeklyTrend();
-  renderCatStreaks();
-  renderMilestones();
-  renderRadar();
-  renderAdvInsights();
+  // Render all beta premium panels (only if panel is open)
+  const premBody = document.getElementById('premiumCollapseBody');
+  if (premBody && premBody.style.display !== 'none') {
+    renderWeeklyTrend();
+    renderCatStreaks();
+    renderMilestones();
+    renderRadar();
+    renderAdvInsights();
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2528,160 +2809,199 @@ async function generateShareImage() {
     { name:'Endorphin', pct: Math.round(catEffectivePct('endorphin')), color:'#5a82c0' },
   ];
 
+  // ── Build brainvatar SVG at 400×400 for canvas ──────────────
+  const tier = getBrainvatarTier(score);
+  const palettes = {
+    elite: { primary: '#4a9e82', secondary: '#5a82c0', glow: 'rgba(74,158,130,0.35)', aura: true  },
+    good:  { primary: '#c8712a', secondary: '#7c6ab8', glow: 'rgba(200,113,42,0.2)',  aura: false },
+    mid:   { primary: '#7c6ab8', secondary: '#5a82c0', glow: 'rgba(124,106,184,0.15)',aura: false },
+    low:   { primary: '#4a4640', secondary: '#3d3a33', glow: 'rgba(90,80,70,0.1)',    aura: false },
+    zero:  { primary: '#383430', secondary: '#2e2b24', glow: 'rgba(0,0,0,0)',         aura: false },
+  };
+  const p = palettes[tier];
+  const expressions = {
+    elite: { le: 'M155,220 Q162,210 170,220', re: 'M230,220 Q237,210 244,220', mouth: 'M168,255 Q200,285 232,255' },
+    good:  { le: 'M157,222 Q164,212 172,222', re: 'M228,222 Q235,212 242,222', mouth: 'M170,260 Q200,278 230,260' },
+    mid:   { le: 'M158,223 A10,10 0 1,1 178,223', re: 'M222,223 A10,10 0 1,1 242,223', mouth: 'M172,264 Q200,272 228,264' },
+    low:   { le: 'M158,222 Q166,235 174,222', re: 'M226,222 Q234,235 242,222', mouth: 'M170,268 Q200,260 230,268' },
+    zero:  { le: 'M160,222 Q167,234 174,222', re: 'M226,222 Q233,234 240,222', mouth: 'M172,268 Q200,264 228,268' },
+  };
+  const ex = expressions[tier];
+  const wrO = { elite: 0.65, good: 0.45, mid: 0.28, low: 0.12, zero: 0.07 }[tier];
+  const cx = 200, cy = 180;
+
+  const blush = tier === 'elite' ? `<ellipse cx="148" cy="248" rx="20" ry="12" fill="${p.primary}" opacity="0.28"/><ellipse cx="252" cy="248" rx="20" ry="12" fill="${p.primary}" opacity="0.28"/>` : '';
+  const sparkles = tier === 'elite' ? `<text x="55" y="72" font-size="28" opacity="0.9">✨</text><text x="316" y="80" font-size="22" opacity="0.8">⭐</text><text x="36" y="140" font-size="18" opacity="0.6">✦</text><text x="342" y="138" font-size="20" opacity="0.55">✦</text>` : '';
+  const zzz = tier === 'zero' ? `<text x="272" y="106" fill="${p.primary}" font-size="22" opacity="0.4">z</text><text x="291" y="80" fill="${p.primary}" font-size="30" opacity="0.28">z</text><text x="314" y="50" fill="${p.primary}" font-size="36" opacity="0.18">z</text>` : '';
+  const aura = p.aura ? `<circle cx="${cx}" cy="${cy}" r="182" fill="none" stroke="${p.primary}" stroke-width="4" opacity="0.15"/><circle cx="${cx}" cy="${cy}" r="170" fill="none" stroke="${p.secondary}" stroke-width="2" opacity="0.1"/>` : '';
+
+  const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+    <defs>
+      <radialGradient id="g1" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="${p.glow}"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+      <radialGradient id="g2" cx="40%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="${p.primary}" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="${p.secondary}" stop-opacity="0.08"/>
+      </radialGradient>
+    </defs>
+    <circle cx="${cx}" cy="${cy}" r="185" fill="url(#g1)" opacity="0.8"/>
+    ${aura}
+    <path d="M${cx},75 C138,75 95,100 90,140 C80,145 65,160 70,185 C60,200 65,230 85,240 C85,270 105,295 135,300 C145,320 165,330 185,325 C190,335 200,340 200,340 C200,340 210,335 215,325 C235,330 255,320 265,300 C295,295 315,270 315,240 C335,230 340,200 330,185 C335,160 320,145 310,140 C305,100 262,75 ${cx},75 Z"
+      fill="url(#g2)" stroke="${p.primary}" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M130,130 Q145,115 165,125 Q180,110 200,120" fill="none" stroke="${p.primary}" stroke-width="3.5" stroke-linecap="round" opacity="${wrO}"/>
+    <path d="M235,125 Q250,110 270,125 Q280,140 265,155" fill="none" stroke="${p.secondary}" stroke-width="3.5" stroke-linecap="round" opacity="${wrO}"/>
+    <path d="M105,175 Q120,160 135,175 Q145,190 130,200" fill="none" stroke="${p.primary}" stroke-width="3" stroke-linecap="round" opacity="${wrO * 0.8}"/>
+    <path d="M275,170 Q290,155 300,175 Q305,195 290,205" fill="none" stroke="${p.secondary}" stroke-width="3" stroke-linecap="round" opacity="${wrO * 0.8}"/>
+    <path d="M155,140 Q170,130 185,140 Q195,155 180,165 Q165,175 155,160" fill="none" stroke="${p.primary}" stroke-width="2.5" stroke-linecap="round" opacity="${wrO * 0.7}"/>
+    <path d="${ex.le}" fill="none" stroke="${p.primary}" stroke-width="6" stroke-linecap="round"/>
+    <path d="${ex.re}" fill="none" stroke="${p.primary}" stroke-width="6" stroke-linecap="round"/>
+    <path d="${ex.mouth}" fill="none" stroke="${p.primary}" stroke-width="5.5" stroke-linecap="round"/>
+    ${blush}
+    ${sparkles}
+    ${zzz}
+  </svg>`;
+
   const W = 1080, H = 1080, PAD = 72;
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  // ── Background — #1c1a17 (app --bg) ───────────────────────
+  // Background
   ctx.fillStyle = '#1c1a17';
   ctx.fillRect(0, 0, W, H);
 
-  // Subtle radial glow matching app ambient orbs
-  const grd = ctx.createRadialGradient(W * 0.35, H * 0.25, 60, W * 0.35, H * 0.25, 550);
-  grd.addColorStop(0, 'rgba(200,113,42,0.07)');
-  grd.addColorStop(0.5, 'rgba(124,106,184,0.05)');
-  grd.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = grd;
+  // Subtle glow
+  const bgGrd = ctx.createRadialGradient(W * 0.5, H * 0.38, 60, W * 0.5, H * 0.38, 520);
+  bgGrd.addColorStop(0, `${gradeColor}18`);
+  bgGrd.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = bgGrd;
   ctx.fillRect(0, 0, W, H);
 
-  // ── Top gradient accent bar (matches app header top-bar) ──
+  // Top gradient bar
   const accentGrd = ctx.createLinearGradient(0, 0, W, 0);
-  accentGrd.addColorStop(0,    '#c8712a');
-  accentGrd.addColorStop(0.33, '#b85070');
-  accentGrd.addColorStop(0.66, '#4a9e82');
-  accentGrd.addColorStop(1,    '#5a82c0');
+  accentGrd.addColorStop(0, '#c8712a'); accentGrd.addColorStop(0.33, '#b85070');
+  accentGrd.addColorStop(0.66, '#4a9e82'); accentGrd.addColorStop(1, '#5a82c0');
   ctx.fillStyle = accentGrd;
   ctx.fillRect(0, 0, W, 8);
 
-  // ── Surface card background (--surface #242119) ───────────
+  // Card background
   ctx.fillStyle = '#242119';
-  roundRect(ctx, PAD - 20, 50, W - (PAD - 20) * 2, H - 110);
+  roundRect(ctx, PAD - 20, 50, W - (PAD - 20) * 2, H - 110, 24);
   ctx.fill();
 
-  // ── Brand: NeuroHabit ──────────────────────────────────────
+  // Brand
   ctx.fillStyle = '#e8e3d8';
   ctx.font = '600 38px system-ui, sans-serif';
   ctx.textBaseline = 'alphabetic';
   ctx.fillText('NeuroHabit', PAD, 118);
-
   ctx.fillStyle = '#7a7469';
   ctx.font = '400 17px system-ui, sans-serif';
   ctx.fillText('BY THE AUFTHORITY', PAD, 144);
 
-  // ── Date (right-aligned) ───────────────────────────────────
+  // Date
   ctx.fillStyle = '#7a7469';
   ctx.font = '400 20px system-ui, sans-serif';
   ctx.textAlign = 'right';
   ctx.fillText(dateStr, W - PAD, 118);
   ctx.textAlign = 'left';
 
-  // ── Thin rule ──────────────────────────────────────────────
-  ctx.strokeStyle = '#3d3a33';
-  ctx.lineWidth = 1;
+  // Divider
+  ctx.strokeStyle = '#3d3a33'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(PAD, 168); ctx.lineTo(W - PAD, 168); ctx.stroke();
 
-  // ── Hero score — score number and % rendered separately ───
-  // Measure the score digits at the chosen font size, then place
-  // the % symbol immediately after with correct spacing.
-  const SCORE_SIZE = 240;
-  const PCT_SIZE   = 80;
+  // ── Brainvatar rendered from SVG into canvas ─────────────────
+  await new Promise((resolve) => {
+    const img = new Image();
+    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+    const url  = URL.createObjectURL(blob);
+    img.onload = () => {
+      // Draw brainvatar centred in upper half of card
+      const bvSize = 420;
+      const bvX    = (W - bvSize) / 2;
+      const bvY    = 168;
+      ctx.drawImage(img, bvX, bvY, bvSize, bvSize);
+      URL.revokeObjectURL(url);
+      resolve();
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(); };
+    img.src = url;
+  });
 
-  ctx.font = `300 ${SCORE_SIZE}px system-ui, sans-serif`;
-  ctx.textBaseline = 'alphabetic';
-  const scoreStr   = `${score}`;
-  const scoreWidth = ctx.measureText(scoreStr).width;
-
-  // Score digits
+  // Score number overlaid on brainvatar centre
+  const scoreStr = `${score}%`;
+  ctx.textAlign = 'center';
+  ctx.font = `300 108px system-ui, sans-serif`;
   ctx.fillStyle = gradeColor;
-  ctx.fillText(scoreStr, PAD, 420);
+  ctx.fillText(scoreStr, W / 2, 420);
 
-  // % — placed at PAD + scoreWidth + small gap, at a raised baseline
-  ctx.font = `300 ${PCT_SIZE}px system-ui, sans-serif`;
+  // State label
+  ctx.font = '600 22px system-ui, sans-serif';
   ctx.fillStyle = '#7a7469';
-  ctx.fillText('%', PAD + scoreWidth + 10, 370);
+  ctx.fillText(BRAINVATAR_CONTENT[tier].label.toUpperCase(), W / 2, 456);
+  ctx.textAlign = 'left';
 
-  // ── Grade label ────────────────────────────────────────────
+  // Grade pill area
+  const pillY = 590;
+  ctx.fillStyle = gradeColor;
   ctx.font = '600 28px system-ui, sans-serif';
-  ctx.fillStyle = gradeColor;
-  ctx.fillText(`Grade ${grade}  ·  ${gradeText}`, PAD, 466);
+  ctx.textAlign = 'center';
+  ctx.fillText(`Grade ${grade}  ·  ${gradeText}`, W / 2, pillY);
+  ctx.textAlign = 'left';
 
-  // ── Divider ────────────────────────────────────────────────
-  ctx.strokeStyle = '#3d3a33';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(PAD, 504); ctx.lineTo(W - PAD, 504); ctx.stroke();
+  // Divider
+  ctx.strokeStyle = '#3d3a33'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD, pillY + 20); ctx.lineTo(W - PAD, pillY + 20); ctx.stroke();
 
-  // ── BRAIN BALANCE label ────────────────────────────────────
-  ctx.fillStyle = '#7a7469';
-  ctx.font = '500 18px system-ui, sans-serif';
-  ctx.fillText('BRAIN BALANCE', PAD, 548);
-
-  // ── Category bars ──────────────────────────────────────────
-  const trackW = W - PAD * 2;
-  const barH   = 10;
-  const rowH   = 58;
-  const startY = 570;
-
+  // Category bars (compact 2-column)
+  const colW  = (W - PAD * 2 - 40) / 2;
+  const barH  = 8;
+  const rowH  = 54;
+  const startY = pillY + 50;
   catData.forEach((cat, i) => {
-    const rowY = startY + i * rowH;
-
-    // Category name
+    const col  = i % 2;
+    const row  = Math.floor(i / 2);
+    const x    = PAD + col * (colW + 40);
+    const y    = startY + row * rowH;
     ctx.fillStyle = '#7a7469';
     ctx.font = '400 20px system-ui, sans-serif';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText(cat.name, PAD, rowY);
-
-    // Percentage (right-aligned)
+    ctx.fillText(cat.name, x, y);
     ctx.fillStyle = cat.color;
     ctx.font = '600 20px system-ui, sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText(`${cat.pct}%`, W - PAD, rowY);
+    ctx.fillText(`${cat.pct}%`, x + colW, y);
     ctx.textAlign = 'left';
-
-    // Track background (--surface2 #2e2b24)
-    const trackY = rowY + 9;
-    roundRect(ctx, PAD, trackY, trackW, barH, 5);
-    ctx.fillStyle = '#2e2b24';
-    ctx.fill();
-
-    // Filled portion
-    const fillW = Math.max(0, (cat.pct / 100) * trackW);
-    if (fillW > 0) {
-      roundRect(ctx, PAD, trackY, fillW, barH, 5);
-      ctx.fillStyle = cat.color;
-      ctx.fill();
-    }
+    const trackY = y + 8;
+    roundRect(ctx, x, trackY, colW, barH, 4);
+    ctx.fillStyle = '#2e2b24'; ctx.fill();
+    const fw = Math.max(0, (cat.pct / 100) * colW);
+    if (fw > 0) { roundRect(ctx, x, trackY, fw, barH, 4); ctx.fillStyle = cat.color; ctx.fill(); }
   });
 
-  // ── Divider ────────────────────────────────────────────────
-  const afterBarsY = startY + catData.length * rowH + 4;
-  ctx.strokeStyle = '#3d3a33';
-  ctx.lineWidth = 1;
+  // Brain balance feedback
+  const afterBarsY = startY + 2 * rowH + 18;
+  ctx.strokeStyle = '#3d3a33'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(PAD, afterBarsY); ctx.lineTo(W - PAD, afterBarsY); ctx.stroke();
-
-  // ── Brain balance feedback ─────────────────────────────────
-  const feedbackY = afterBarsY + 32;
   ctx.fillStyle = '#e8e3d8';
-  ctx.font = 'italic 400 22px system-ui, sans-serif';
+  ctx.font = 'italic 400 21px system-ui, sans-serif';
   ctx.textBaseline = 'alphabetic';
-  wrapText(ctx, getBrainBalanceFeedback(), PAD, feedbackY, trackW, 34);
+  wrapText(ctx, getBrainBalanceFeedback(), PAD, afterBarsY + 30, W - PAD * 2, 33);
 
-  // ── Footer ─────────────────────────────────────────────────
+  // Footer
   ctx.fillStyle = '#504c45';
   ctx.font = '400 18px system-ui, sans-serif';
   ctx.textAlign = 'center';
-  ctx.textBaseline = 'alphabetic';
   ctx.fillText('neurohabit.app  ·  by The Aufthority', W / 2, H - 46);
   ctx.textAlign = 'left';
 
-  // ── Export ─────────────────────────────────────────────────
+  // Export
   canvas.toBlob(async (blob) => {
     const file = new File([blob], 'neurohabit-score.png', { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: 'My NeuroHabit Score', text: buildShareText() });
-        return;
-      } catch (e) { /* fall through */ }
+      try { await navigator.share({ files: [file], title: 'My NeuroHabit Score', text: buildShareText() }); return; }
+      catch (e) { /* fall through */ }
     }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -2892,32 +3212,6 @@ function showToast(msg, type = 'info', duration = 3500) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ONBOARDING — avatar selection + brain naming
-   ═══════════════════════════════════════════════════════════ */
-let selectedAvatar = null;
-
-function selectAvatar(id) {
-  selectedAvatar = id;
-  document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById(`avatar-${id}`).classList.add('selected');
-  onboardCheck();
-}
-
-function onboardCheck() {
-  const name = document.getElementById('brainNameInput').value.trim();
-  const btn  = document.getElementById('onboardBtn');
-  btn.classList.toggle('ready', name.length > 0 && selectedAvatar !== null);
-}
-
-function finishOnboarding() {
-  const name = document.getElementById('brainNameInput').value.trim();
-  if (!name || !selectedAvatar) return;
-  avatarData = { done: true, avatar: selectedAvatar, brainName: name };
-  sv(AK, avatarData);
-  showMainApp();
-}
-
-/* ═══════════════════════════════════════════════════════════
    AUTH (Firebase)
    ═══════════════════════════════════════════════════════════ */
 
@@ -2977,32 +3271,9 @@ function renderProfile() {
   const grades = [[100,'S'],[80,'A'],[60,'B'],[40,'C'],[20,'D'],[0,'—']];
   const [, g]  = grades.find(([min]) => score >= min) || grades[5];
 
-  /* Show brain avatar SVG if chosen, otherwise initials */
-  const avatarEl = document.getElementById('profileAvatar');
-  if (avatarData?.avatar) {
-    const card = document.getElementById(`avatar-${avatarData.avatar}`);
-    if (card) {
-      const svg = card.querySelector('svg');
-      if (svg) avatarEl.innerHTML = svg.outerHTML;
-    }
-  } else {
-    avatarEl.innerHTML = initials;
-    avatarEl.style.background = 'linear-gradient(135deg, var(--coach), var(--dopamine))';
-  }
-
+  document.getElementById('profileAvatar').textContent = initials;
   document.getElementById('profileName').textContent   = name.charAt(0).toUpperCase() + name.slice(1);
   document.getElementById('profileEmail').textContent  = email;
-  const brainNameEl = document.getElementById('profileBrainName');
-  if (brainNameEl && avatarData?.brainName) {
-    brainNameEl.textContent = `Brain: ${avatarData.brainName}`;
-  }
-  const currentBrainLabel = document.getElementById('currentBrainLabel');
-  if (currentBrainLabel) {
-    const avatarNames = { axel: 'The Spark', maya: 'The Nurturer', kai: 'The Thinker' };
-    currentBrainLabel.textContent = avatarData?.brainName
-      ? `${avatarData.brainName} · ${avatarNames[avatarData.avatar] || ''}`
-      : 'Choose your brain character';
-  }
   document.getElementById('profilePlanBadge').textContent = userData.skipAuth ? 'Guest' : 'Free';
   document.getElementById('statHeroScore').textContent = score + '%';
   document.getElementById('statStreak').textContent    = streak.count || 0;
@@ -3054,27 +3325,13 @@ function launchApp() {
   appLaunched = true;
   document.getElementById('screen-login').classList.remove('screen-active');
   document.getElementById('screen-login').style.display = 'none';
-
-  /* Show onboarding if user hasn't picked an avatar yet */
-  if (!avatarData.done) {
-    document.getElementById('screen-onboarding').style.display = 'flex';
-    document.getElementById('screen-onboarding').classList.add('screen-active');
-    return;
-  }
-
-  showMainApp();
-}
-
-function showMainApp() {
-  document.getElementById('screen-onboarding').style.display = 'none';
-  document.getElementById('screen-onboarding').classList.remove('screen-active');
   document.getElementById('screen-app').style.display = 'flex';
   document.getElementById('screen-app').classList.add('screen-active');
   document.getElementById('appHeader').style.display = 'flex';
   document.getElementById('bottomNav').style.display = 'flex';
   initApp();
 
-  /* EG-01: Midnight rollover — visibilitychange for screen wake */
+  /* EG-01: Midnight rollover — reload app when user returns after date change */
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
       const currentDay = new Date().toISOString().slice(0, 10);
@@ -3082,7 +3339,7 @@ function showMainApp() {
     }
   });
 
-  /* Fix 2: Interval check every 60s — catches midnight even if screen stays on */
+  /* Fix 2: Check every 60s — catches midnight even if screen stays on */
   setInterval(() => {
     const currentDay = new Date().toISOString().slice(0, 10);
     if (currentDay !== today) location.reload();
@@ -3107,40 +3364,99 @@ function confirmNewDay() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PWA INSTALL
-   ═══════════════════════════════════════════════════════════ */
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault(); deferredPrompt = e;
-  // Show in-app install banner after 3.5s
-  setTimeout(() => document.getElementById('installBanner').classList.add('show'), 3500);
-  // Show install row in profile page immediately
-  const row = document.getElementById('installAppRow');
-  if (row) row.style.display = 'flex';
-});
-function triggerInstall() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(() => {
-    dismissInstall();
-    deferredPrompt = null;
-    // Hide install row after user responds
-    const row = document.getElementById('installAppRow');
-    if (row) row.style.display = 'none';
-  });
-}
-function dismissInstall() { document.getElementById('installBanner').classList.remove('show'); }
-window.addEventListener('appinstalled', () => {
-  dismissInstall();
-  const row = document.getElementById('installAppRow');
-  if (row) row.style.display = 'none';
-});
-
-/* ═══════════════════════════════════════════════════════════
-   SERVICE WORKER
+   SERVICE WORKER — register first so Chrome can evaluate
+   PWA installability criteria on this page load
    ═══════════════════════════════════════════════════════════ */
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').then(r => console.log('[SW]', r.scope)).catch(e => console.warn('[SW]', e)));
+  navigator.serviceWorker.register('/neurohabit/sw.js', { scope: '/neurohabit/' })
+    .then(r => console.log('[SW] registered', r.scope))
+    .catch(e => console.warn('[SW] registration failed', e));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PWA INSTALL — Android (native prompt) + iOS (manual sheet)
+   ═══════════════════════════════════════════════════════════ */
+const INSTALL_DISMISSED_KEY = 'nh_install_dismissed';
+let deferredPrompt = null;
+
+function isIos() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+}
+function isInStandaloneMode() {
+  return (window.navigator.standalone === true) ||
+    window.matchMedia('(display-mode: standalone)').matches;
+}
+function wasRecentlyDismissed() {
+  try {
+    const d = JSON.parse(localStorage.getItem(INSTALL_DISMISSED_KEY));
+    if (!d) return false;
+    return (Date.now() - d) < 7 * 24 * 60 * 60 * 1000; // 7-day cooldown
+  } catch { return false; }
+}
+
+/*
+ * beforeinstallprompt MUST be listened for at the top level (not inside
+ * a load handler) — the browser can fire it before 'load' in some cases.
+ * We capture and suppress it here; showing it is deferred to our own timing.
+ */
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); // suppress browser's auto-prompt
+  deferredPrompt = e;
+  console.log('[PWA] beforeinstallprompt captured');
+  if (!isInStandaloneMode() && !wasRecentlyDismissed()) {
+    document.getElementById('installBannerSub').textContent = 'Add to home screen for the best experience';
+    document.getElementById('installBtn').textContent = 'Install';
+    setTimeout(() => {
+      document.getElementById('installBanner').classList.add('show');
+    }, 2000);
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('[PWA] app installed');
+  _hideInstallBanner();
+  deferredPrompt = null;
+});
+
+/* Show iOS banner on load — Safari never fires beforeinstallprompt */
+window.addEventListener('load', () => {
+  if (isIos() && !isInStandaloneMode() && !wasRecentlyDismissed()) {
+    document.getElementById('installBannerSub').textContent = 'Tap here to add to your Home Screen';
+    document.getElementById('installBtn').textContent = 'How to Install';
+    setTimeout(() => {
+      document.getElementById('installBanner').classList.add('show');
+    }, 2000);
+  }
+});
+
+function triggerInstall() {
+  if (deferredPrompt) {
+    // Android/Chrome — fire the native install prompt
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      console.log('[PWA] user choice:', choice.outcome);
+      _hideInstallBanner();
+      deferredPrompt = null;
+    });
+  } else if (isIos()) {
+    // iOS — show step-by-step manual instructions
+    _hideInstallBanner();
+    document.getElementById('iosInstallSheet').style.display = 'flex';
+  }
+}
+
+function dismissInstall() {
+  _hideInstallBanner();
+}
+
+function dismissIosSheet() {
+  document.getElementById('iosInstallSheet').style.display = 'none';
+  try { localStorage.setItem(INSTALL_DISMISSED_KEY, JSON.stringify(Date.now())); } catch {}
+}
+
+function _hideInstallBanner() {
+  document.getElementById('installBanner').classList.remove('show');
+  try { localStorage.setItem(INSTALL_DISMISSED_KEY, JSON.stringify(Date.now())); } catch {}
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -3148,13 +3464,27 @@ if ('serviceWorker' in navigator) {
    (guest sessions fall through via userData.skipAuth check)
    ═══════════════════════════════════════════════════════════ */
 
+function togglePremiumPanel() {
+  const body = document.getElementById('premiumCollapseBody');
+  const btn  = document.getElementById('premiumToggleBtn');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('open', !isOpen);
+  // Render panels when opened for first time so they load on demand
+  if (!isOpen) {
+    renderWeeklyTrend();
+    renderCatStreaks();
+    renderMilestones();
+    renderRadar();
+    renderAdvInsights();
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════
    EXPOSE FUNCTIONS GLOBALLY (required for onclick handlers)
    ═══════════════════════════════════════════════════════════ */
+window.togglePremiumPanel  = togglePremiumPanel;
 window.showToast          = showToast;
-window.selectAvatar       = selectAvatar;
-window.onboardCheck       = onboardCheck;
-window.finishOnboarding   = finishOnboarding;
 window.signInWithGoogle   = signInWithGoogle;
 window.skipLogin          = skipLogin;
 window.handleSignOut      = handleSignOut;
@@ -3163,6 +3493,7 @@ window.editProfile        = editProfile;
 window.changePassword     = changePassword;
 window.confirmNewDay      = confirmNewDay;
 window.dismissInstall     = dismissInstall;
+window.dismissIosSheet    = dismissIosSheet;
 window.triggerInstall     = triggerInstall;
 window.showScreen         = showScreen;
 window.hideScreen         = hideScreen;
