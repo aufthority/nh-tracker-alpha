@@ -620,7 +620,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
   padding: 14px 14px 8px;
   margin-bottom: 10px;
 }
-.live-chart-bars {
+.live-chart-bars { /* legacy — replaced by line chart */
   display: flex; align-items: flex-end; gap: 6px;
   height: 72px; margin-bottom: 6px;
 }
@@ -863,7 +863,60 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .premium-collapse-body .premium-preview-block:first-child { border-top: none; }
 .premium-collapse-body .premium-preview-block + .premium-preview-block { border-top: 1px solid var(--border); }
 
-/* ═══ ONBOARDING ════════════════════════════════════════════ */
+/* ═══ PHASE GUIDE (grade screen) ═══════════════════════════ */
+.phase-guide { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+.phase-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.phase-row-brain { flex-shrink: 0; }
+.phase-row-info { flex: 1; }
+.phase-row-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.phase-row-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.phase-row-trigger { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 4px; }
+
+/* ═══ THOUGHT BUBBLE ═════════════════════════════════════════ */
+.brain-thought-wrap { position: relative; display: flex; align-items: flex-start; gap: 0; margin-bottom: 16px; }
+.thought-bubble { position: relative; background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 12px 14px; flex: 1; margin-left: 10px; }
+.thought-bubble::before {
+  content: '';
+  position: absolute;
+  left: -8px; top: 18px;
+  width: 0; height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 8px solid var(--border2);
+}
+.thought-bubble::after {
+  content: '';
+  position: absolute;
+  left: -6px; top: 19px;
+  width: 0; height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 7px solid var(--surface);
+}
+.thought-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase; margin-bottom: 4px; }
+.thought-body { font-size: 13px; color: var(--text); line-height: 1.65; }
+.thought-attr { font-size: 11px; color: var(--subtle); margin-top: 4px; }
+.thought-bubble.tb-science .thought-eyebrow { color: var(--coach); }
+.thought-bubble.tb-quote   .thought-eyebrow { color: var(--muted); }
+.thought-bubble.tb-quote   .thought-body    { font-style: italic; color: var(--muted); }
+
+.trend-chart-wrap { position: relative; width: 100%; }
+.trend-svg { width: 100%; overflow: visible; }
+.trend-day-label { font-size: 9px; fill: var(--muted); }
+.trend-day-label.today { fill: var(--text); font-weight: 600; }
+.trend-active-dot { transition: r 0.2s; }
+
+/* ═══ AVATAR PICKER ══════════════════════════════════════════ */
+.avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.avatar-option { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 6px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.15s; text-align: center; }
+.avatar-option:hover { border-color: var(--border2); background: var(--surface2); }
+.avatar-option.selected { border-color: var(--coach); background: color-mix(in srgb, var(--coach) 10%, var(--surface)); }
+.avatar-option-emoji { font-size: 28px; line-height: 1; }
+.avatar-option-label { font-size: 10px; color: var(--muted); line-height: 1.3; }
+.avatar-option.selected .avatar-option-label { color: var(--text); }
+.profile-avatar-emoji { font-size: 32px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+
+/* ═══ ONBOARDING  ════════════════════════════════════════════ */
 #screen-onboarding { overflow-y: auto; padding: 0; background: var(--bg); }
 .onboard-inner { max-width: 480px; margin: 0 auto; padding: 32px 20px 60px; }
 .onboard-header { text-align: center; margin-bottom: 28px; }
@@ -938,6 +991,19 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
       <div class="onboard-sub">Choose at least one core habit per category. You can add more anytime — but your choices are locked for 28 days so the science can work.</div>
     </div>
     <div id="onboard-steps"></div>
+    <!-- Avatar Picker -->
+    <div class="onboard-step" style="margin-top:24px">
+      <div class="onboard-step-head">
+        <div class="onboard-step-dot" style="background:var(--coach)"></div>
+        <div>
+          <div class="onboard-step-title">Choose your avatar</div>
+          <div class="onboard-step-sub">Pick the one that feels most like you right now</div>
+        </div>
+      </div>
+      <div class="avatar-grid" id="onboardAvatarGrid"></div>
+    </div>
+    <div class="onboard-divider"></div>
+
     <div class="onboard-lock-note">
       <strong>28-day habit lock</strong> — Research shows 28 days is the minimum needed to know if a habit works for you (Lally et al. 2010, Keller et al. 2021). You can <em>add</em> habits at any time, but <em>removals</em> open after day 28. The recommended wait is 42 days.
     </div>
@@ -993,11 +1059,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
     <div class="page page-active" id="page-coach">
       <div class="coach-page-inner">
 
-        <!-- Brain Phase Display -->
+        <!-- Brain Phase Display + Thought Bubble -->
         <div class="brain-phase-block">
           <svg id="brainvatarSvg" class="brain-phase-svg" width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"></svg>
           <div class="brain-phase-label" id="brainvatarLabel">Ready</div>
           <div class="brain-phase-sub" id="brainvatarSub">Log your first habit to begin</div>
+        </div>
+        <!-- Thought Bubble — science fact or quote beside brain -->
+        <div class="brain-thought-wrap" id="brainThoughtWrap" style="display:none">
+          <div style="width:64px;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;padding-top:4px">
+            <svg width="32" height="32" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" id="thoughtBrainMini"></svg>
+          </div>
+          <div id="thoughtBubbleContent" class="thought-bubble" style="cursor:pointer" title="Tap for next thought"></div>
         </div>
 
         <!-- Core Day Badge / Nudge / Pips -->
@@ -1060,7 +1133,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
                 <span class="beta-tag">⭐ Premium</span>
               </div>
               <div class="premium-radar-wrap">
-                <svg id="radarChart" viewBox="0 0 220 200" width="220" height="200"></svg>
+                <svg id="radarChart" viewBox="0 0 280 240" width="100%" style="max-width:280px"></svg>
                 <div class="radar-legend" id="radarLegend"></div>
               </div>
               <p class="premium-preview-desc">Today's neurochemical shape at a glance.</p>
@@ -1224,6 +1297,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
             </div>
             <svg class="profile-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
+          <div class="profile-row" onclick="showAvatarPicker()">
+            <div class="profile-row-icon" id="profileAvatarMini" style="font-size:20px">👤</div>
+            <div class="profile-row-body">
+              <strong>Change Avatar</strong>
+              <span>Pick a character that represents you</span>
+            </div>
+            <svg class="profile-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
           <div class="profile-row" onclick="changePassword()">
             <div class="profile-row-icon">🔑</div>
             <div class="profile-row-body">
@@ -1306,24 +1387,21 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       Back
     </button>
-    <span class="grade-screen-title">How You're Graded</span>
+    <span class="grade-screen-title">Your Brain State</span>
   </div>
   <div class="grade-screen-content">
-    <h2>How You're Graded</h2>
-    <p>Your Hero Score is the average of all four category percentages. Foundational habits (⭐⭐⭐) gate the gauge — complete at least one to unlock above 50%.</p>
-    <div class="grade-row"><div class="grade-letter" style="color:#4a9e82">S</div><div class="grade-info"><strong>100% — Perfect Day</strong><span>All four neurochemicals fully activated.</span></div></div>
-    <div class="grade-row"><div class="grade-letter" style="color:#4a9e82">A</div><div class="grade-info"><strong>80–99% — Excellent</strong><span>Strong across the board. All foundational habits done.</span></div></div>
-    <div class="grade-row"><div class="grade-letter" style="color:#5a82c0">B</div><div class="grade-info"><strong>60–79% — Good</strong><span>Foundational habits complete in most categories.</span></div></div>
-    <div class="grade-row"><div class="grade-letter" style="color:#c8712a">C</div><div class="grade-info"><strong>40–59% — Okay</strong><span>Some habits done but foundational gaps remain.</span></div></div>
-    <div class="grade-row"><div class="grade-letter" style="color:#b85070">D</div><div class="grade-info"><strong>20–39% — Low</strong><span>Minimal habits completed. Pick one category and start.</span></div></div>
-    <div class="grade-row"><div class="grade-letter" style="color:#7a7469">—</div><div class="grade-info"><strong>0–19% — Not Started</strong><span>A new day waiting to be shaped.</span></div></div>
-    <div class="scoring-explainer">
-      <h3>Scoring Rules</h3>
-      <p><strong>Raw %</strong> = (completed habit weights ÷ total possible) × 100.</p>
-      <p><strong>Foundational Gate</strong>: Any single ⭐⭐⭐ habit unlocks the full gauge. Until then, gauge is capped at 50%.</p>
-      <p><strong>Serotonin exception</strong>: Has 3 foundational habits — completing ANY ONE of them unlocks the full gauge.</p>
-      <p><strong>Flex Mode</strong>: Long-press or tap Flex to reduce a habit's weight on harder days.</p>
-      <p><strong>Hero Score</strong> = average of all four effective category percentages.</p>
+    <h2>Your Brain Phases</h2>
+    <p>Your brain phase reflects how much of your core foundation is active today. It is not a grade — it is a mirror. Every phase is valid.</p>
+    <div class="phase-guide" id="phaseGuideEl"></div>
+    <div class="scoring-explainer" style="margin-top:20px">
+      <h3>How the phases work</h3>
+      <p>Each of your four neurochemical categories has at least one <strong>core habit</strong> — the habit with the strongest scientific evidence for that system. Your brain phase rises as you complete more of your chosen core habits across categories.</p>
+      <p><strong>Phase 3 — Foundation Active</strong> is the key threshold. At least 50% of your core habits across all four categories are done. The evidence says this is a genuinely good day for your brain.</p>
+      <p>Secondary and bonus habits deepen each category further — they do not change your brain phase. The phase is driven purely by your core habits.</p>
+      <div style="margin-top:12px;padding:10px 12px;background:color-mix(in srgb,var(--coach) 10%,var(--surface2));border:1px solid color-mix(in srgb,var(--coach) 25%,transparent);border-radius:var(--radius-sm)">
+        <span style="font-size:11px;color:var(--coach);font-weight:600">⭐ Premium feature</span>
+        <p style="font-size:12px;color:var(--muted);margin:4px 0 0;line-height:1.5">Detailed numerical scoring, category breakdowns, and weekly trend analysis are available in NeuroHabit Premium.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -2485,8 +2563,15 @@ function buildCoachFeed() {
   const quote = QUOTES[quoteIdx];
   cards.push({ type: 'quote', eye: "Today's thought", body: quote.body, attr: quote.attr });
 
-  // Render
-  cards.forEach(function(card) {
+  // Render — science and quote go into the thought bubble, rest into the feed
+  var thoughtCards = cards.filter(function(c) { return c.type === 'science' || c.type === 'quote'; });
+  var feedCards    = cards.filter(function(c) { return c.type !== 'science' && c.type !== 'quote'; });
+
+  // Update thought bubble (cycles through science/quote)
+  renderThoughtBubble(thoughtCards);
+
+  // Regular feed cards
+  feedCards.forEach(function(card) {
     const el = document.createElement('div');
     el.className = 'coach-feed-card card-' + card.type;
     el.innerHTML = '<div class="coach-feed-eyebrow">' + card.eye + '</div>'
@@ -2494,6 +2579,25 @@ function buildCoachFeed() {
       + (card.attr ? '<div class="coach-feed-attr">— ' + card.attr + '</div>' : '');
     feed.appendChild(el);
   });
+}
+
+var _thoughtIdx = 0;
+function renderThoughtBubble(cards) {
+  const wrap = document.getElementById('brainThoughtWrap');
+  if (!wrap || !cards || cards.length === 0) { if (wrap) wrap.style.display = 'none'; return; }
+  wrap.style.display = 'flex';
+  const card = cards[_thoughtIdx % cards.length];
+  const classMap = { science: 'tb-science', quote: 'tb-quote' };
+  const eyeColorMap = { science: 'var(--coach)', quote: 'var(--muted)' };
+  const bubble = document.getElementById('thoughtBubbleContent');
+  if (!bubble) return;
+  bubble.className = 'thought-bubble ' + (classMap[card.type] || '');
+  bubble.innerHTML =
+    '<div class="thought-eyebrow" style="color:' + (eyeColorMap[card.type] || 'var(--muted)') + '">' + card.eye + '</div>' +
+    '<div class="thought-body">' + card.body + '</div>' +
+    (card.attr ? '<div class="thought-attr">— ' + card.attr + '</div>' : '');
+  // Tap to cycle
+  bubble.onclick = function() { _thoughtIdx++; renderThoughtBubble(cards); };
 }
 
 /* Core pips */
@@ -2519,6 +2623,7 @@ function renderCoach() {
   // Brain phase
   const phase = brainPhase();
   drawBrainSvg(document.getElementById('brainvatarSvg'), phase);
+  drawBrainSvg(document.getElementById('thoughtBrainMini'), phase);
   document.getElementById('brainvatarLabel').textContent = BRAIN_LABELS[phase];
   document.getElementById('brainvatarSub').textContent   = BRAIN_SUBS[phase];
 
@@ -2567,40 +2672,117 @@ function renderCoach() {
 function renderWeeklyTrend() {
   const el = document.getElementById('weeklyTrendChart');
   if (!el) return;
+
   const now    = new Date();
   const dow    = now.getDay();
   const monOff = dow === 0 ? -6 : 1 - dow;
   const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const COLORS  = ['#c8712a','#4a9e82','#b85070','#5a82c0','#7c6ab8','#c8712a','#4a9e82'];
 
-  const days = Array.from({ length: 7 }, (_, i) => {
+  const days = Array.from({ length: 7 }, function(_, i) {
     const d   = new Date(now); d.setDate(now.getDate() + monOff + i);
     const key = d.toISOString().slice(0, 10);
     const isToday  = key === today;
     const isFuture = key > today;
-    const score = isToday ? Math.round(heroScore()) : (weekData[key] ?? 0);
-    return { label: labels[i], score, isFuture, isToday };
+    const active = isToday
+      ? Object.values(appState[today] || {}).some(function(v) { return v === true; })
+      : (weekData[key] || 0) > 0;
+    const fdnRate = isToday ? (function() {
+      var cf = countFoundationals();
+      return cf.total > 0 ? cf.done / cf.total : 0;
+    })() : (weekData[key] ? Math.min((weekData[key] / 100), 1) : 0);
+    return { label: labels[i], active: active, fdnRate: fdnRate, isFuture: isFuture, isToday: isToday };
   });
 
-  const maxScore = Math.max(...days.map(d => d.score), 1);
+  /* SVG dimensions */
+  const W = 280, H = 72, PAD_X = 20, PAD_Y = 8;
+  const chartW = W - PAD_X * 2;
+  const chartH = H - PAD_Y * 2;
+  const n = days.length;
+  const xStep = chartW / (n - 1);
 
-  el.innerHTML = `
-    <div class="live-chart-bars">
-      ${days.map((d, i) => {
-        const h = d.isFuture ? 4 : Math.max(4, (d.score / 100) * 72);
-        const color = d.isFuture ? 'var(--border2)' : COLORS[i];
-        const opacity = d.isFuture ? 0.3 : 0.85;
-        return `
-          <div class="live-bar-wrap">
-            <div class="live-bar-score">${d.isFuture ? '' : d.score > 0 ? d.score + '%' : ''}</div>
-            <div class="live-bar ${d.isToday ? 'today-bar' : ''}"
-              style="height:${h}px;background:${color};opacity:${opacity};"></div>
-          </div>`;
-      }).join('')}
-    </div>
-    <div class="live-chart-labels">
-      ${days.map((d, i) => `<span style="color:${d.isToday ? 'var(--text)' : 'var(--muted)'};font-weight:${d.isToday ? 600 : 400}">${d.label}</span>`).join('')}
-    </div>`;
+  /* Map fdn rate (0-1) to Y position (higher = up = smaller Y) */
+  function xAt(i) { return PAD_X + i * xStep; }
+  function yAt(rate) { return PAD_Y + chartH * (1 - rate); }
+
+  /* Build smooth path — only for past/today points */
+  var pathPts = days.map(function(d, i) {
+    return { x: xAt(i), y: yAt(d.isFuture ? 0 : d.fdnRate), d: d };
+  });
+
+  /* Smooth bezier path */
+  function smoothPath(pts, future) {
+    var activePts = pts.filter(function(p) { return !p.d.isFuture; });
+    if (activePts.length < 2) {
+      if (activePts.length === 1) return 'M ' + activePts[0].x + ' ' + activePts[0].y;
+      return '';
+    }
+    var d = 'M ' + activePts[0].x + ' ' + activePts[0].y;
+    for (var i = 1; i < activePts.length; i++) {
+      var prev = activePts[i - 1], curr = activePts[i];
+      var cpx = (prev.x + curr.x) / 2;
+      d += ' C ' + cpx + ' ' + prev.y + ' ' + cpx + ' ' + curr.y + ' ' + curr.x + ' ' + curr.y;
+    }
+    return d;
+  }
+
+  var linePath = smoothPath(pathPts, false);
+
+  /* Area fill path — close below the line */
+  var activePts = pathPts.filter(function(p) { return !p.d.isFuture; });
+  var areaPath = linePath;
+  if (activePts.length >= 2) {
+    areaPath += ' L ' + activePts[activePts.length - 1].x + ' ' + (PAD_Y + chartH) +
+                ' L ' + activePts[0].x + ' ' + (PAD_Y + chartH) + ' Z';
+  }
+
+  /* Grid lines at 25%, 50%, 75% */
+  var gridLines = [0.25, 0.5, 0.75].map(function(r) {
+    var y = yAt(r);
+    return '<line x1="' + PAD_X + '" y1="' + y + '" x2="' + (W - PAD_X) + '" y2="' + y +
+           '" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2 3"/>';
+  }).join('');
+
+  /* Dots for each non-future day */
+  var dots = pathPts.map(function(p, i) {
+    if (p.d.isFuture) {
+      return '<circle cx="' + p.x + '" cy="' + yAt(0) + '" r="2" fill="var(--border)" opacity="0.3"/>';
+    }
+    var col = p.d.active ? (p.d.isToday ? 'var(--coach)' : 'var(--serotonin)') : 'var(--border2)';
+    var r = p.d.isToday ? 5 : 3.5;
+    return '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + r + '" fill="' + col + '" class="trend-active-dot"/>';
+  }).join('');
+
+  /* Day labels below */
+  var labelsHTML = days.map(function(d, i) {
+    var cls = d.isToday ? 'trend-day-label today' : 'trend-day-label';
+    return '<text x="' + xAt(i) + '" y="' + (H + 14) + '" text-anchor="middle" class="' + cls + '">' + d.label + '</text>';
+  }).join('');
+
+  /* Phase labels on right axis */
+  var phaseLabels = [
+    { r: 0.75, label: 'Thriving', col: '#4a9e82' },
+    { r: 0.50, label: 'Active',   col: '#b85070' },
+    { r: 0.25, label: 'Warming',  col: '#c8712a' },
+  ].map(function(pl) {
+    var y = yAt(pl.r);
+    return '<text x="' + (W - PAD_X + 4) + '" y="' + (y + 3) + '" font-size="8" fill="' + pl.col + '" opacity="0.7">' + pl.label + '</text>';
+  }).join('');
+
+  el.innerHTML =
+    '<div class="trend-chart-wrap">' +
+      '<svg class="trend-svg" viewBox="0 0 ' + W + ' ' + (H + 20) + '" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs>' +
+          '<linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">' +
+            '<stop offset="0%" stop-color="var(--coach)" stop-opacity="0.18"/>' +
+            '<stop offset="100%" stop-color="var(--coach)" stop-opacity="0"/>' +
+          '</linearGradient>' +
+        '</defs>' +
+        gridLines +
+        (areaPath.length > 10 ? '<path d="' + areaPath + '" fill="url(#trendGrad)"/>' : '') +
+        (linePath.length > 2  ? '<path d="' + linePath  + '" fill="none" stroke="var(--coach)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' : '') +
+        dots + labelsHTML + phaseLabels +
+      '</svg>' +
+    '</div>';
 }
 
 /* 2. Per-category streaks — computed from weekData history */
@@ -2718,76 +2900,81 @@ function renderRadar() {
     { name:'Endorphin', color:'#5a82c0', pct: catEffectivePct('endorphin') },
   ];
 
-  // Square radar with 4 axes at 0°, 90°, 180°, 270° (top, right, bottom, left)
-  const cx = 110, cy = 100, R = 76;
-  const angles = [-90, 0, 90, 180]; // top, right, bottom, left (degrees)
-  const toRad  = d => d * Math.PI / 180;
+  // Larger viewBox: 280x240. Radar centred with generous label padding
+  const cx = 140, cy = 118, R = 72;
+  const angles = [-90, 0, 90, 180]; // top, right, bottom, left
+  const toRad  = function(d) { return d * Math.PI / 180; };
 
-  // Axis endpoints
-  const axes = angles.map(a => ({
-    x: cx + R * Math.cos(toRad(a)),
-    y: cy + R * Math.sin(toRad(a))
-  }));
-
-  // Grid rings at 25%, 50%, 75%, 100%
-  const gridRings = [0.25, 0.5, 0.75, 1.0];
-  const gridLines = gridRings.map(frac => {
-    const pts = angles.map(a => [
-      cx + R * frac * Math.cos(toRad(a)),
-      cy + R * frac * Math.sin(toRad(a))
-    ]);
-    return pts.map(p => p.join(',')).join(' ');
+  const axes = angles.map(function(a) {
+    return { x: cx + R * Math.cos(toRad(a)), y: cy + R * Math.sin(toRad(a)) };
   });
 
-  // Data polygon
-  const dataPoints = cats.map((cat, i) => {
+  const gridRings = [0.25, 0.5, 0.75, 1.0];
+  const gridLines = gridRings.map(function(frac) {
+    var pts = angles.map(function(a) {
+      return (cx + R * frac * Math.cos(toRad(a))) + ',' + (cy + R * frac * Math.sin(toRad(a)));
+    });
+    return pts.join(' ');
+  });
+
+  const dataPoints = cats.map(function(cat, i) {
     const frac = cat.pct / 100;
     return [
       cx + R * frac * Math.cos(toRad(angles[i])),
       cy + R * frac * Math.sin(toRad(angles[i]))
     ];
   });
-  const dataPath = dataPoints.map(p => p.join(',')).join(' ');
+  const dataPath = dataPoints.map(function(p) { return p.join(','); }).join(' ');
 
-  // Axis labels
-  const labelOffset = 14;
+  // Label positions — pulled further in from edges so long labels don't clip
+  // Dopamine = top, Serotonin = right, Oxytocin = bottom, Endorphin = left
   const labelPositions = [
-    { x: cx,     y: cy - R - labelOffset, anchor: 'middle'  }, // top
-    { x: cx + R + labelOffset, y: cy + 4, anchor: 'start'   }, // right
-    { x: cx,     y: cy + R + labelOffset, anchor: 'middle'  }, // bottom
-    { x: cx - R - labelOffset, y: cy + 4, anchor: 'end'     }, // left
+    { x: cx,           y: cy - R - 18,  anchor: 'middle', dy: 0   }, // top: Dopamine
+    { x: cx + R + 8,   y: cy - 6,       anchor: 'start',  dy: 0   }, // right: Serotonin (two lines)
+    { x: cx,           y: cy + R + 16,  anchor: 'middle', dy: 0   }, // bottom: Oxytocin
+    { x: cx - R - 8,   y: cy - 6,       anchor: 'end',    dy: 0   }, // left: Endorphin (two lines)
   ];
 
-  svg.innerHTML = `
-    <!-- Grid rings -->
-    ${gridLines.map((pts, i) => `
-      <polygon points="${pts}" fill="none" stroke="${i === 3 ? '#4a4640' : '#3d3a33'}" stroke-width="${i === 3 ? 1.5 : 0.8}"/>
-    `).join('')}
-    <!-- Axes -->
-    ${axes.map(a => `<line x1="${cx}" y1="${cy}" x2="${a.x}" y2="${a.y}" stroke="#3d3a33" stroke-width="0.8"/>`).join('')}
-    <!-- Data polygon -->
-    <polygon points="${dataPath}"
-      fill="rgba(124,106,184,0.15)" stroke="#7c6ab8" stroke-width="1.5" stroke-linejoin="round"/>
-    <!-- Data points (coloured per category) -->
-    ${dataPoints.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${cats[i].color}" stroke="var(--surface)" stroke-width="1.5"/>`).join('')}
-    <!-- Axis labels -->
-    ${cats.map((cat, i) => `
-      <text x="${labelPositions[i].x}" y="${labelPositions[i].y}"
-        text-anchor="${labelPositions[i].anchor}"
-        fill="#7a7469" font-size="10" font-family="system-ui">${cat.name}</text>
-    `).join('')}
-    <!-- Percentage labels on data points -->
-    ${dataPoints.map((p, i) => cats[i].pct > 5 ? `
-      <text x="${p[0]}" y="${p[1] - 8}"
-        text-anchor="middle" fill="${cats[i].color}"
-        font-size="10" font-weight="600" font-family="system-ui">${Math.round(cats[i].pct)}%</text>
-    ` : '').join('')}`;
+  // For right/left labels: render two lines so they don't bleed
+  function labelSVG(cat, pos, i) {
+    const isRightOrLeft = i === 1 || i === 3;
+    const name = cat.name;
+    const pctTxt = Math.round(cat.pct) + '%';
+    if (isRightOrLeft) {
+      // Two-line: name on first line, pct on second
+      return '<text x="' + pos.x + '" y="' + pos.y + '" text-anchor="' + pos.anchor + '" fill="' + cat.color + '" font-size="10" font-family="system-ui" font-weight="600">' +
+        '<tspan x="' + pos.x + '" dy="0">' + name + '</tspan>' +
+        '<tspan x="' + pos.x + '" dy="13" fill="#7a7469" font-weight="400" font-size="9">' + pctTxt + '</tspan>' +
+        '</text>';
+    }
+    return '<text x="' + pos.x + '" y="' + pos.y + '" text-anchor="' + pos.anchor + '" fill="' + cat.color + '" font-size="10" font-family="system-ui" font-weight="600">' + name + '</text>' +
+      '<text x="' + pos.x + '" y="' + (pos.y + 13) + '" text-anchor="' + pos.anchor + '" fill="#7a7469" font-size="9" font-family="system-ui">' + pctTxt + '</text>';
+  }
 
-  legend.innerHTML = cats.map(cat => `
-    <div class="radar-legend-item">
-      <span class="radar-legend-dot" style="background:${cat.color}"></span>
-      <span>${cat.name} — ${Math.round(cat.pct)}%</span>
-    </div>`).join('');
+  svg.setAttribute('viewBox', '0 0 280 240');
+
+  var gridHTML = gridLines.map(function(pts, i) {
+    return '<polygon points="' + pts + '" fill="none" stroke="' + (i === 3 ? '#4a4640' : '#3d3a33') + '" stroke-width="' + (i === 3 ? 1.5 : 0.8) + '"/>';
+  }).join('');
+
+  var axesHTML = axes.map(function(a) {
+    return '<line x1="' + cx + '" y1="' + cy + '" x2="' + a.x + '" y2="' + a.y + '" stroke="#3d3a33" stroke-width="0.8"/>';
+  }).join('');
+
+  var dotsHTML = dataPoints.map(function(p, i) {
+    return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="5" fill="' + cats[i].color + '" stroke="var(--surface)" stroke-width="1.5"/>';
+  }).join('');
+
+  var labelsHTML = cats.map(function(cat, i) { return labelSVG(cat, labelPositions[i], i); }).join('');
+
+  svg.innerHTML =
+    gridHTML + axesHTML +
+    '<polygon points="' + dataPath + '" fill="rgba(124,106,184,0.15)" stroke="#7c6ab8" stroke-width="1.5" stroke-linejoin="round"/>' +
+    dotsHTML + labelsHTML;
+
+  legend.innerHTML = cats.map(function(cat) {
+    return '<div class="radar-legend-item"><span class="radar-legend-dot" style="background:' + cat.color + '"></span><span>' + cat.name + ' — ' + Math.round(cat.pct) + '%</span></div>';
+  }).join('');
 }
 
 /* 5. Advanced NeuroCoach insights — computed from live + historical data */
@@ -3351,6 +3538,7 @@ function haptic(style = 'light') {
    SCREEN MANAGEMENT
    ═══════════════════════════════════════════════════════════ */
 function showScreen(id) {
+  if (id === 'screen-grade') { setTimeout(renderPhaseGuide, 50); }
   document.querySelectorAll('.screen').forEach(s => { s.style.display = 'flex'; s.classList.remove('screen-active','screen-left'); s.classList.add('screen-left'); });
   const t = document.getElementById(id); t.style.display = 'flex'; t.classList.remove('screen-left'); t.classList.add('screen-active');
 }
@@ -3408,9 +3596,95 @@ function showToast(msg, type = 'info', duration = 3500) {
 let appLaunched = false;
 
 /* Listen for sign-in/out — replaces the DOMContentLoaded auto-login */
+function showAvatarPicker() {
+  // Build a quick modal for avatar picking from the profile page
+  const existing = document.getElementById('avatarPickerModal');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'avatarPickerModal';
+  overlay.className = 'modal-overlay';
+  overlay.style.display = 'flex';
+  overlay.innerHTML =
+    '<div class="modal-card" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">' +
+      '<div class="modal-handle"></div>' +
+      '<div class="modal-header"><div class="modal-icon">👤</div><div class="modal-title">Choose Your Avatar</div></div>' +
+      '<div class="avatar-grid" id="avatarPickerGrid" style="padding:0 4px 8px"></div>' +
+      '<button class="modal-close" id="avatarPickerClose">Done</button>' +
+    '</div>';
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.remove();
+  });
+  setTimeout(function() {
+    var closeBtn = document.getElementById('avatarPickerClose');
+    if (closeBtn) closeBtn.addEventListener('click', function() { overlay.remove(); });
+  }, 50);
+
+  document.body.appendChild(overlay);
+
+  const grid = document.getElementById('avatarPickerGrid');
+  AVATARS.forEach(function(av) {
+    const isSelected = userAvatar && userAvatar.id === av.id;
+    const el = document.createElement('div');
+    el.className = 'avatar-option' + (isSelected ? ' selected' : '');
+    el.innerHTML =
+      '<div class="avatar-option-emoji">' + av.emoji + '</div>' +
+      '<div class="avatar-option-label">' + av.label + '<br><span style="font-size:9px;opacity:0.7">' + av.desc + '</span></div>';
+    el.addEventListener('click', function() {
+      userAvatar = { id: av.id, emoji: av.emoji, label: av.label };
+      sv(AVK, userAvatar);
+      renderProfileAvatar();
+      const mini = document.getElementById('profileAvatarMini');
+      if (mini) mini.textContent = av.emoji;
+      grid.querySelectorAll('.avatar-option').forEach(function(opt) { opt.classList.remove('selected'); });
+      el.classList.add('selected');
+    });
+    grid.appendChild(el);
+  });
+}
+
 /* ═══════════════════════════════════════════════════════════
    ONBOARDING — habit selection flow
    ═══════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   AVATAR SYSTEM — relatable character identities
+   ═══════════════════════════════════════════════════════════ */
+const AVATARS = [
+  { id: 'tired-parent',   emoji: '😮‍💨', label: 'Tired Parent',        desc: 'Running on love and coffee' },
+  { id: 'shift-worker',   emoji: '🌙',         label: 'Shift Worker',         desc: 'My schedule is a mystery' },
+  { id: 'neurodivergent', emoji: '🌀',         label: 'Neurodivergent',       desc: 'My brain works differently' },
+  { id: 'messy-student',  emoji: '📚',         label: 'Messy Student',        desc: 'Deadline? What deadline?' },
+  { id: 'gamer',          emoji: '🎮',         label: 'The Gamer',            desc: 'One more round, I promise' },
+  { id: 'man-child',      emoji: '🧸',         label: 'Man Child',            desc: 'Adulting is hard, okay?' },
+  { id: 'non-veggie',     emoji: '🍖',         label: 'Non-Veg Eater',        desc: 'Plants are for decoration' },
+  { id: 'workaholic',     emoji: '💼',         label: 'Workaholic',           desc: 'Sleep is overrated, right?' },
+  { id: 'anxious-one',    emoji: '🫠',         label: 'The Anxious One',      desc: 'Overthinking everything' },
+  { id: 'introvert',      emoji: '🏠',         label: 'Proud Introvert',      desc: 'People are exhausting' },
+  { id: 'gym-bro',        emoji: '💪',         label: 'Gym Bro',              desc: 'Did I mention I lift?' },
+  { id: 'creative',       emoji: '🎨',         label: 'The Creative',         desc: 'Living in my own world' },
+];
+
+const AVK = 'nh_pwa_avatar'; // localStorage key
+let userAvatar = ld(AVK) || null; // { id, emoji, label }
+
+function getAvatarEmoji() {
+  if (userAvatar) return userAvatar.emoji;
+  if (userData && userData.name) return userData.name.slice(0, 2).toUpperCase();
+  return '?';
+}
+
+function renderProfileAvatar() {
+  const el = document.getElementById('profileAvatar');
+  if (!el) return;
+  if (userAvatar) {
+    el.innerHTML = '<span class="profile-avatar-emoji">' + userAvatar.emoji + '</span>';
+    el.style.fontSize = '32px';
+  } else {
+    el.textContent = userData && userData.name ? userData.name.slice(0, 2).toUpperCase() : '?';
+  }
+}
 
 const CAT_META = [
   { type: 'dopamine',  label: 'Dopamine',  sub: 'Drive, motivation & reward',    color: '#c8712a' },
@@ -3435,6 +3709,27 @@ function showOnboarding() {
   screen.style.display = 'flex';
   screen.classList.add('screen-active');
   renderOnboardSteps();
+  renderOnboardAvatarGrid();
+}
+
+function renderOnboardAvatarGrid() {
+  const grid = document.getElementById('onboardAvatarGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  AVATARS.forEach(function(av) {
+    const isSelected = userAvatar && userAvatar.id === av.id;
+    const el = document.createElement('div');
+    el.className = 'avatar-option' + (isSelected ? ' selected' : '');
+    el.innerHTML =
+      '<div class="avatar-option-emoji">' + av.emoji + '</div>' +
+      '<div class="avatar-option-label">' + av.label + '<br><span style="font-size:9px;opacity:0.7">' + av.desc + '</span></div>';
+    el.addEventListener('click', function() {
+      userAvatar = { id: av.id, emoji: av.emoji, label: av.label };
+      sv(AVK, userAvatar);
+      renderOnboardAvatarGrid();
+    });
+    grid.appendChild(el);
+  });
 }
 
 function renderOnboardSteps() {
@@ -3582,6 +3877,38 @@ function finishOnboarding() {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   PHASE GUIDE — rendered on the "How You're Graded" screen
+   ═══════════════════════════════════════════════════════════ */
+function renderPhaseGuide() {
+  const el = document.getElementById('phaseGuideEl');
+  if (!el) return;
+  const phases = [
+    { phase: 0, name: 'Dormant',            desc: 'No habits logged yet today. Your brain is resting.', trigger: 'No habits logged', col: '#4a4640' },
+    { phase: 1, name: 'Awakening',          desc: 'Habits are being logged but no core habit is complete yet. Your brain is starting to respond.', trigger: '1 or more habits logged, no core complete', col: '#6b6560' },
+    { phase: 2, name: 'Warming Up',         desc: 'Some core habits done across your categories. Neurochemical activity is building.', trigger: '25% or more of your core habits complete', col: '#c8712a' },
+    { phase: 3, name: 'Foundation Active',  desc: 'At least 50% of your chosen core habits are done. The evidence says this is a genuinely good day for your brain.', trigger: '50% or more of your core habits complete', col: '#b85070' },
+    { phase: 4, name: 'Thriving',           desc: 'All four systems are well supported. Your brain is fully activated today.', trigger: '75% or more of your core habits complete', col: '#4a9e82' },
+  ];
+
+  el.innerHTML = phases.map(function(p) {
+    var svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgEl.setAttribute('width', '48');
+    svgEl.setAttribute('height', '48');
+    svgEl.setAttribute('viewBox', '0 0 96 96');
+    drawBrainSvg(svgEl, p.phase);
+    var svgStr = svgEl.outerHTML;
+    return '<div class="phase-row">' +
+      '<div class="phase-row-brain">' + svgStr + '</div>' +
+      '<div class="phase-row-info">' +
+        '<div class="phase-row-name" style="color:' + p.col + '">' + p.name + '</div>' +
+        '<div class="phase-row-desc">' + p.desc + '</div>' +
+        '<div class="phase-row-trigger" style="color:' + p.col + '">' + p.trigger + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
    HABIT SET MANAGEMENT — add / remove from user's selected set
    ═══════════════════════════════════════════════════════════ */
 function addHabitToSet(type, hid) {
@@ -3678,6 +4005,7 @@ function renderProfile() {
   document.getElementById('statStreak').textContent    = streak.count || 0;
   const { done: _fd, total: _ft } = countFoundationals();
   document.getElementById('statGrade').textContent = _fd + ' / ' + _ft + ' done';
+  renderProfileAvatar();
 }
 
 function editProfile() {
@@ -3941,6 +4269,8 @@ window.triggerInstall     = triggerInstall;
 window.showScreen         = showScreen;
 window.hideScreen         = hideScreen;
 window.showOnboarding      = showOnboarding;
+window.showAvatarPicker    = showAvatarPicker;
+window.renderPhaseGuide    = renderPhaseGuide;
 window.finishOnboarding    = finishOnboarding;
 window.addHabitToSet       = addHabitToSet;
 window.removeHabitFromSet  = removeHabitFromSet;
