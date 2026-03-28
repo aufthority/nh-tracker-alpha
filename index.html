@@ -333,7 +333,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .brain-state-chip span { font-size: 12px; font-weight: 500; color: var(--text); }
 .core-pips-row { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; }
 .core-pip-dot { width: 8px; height: 8px; border-radius: 50%; transition: background 0.3s; }
-.core-day-badge { text-align: center; font-size: 13px; font-weight: 600; color: #085041; background: color-mix(in srgb, var(--serotonin) 14%, var(--surface2)); border: 1px solid color-mix(in srgb, var(--serotonin) 30%, transparent); border-radius: var(--radius-sm); padding: 9px 16px; margin-bottom: 8px; }
+.core-day-badge { text-align: center; font-size: 13px; font-weight: 600; color: var(--text); background: color-mix(in srgb, var(--serotonin) 28%, var(--surface2)); border: 1px solid color-mix(in srgb, var(--serotonin) 55%, transparent); border-radius: var(--radius-sm); padding: 10px 16px; margin-bottom: 8px; box-shadow: 0 0 12px color-mix(in srgb, var(--serotonin) 18%, transparent); letter-spacing: 0.02em; }
 .core-nudge-text { text-align: center; font-size: 12px; color: var(--muted); line-height: 1.6; padding: 4px 0; margin-bottom: 8px; }
 .coach-feed { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .coach-feed-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 13px 14px; border-left: 3px solid var(--border2); }
@@ -758,12 +758,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .habit-inline-info {
   display: none; margin-top: 8px; padding-top: 8px;
   border-top: 1px solid var(--border);
-  font-size: 12px; color: var(--muted); line-height: 1.6;
+  font-size: 12px; color: var(--text); line-height: 1.6;
+  opacity: 1 !important;
 }
 .habit-inline-info.show { display: block; }
 .habit-inline-examples { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
 .habit-inline-examples span { display: flex; gap: 6px; }
-.habit-inline-examples span::before { content: '→'; color: var(--subtle); flex-shrink: 0; }
+.habit-inline-examples span::before { content: '→'; color: var(--muted); flex-shrink: 0; }
 
 /* Grace day badge on streak */
 .grace-badge {
@@ -959,7 +960,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .onboard-error.show { display: block; }
 
 /* ═══ HABIT SET MANAGEMENT STYLES ═══════════════════════════ */
-.habit-unselected { opacity: 0.55; }
+.habit-unselected { }
+.habit-unselected .habit-body > .habit-label { opacity: 0.55; }
+.habit-unselected .habit-meta { opacity: 0.55; }
+.habit-unselected .habit-inline-info { opacity: 1; color: var(--text); }
 .habit-unsel-badge { font-size: 9px; color: var(--muted); background: var(--surface3); border-radius: 4px; padding: 1px 5px; margin-left: 4px; }
 .habit-add-btn { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border2); background: var(--surface2); color: var(--muted); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
 .habit-add-btn:hover { background: var(--surface3); color: var(--text); }
@@ -1081,7 +1085,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
         </div>
 
         <!-- Core Day Badge / Nudge / Pips -->
-        <div id="coreDayBadge" class="core-day-badge" style="display:none">Core Day</div>
+        <div id="coreDayBadge" class="core-day-badge" style="display:none">✦ Core Day</div>
         <div id="coreNudge" class="core-nudge-text" style="display:none"></div>
         <div class="core-pips-row" id="corePipsRow"></div>
 
@@ -2094,7 +2098,7 @@ function renderSection(type) {
       discRow.style.setProperty('--ac', 'var(--' + type + ')');
       const canAdd = canAddHabit(type, h.id);
       discRow.innerHTML =
-        '<div class="habit-body" style="opacity:0.45">' +
+        '<div class="habit-body">' +
           '<span class="habit-label">' + h.label + '</span>' +
           '<div class="habit-meta">' +
             '<span class="habit-type-tag">' + typeMap[h.type] + '</span>' +
@@ -2461,25 +2465,34 @@ function updateHeader() {
    stoic quotes, funny movie quotes
    ═══════════════════════════════════════════════════════════ */
 const THOUGHT_POOL = [
-  /* ── Neuroscience facts ───────────────────────────────── */
-  { cat: 'neuro', eye: 'Neuroscience', body: "Deep work creates a dopamine plateau — sustained focus trains your brain for long-term ambition, not short-term distraction.", attr: "Berke & Gershman, dopamine research" },
-  { cat: 'neuro', eye: 'Neuroscience', body: "Morning sunlight within 60 minutes of waking sets your circadian clock — shaping alertness now and sleep quality 16 hours later.", attr: "Circadian biology research" },
-  { cat: 'neuro', eye: 'Neuroscience', body: "Resistance training has an effect size of 0.66 for reducing depression — larger than cardio alone. Muscle is an endocrine organ.", attr: "Gordon et al., JAMA Psychiatry, 2018" },
-  { cat: 'neuro', eye: 'Neuroscience', body: "Social connection predicts longevity as powerfully as not smoking. Loneliness carries a mortality risk comparable to obesity.", attr: "Holt-Lunstad, World Psychiatry, 2024" },
-  { cat: 'neuro', eye: 'Neuroscience', body: "A 10 to 20 minute nap resets alertness and working memory — aligning with the natural circadian dip at 1 to 3pm.", attr: "NASA nap research; circadian biology" },
-  { cat: 'neuro', eye: 'Neuroscience', body: "Gratitude practice physically rewires the prefrontal cortex toward a more positive default firing pattern.", attr: "Positive psychology neuroscience research" },
-  { cat: 'neuro', eye: 'Neuroscience', body: "Oxytocin released through genuine social connection also reduces cortisol — connection is literally stress medicine.", attr: "Uvnas-Moberg, oxytocin research" },
-  { cat: 'neuro', eye: 'Neuroscience', body: "Rhythmic physical movement — walking, swimming, cycling — directly increases raphe nuclei firing, your brain's primary serotonin production site.", attr: "Jacobs & Fornal 1999; Aan het Rot et al. 2016" },
-  /* ── Nutritional & behavioural science ────────────────── */
-  { cat: 'nutrition', eye: 'Behavioural Science', body: "95% of serotonin is produced in the gut. Every fibre-rich meal is a direct act of mood regulation.", attr: "Gut-brain axis research" },
-  { cat: 'nutrition', eye: 'Behavioural Science', body: "It takes roughly 66 days to form a habit — not 21. Missing one day has no meaningful impact on long-term formation.", attr: "Lally et al., European Journal of Social Psychology, 2010" },
-  { cat: 'nutrition', eye: 'Behavioural Science', body: "Walking 7,000 to 8,000 steps per day captures most of the all-cause mortality benefit — even without a dedicated workout.", attr: "Paluch et al., JAMA Network Open, 2022" },
-  { cat: 'nutrition', eye: 'Behavioural Science', body: "Shared meals predict social network strength more strongly than almost any other daily behaviour.", attr: "Dunbar et al., 2017" },
-  { cat: 'nutrition', eye: 'Behavioural Science', body: "Reading for just 6 minutes reduces cortisol by up to 68%. It is one of the fastest relaxation techniques ever measured.", attr: "University of Sussex, 2009" },
-  { cat: 'nutrition', eye: 'Behavioural Science', body: "The Progress Principle: logging meaningful forward progress on any goal is the single strongest daily predictor of positive emotion.", attr: "Amabile & Kramer, Harvard Business Review" },
-  { cat: 'nutrition', eye: 'Behavioural Science', body: "Expressed appreciation activates oxytocin in both the giver and the receiver. Sincerity is the mechanism — generic praise does not trigger it.", attr: "Algoe et al., Psychological Science 2020" },
-  { cat: 'nutrition', eye: 'Behavioural Science', body: "Added sugar spikes then crashes dopamine — directly destabilising your serotonin baseline. Multiple studies link high sugar intake to depression.", attr: "Longitudinal metabolic and mood research" },
-  /* ── Stoic quotes ─────────────────────────────────────── */
+  /* ── Neuroscience — brain, habits, movement ──────────────── */
+  { cat: 'neuro', eye: 'Neuroscience', body: "Deep work creates a dopamine plateau — sustained focus trains your brain for long-term ambition rather than short-term distraction. This is distinct from the dopamine spike of checking notifications.", attr: "Berke & Gershman, dopamine research" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Morning sunlight within 60 minutes of waking calibrates your suprachiasmatic nucleus — the brain's master clock — shaping cortisol, alertness, and sleep quality for the next 16 hours.", attr: "Circadian biology; Leung et al. Nature Neuroscience 2020" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Resistance training produces BDNF — Brain-Derived Neurotrophic Factor — a protein that literally grows new neurons and protects existing ones. Muscle contraction is a direct act of brain maintenance.", attr: "Gordon et al., JAMA Psychiatry 2018" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Social isolation activates the same neural circuits as physical pain. The brain processes loneliness as a threat to survival — connection is not optional, it is physiologically necessary.", attr: "Holt-Lunstad, World Psychiatry 2024; Eisenberger, 2012" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "A 10 to 20 minute nap reactivates the hippocampus — the brain region responsible for memory consolidation and learning. The timing aligns with the natural afternoon cortisol dip at 1 to 3pm.", attr: "Mander et al., 2011; NASA nap research" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Gratitude practice measurably increases serotonin and dopamine simultaneously. Brain imaging shows activation of the anterior cingulate cortex — the same region that mediates empathy and emotional regulation.", attr: "Zahn et al., Frontiers in Human Neuroscience 2014" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Oxytocin released during genuine social contact directly inhibits the amygdala — reducing threat response, lowering cortisol, and making it physically easier to trust other people.", attr: "Kirsch et al., Journal of Neuroscience 2005" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Rhythmic movement directly increases raphe nuclei firing rate — your brain's primary serotonin production site. The rhythm itself is the mechanism, not the intensity. Walking, swimming, and cycling all qualify.", attr: "Jacobs & Fornal 1999; Aan het Rot et al. 2016" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "The prefrontal cortex — responsible for decision-making, impulse control, and long-term thinking — is the last brain region to fully develop. It continues maturing until approximately age 25.", attr: "Casey et al., Developmental Science 2008" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Sleep deprivation of just one night reduces the sensitivity of dopamine receptors by up to 20 percent. This is why poor sleep makes motivation feel genuinely harder — not a matter of willpower.", attr: "Volkow et al., Journal of Neuroscience 2012" },
+  { cat: 'neuro', eye: 'Emerging Research', body: "A 2024 meta-analysis found that aerobic exercise reduces symptoms of anxiety and depression comparably to first-line antidepressant medication — with the added benefit of improving cognition and sleep simultaneously.", attr: "Singh et al., British Journal of Sports Medicine 2023" },
+  { cat: 'neuro', eye: 'Emerging Research', body: "Psychobiotic research — studying how gut bacteria directly influence brain function — is one of the fastest-growing fields in medicine. Specific bacterial strains have now been shown to reduce cortisol and improve anxiety outcomes in RCTs.", attr: "Dinan et al., Biological Psychiatry 2022" },
+  { cat: 'neuro', eye: 'Emerging Research', body: "Time-restricted eating — consuming food within a consistent 8 to 10 hour daily window — has been shown to improve sleep quality, reduce inflammation markers, and support circadian rhythm independently of caloric intake.", attr: "Wilkinson et al., Cell Metabolism 2020" },
+  { cat: 'neuro', eye: 'Emerging Research', body: "Green exercise — physical activity in natural environments — produces measurably greater improvements in mood and self-esteem than the same activity performed indoors, even after controlling for duration and intensity.", attr: "Barton & Pretty, Environmental Science & Technology 2010; replicated 2023" },
+  /* ── Behavioural science — habit, psychology, lifestyle ──── */
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "95% of serotonin is produced in the gut, not the brain. The enteric nervous system contains over 100 million neurons and communicates bidirectionally with the brain via the vagus nerve.", attr: "Cryan & Dinan, Nature Reviews Neuroscience 2012" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Habit automaticity — the point at which a behaviour no longer requires conscious effort — takes an average of 66 days, not 21. Simpler habits form faster; complex ones can take over 200 days.", attr: "Lally et al., European Journal of Social Psychology 2010" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Walking 7,000 to 8,000 steps per day captures most of the all-cause mortality benefit of daily movement. The dose-response curve flattens above 10,000 steps — the baseline matters more than the peak.", attr: "Paluch et al., JAMA Network Open 2022 (n=47,471)" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Communal eating predicts the size and quality of social networks more reliably than almost any other daily behaviour — more than digital communication, shared hobbies, or proximity.", attr: "Dunbar et al., 2017" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Reading fiction for just 6 minutes reduced physiological markers of stress by 68% in a controlled study — faster and more effective than music, tea, or walking for acute stress relief.", attr: "Lewis, University of Sussex 2009" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "The Progress Principle: of all the things that can boost inner work life during a workday, the single most important is making meaningful progress. Even small wins activate the dopamine reward circuit.", attr: "Amabile & Kramer, Harvard Business Review 2011" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Implementation intentions — planning not just what to do but when and where — increase habit completion rates by 40 to 70% compared to intention alone. Specificity is the mechanism.", attr: "Gollwitzer, American Psychologist 1999; replicated across 94 studies" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Chronic added sugar consumption reduces BDNF levels — impairing learning, memory formation, and neuroplasticity. The effect is dose-dependent and partially reversible within weeks of reduction.", attr: "Agrawal & Bhatt, Nature Reviews Neuroscience 2009" },
+  { cat: 'nutrition', eye: 'Emerging Research', body: "A 2023 large-scale study found that even light physical activity — below the recommended thresholds — was associated with significantly lower risk of depression compared to sedentary behaviour. The threshold effect is lower than previously thought.", attr: "Choi et al., JAMA Psychiatry 2023" },
+  { cat: 'nutrition', eye: 'Emerging Research', body: "Social prescribing — where clinicians formally prescribe community activities, volunteering, or social contact as medical interventions — is now a formalised health policy in the UK and is being adopted globally.", attr: "WHO Europe, Social Prescribing Framework 2023" },
+  { cat: 'nutrition', eye: 'Emerging Research', body: "Magnesium deficiency — present in an estimated 45 to 68 percent of adults in industrialised countries — is strongly associated with anxiety, poor sleep, and low stress resilience. Dark leafy greens, nuts, and seeds are the most bioavailable sources.", attr: "Boyle et al., Nutrients 2017; updated Rosanoff 2023" },
+  /* ── Stoic and philosophical quotes ──────────────────────── */
   { cat: 'stoic', eye: "Today's thought", body: "You do not rise to the level of your goals. You fall to the level of your systems.", attr: "James Clear" },
   { cat: 'stoic', eye: "Today's thought", body: "The impediment to action advances action. What stands in the way becomes the way.", attr: "Marcus Aurelius" },
   { cat: 'stoic', eye: "Today's thought", body: "We are what we repeatedly do. Excellence is not an act but a habit.", attr: "Aristotle" },
@@ -2488,18 +2501,22 @@ const THOUGHT_POOL = [
   { cat: 'stoic', eye: "Today's thought", body: "The two most powerful warriors are patience and time.", attr: "Leo Tolstoy" },
   { cat: 'stoic', eye: "Today's thought", body: "You have power over your mind, not outside events. Realise this, and you will find strength.", attr: "Marcus Aurelius" },
   { cat: 'stoic', eye: "Today's thought", body: "First say to yourself what you would be; then do what you have to do.", attr: "Epictetus" },
-  /* ── Funny movie/TV quotes ────────────────────────────── */
-  { cat: 'fun', eye: 'Random Wisdom', body: "Why so serious?", attr: "The Joker, The Dark Knight (2008)" },
-  { cat: 'fun', eye: 'Random Wisdom', body: "You is kind, you is smart, you is important.", attr: "The Help (2011)" },
-  { cat: 'fun', eye: 'Random Wisdom', body: "To infinity and beyond!", attr: "Buzz Lightyear, Toy Story (1995)" },
-  { cat: 'fun', eye: 'Random Wisdom', body: "Just keep swimming.", attr: "Dory, Finding Nemo (2003)" },
-  { cat: 'fun', eye: 'Random Wisdom', body: "Life is like a box of chocolates. You never know what you are gonna get.", attr: "Forrest Gump (1994)" },
-  { cat: 'fun', eye: 'Random Wisdom', body: "Why are you running?", attr: "Mr. Tawau, Polis Evo (2015)" },
-  { cat: 'fun', eye: 'Random Wisdom', body: "I am not superstitious, but I am a little stitious.", attr: "Michael Scott, The Office" },
-  { cat: 'fun', eye: 'Random Wisdom', body: "That is what she said.", attr: "Michael Scott, The Office" },
-  { cat: 'fun', eye: 'Random Wisdom', body: "I volunteer as tribute.", attr: "Katniss Everdeen, The Hunger Games (2012)" },
-  { cat: 'fun', eye: 'Random Wisdom', body: "Elementary, my dear Watson.", attr: "Sherlock Holmes (various)" },
+  { cat: 'stoic', eye: "Today's thought", body: "He who has a why to live can bear almost any how.", attr: "Friedrich Nietzsche" },
+  { cat: 'stoic', eye: "Today's thought", body: "An unexamined life is not worth living.", attr: "Socrates" },
+  { cat: 'stoic', eye: "Today's thought", body: "The secret of getting ahead is getting started.", attr: "Mark Twain" },
+  { cat: 'stoic', eye: "Today's thought", body: "Small habits do not add up. They compound.", attr: "James Clear" },
 ];
+
+/* Build an interleaved sequence so tapping always cycles through categories:
+   neuro → nutrition → stoic → neuro → nutrition → stoic → ...
+   This gives proper variety rather than running all of one type first. */
+const _poolByCategory = {
+  neuro:     THOUGHT_POOL.filter(function(t) { return t.cat === 'neuro'; }),
+  nutrition: THOUGHT_POOL.filter(function(t) { return t.cat === 'nutrition'; }),
+  stoic:     THOUGHT_POOL.filter(function(t) { return t.cat === 'stoic'; }),
+};
+const _categoryOrder = ['neuro', 'nutrition', 'stoic'];
+const _categoryCounters = { neuro: 0, nutrition: 0, stoic: 0 };
 
 /* Shorthand aliases for buildCoachFeed compatibility */
 const SCIENCE_FACTS = THOUGHT_POOL.filter(function(t) { return t.cat === 'neuro' || t.cat === 'nutrition'; });
@@ -2510,12 +2527,7 @@ const THOUGHT_STYLES = {
   neuro:     { cls: 'tb-science',   eyeColor: 'var(--coach)' },
   nutrition: { cls: 'tb-nutrition', eyeColor: 'var(--serotonin)' },
   stoic:     { cls: 'tb-quote',     eyeColor: 'var(--muted)' },
-  fun:       { cls: 'tb-fun',       eyeColor: 'var(--dopamine)' },
 };
-
-/* ═══════════════════════════════════════════════════════════
-   RECOVERY BONUS
-   ═══════════════════════════════════════════════════════════ */
 const RBK = 'nh_recovery_seen';
 
 function checkRecoveryBonus() {
@@ -2630,15 +2642,21 @@ function buildCoachFeed() {
   });
 }
 
-var _thoughtIdx = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 86400000) % THOUGHT_POOL.length;
+/* Interleaved category rotation — tap cycles neuro → nutrition → stoic */
+var _catTapIdx = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+
 function renderThoughtBubble() {
   var wrap = document.getElementById('brainThoughtWrap');
   var bubble = document.getElementById('thoughtBubbleContent');
   if (!wrap || !bubble) return;
   wrap.style.display = 'block';
 
-  var card = THOUGHT_POOL[_thoughtIdx % THOUGHT_POOL.length];
-  var style = THOUGHT_STYLES[card.cat] || THOUGHT_STYLES.stoic;
+  /* Pick category in rotation order */
+  var catName = _categoryOrder[_catTapIdx % _categoryOrder.length];
+  var pool    = _poolByCategory[catName];
+  var counter = _categoryCounters[catName];
+  var card    = pool[counter % pool.length];
+  var style   = THOUGHT_STYLES[catName] || THOUGHT_STYLES.stoic;
 
   bubble.className = 'thought-bubble thought-up ' + style.cls;
   bubble.innerHTML =
@@ -2647,7 +2665,9 @@ function renderThoughtBubble() {
     (card.attr ? '<div class="thought-attr">— ' + card.attr + '</div>' : '');
 
   bubble.onclick = function() {
-    _thoughtIdx++;
+    /* Advance the counter for the current category, then move to next category */
+    _categoryCounters[catName]++;
+    _catTapIdx++;
     renderThoughtBubble();
   };
 }
@@ -2745,7 +2765,7 @@ function renderWeeklyTrend() {
   });
 
   /* SVG dimensions */
-  const W = 280, H = 72, PAD_X = 20, PAD_Y = 8;
+  const W = 280, H = 72, PAD_X = 10, PAD_Y = 8;
   const chartW = W - PAD_X * 2;
   const chartH = H - PAD_Y * 2;
   const n = days.length;
@@ -2809,15 +2829,8 @@ function renderWeeklyTrend() {
     return '<text x="' + xAt(i) + '" y="' + (H + 14) + '" text-anchor="middle" class="' + cls + '">' + d.label + '</text>';
   }).join('');
 
-  /* Phase labels on right axis */
-  var phaseLabels = [
-    { r: 0.75, label: 'Thriving', col: '#4a9e82' },
-    { r: 0.50, label: 'Active',   col: '#b85070' },
-    { r: 0.25, label: 'Warming',  col: '#c8712a' },
-  ].map(function(pl) {
-    var y = yAt(pl.r);
-    return '<text x="' + (W - PAD_X + 4) + '" y="' + (y + 3) + '" font-size="8" fill="' + pl.col + '" opacity="0.7">' + pl.label + '</text>';
-  }).join('');
+  /* Phase labels removed — they bleed outside the container */
+  var phaseLabels = '';
 
   el.innerHTML =
     '<div class="trend-chart-wrap">' +
