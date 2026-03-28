@@ -16,16 +16,17 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
 <!-- ============================================================
-     NEUROHABIT PWA — by The Aufthority
-     Revisions v2:
-       1. Habit masterlist fully revised (7 Dopamine, 10 Serotonin,
-          8 Oxytocin, 5 Endorphin) based on meta-analysis literature
-       2. Dopamine: OR-gate (Deep Work OR Sunlight unlocks gauge)
-       3. Serotonin: sleepOrPrayer gate + Sleep flex tiers for shift workers
-       4. Oxytocin: OR-gate (Socialising OR Appreciation unlocks gauge)
-       5. Endorphin: Exercise OR Active Day (mutually exclusive, OR-gate)
-       6. Scoring: Multiplicative gate (Method A) + sqrt dampening (Method B)
-       7. Grade thresholds revised: S≥90, A≥75, B≥55, C≥35, D≥15
+     NEUROHABIT PWA — by The Aufthority  v3
+     Changes:
+       · All paths → /nh-tracker-alpha/
+       · Habit masterlist fully revised (D/S/O/E)
+       · OR-gates: Dopamine, Oxytocin, Endorphin
+       · sleepOrPrayer gate for Serotonin
+       · Exercise / Active Day mutual exclusion
+       · Multiplicative scoring + sqrt dampening
+       · Score hidden — brain phase (0-4) drives UI
+       · NeuroCoach feed replaces score display
+       · Header: brain-state-chip replaces score pill
      ============================================================ -->
 
 <style>
@@ -132,8 +133,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .ring-track { fill: none; stroke: var(--border2); stroke-width: 3; }
 .ring-fill  { fill: none; stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 0.55s cubic-bezier(.4,0,.2,1); }
 .score-ring-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--text); }
-/* .score-pill-info removed — replaced by brain-state-chip */
-
+.score-pill-info .val { font-size: 13px; font-weight: 600; line-height: 1; color: var(--text); }
+.score-pill-info .lbl { font-size: 10px; color: var(--muted); margin-top: 1px; }
 .grade-chip { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: 'Instrument Serif', serif; font-size: 16px; transition: all 0.35s; flex-shrink: 0; cursor: pointer; color: var(--muted); }
 
 /* ═══ BOTTOM NAV ══════════════════════════════════════════════ */
@@ -324,26 +325,16 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 /* ═══ COACH PAGE ═════════════════════════════════════════════ */
 #screen-app { overflow: hidden; }
 .coach-page-inner { padding: 20px 18px 0; }
-
-/* Brain Phase Block */
 .brain-phase-block { display: flex; flex-direction: column; align-items: center; padding: 18px 0 10px; margin-bottom: 8px; }
 .brain-phase-svg { margin-bottom: 10px; }
 .brain-phase-label { font-family: 'Instrument Serif', serif; font-size: 20px; font-weight: 400; color: var(--text); text-align: center; line-height: 1.2; margin-bottom: 3px; }
 .brain-phase-sub { font-size: 12.5px; color: var(--muted); text-align: center; line-height: 1.5; max-width: 280px; }
-
-/* Brain State Chip in Header */
 .brain-state-chip { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 30px; padding: 5px 11px 5px 7px; }
 .brain-state-chip span { font-size: 12px; font-weight: 500; color: var(--text); }
-
-/* Core pips row */
 .core-pips-row { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; }
-.core-pip-dot { width: 8px; height: 8px; border-radius: 50%; transition: background 0.3s, border 0.3s; }
-
-/* Core Day Badge / Nudge */
+.core-pip-dot { width: 8px; height: 8px; border-radius: 50%; transition: background 0.3s; }
 .core-day-badge { text-align: center; font-size: 13px; font-weight: 600; color: #085041; background: color-mix(in srgb, var(--serotonin) 14%, var(--surface2)); border: 1px solid color-mix(in srgb, var(--serotonin) 30%, transparent); border-radius: var(--radius-sm); padding: 9px 16px; margin-bottom: 8px; }
 .core-nudge-text { text-align: center; font-size: 12px; color: var(--muted); line-height: 1.6; padding: 4px 0; margin-bottom: 8px; }
-
-/* NeuroCoach Feed */
 .coach-feed { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .coach-feed-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 13px 14px; border-left: 3px solid var(--border2); }
 .coach-feed-card.card-reflect { border-left-color: var(--serotonin); }
@@ -360,6 +351,36 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .coach-feed-body { font-size: 13px; color: var(--text); line-height: 1.7; }
 .card-quote .coach-feed-body { font-style: italic; color: var(--muted); }
 .coach-feed-attr { font-size: 11px; color: var(--subtle); margin-top: 5px; }
+.coach-hero-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; position: relative; overflow: hidden; }
+.coach-hero-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--dopamine), var(--oxytocin), var(--serotonin), var(--endorphin)); }
+.coach-hero-top { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.coach-big-score { font-family: 'Instrument Serif', serif; font-size: 42px; font-weight: 400; line-height: 1; letter-spacing: -1px; }
+.coach-big-score span { font-size: 18px; color: var(--muted); }
+.coach-score-info strong { display: block; font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.coach-score-info em { font-size: 12px; color: var(--muted); font-style: normal; line-height: 1.4; }
+.coach-cat-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.coach-cat-bar-item { }
+.coach-cat-bar-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+.coach-cat-bar-label span:last-child { font-weight: 600; }
+.coach-cat-bar-track { height: 3px; border-radius: 2px; background: var(--surface2); overflow: hidden; }
+.coach-cat-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s cubic-bezier(.4,0,.2,1); width: 0%; }
+
+/* Share button on coach */
+.share-score-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
+.share-score-btn:hover { background: var(--surface2); }
+
+/* Next-up improvement summary */
+.improve-summary { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; margin-bottom: 14px; }
+.improve-summary-head { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 9px; }
+.improve-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.improve-row:last-child { border-bottom: none; padding-bottom: 0; }
+.improve-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.improve-body { flex: 1; min-width: 0; }
+.improve-body strong { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.improve-body span { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+.improve-pct { font-family: 'Instrument Serif', serif; font-size: 16px; font-weight: 400; flex-shrink: 0; }
+.improve-done { opacity: 0.45; }
+.improve-done .improve-body strong { text-decoration: line-through; text-decoration-color: var(--subtle); }
 
 /* Week dots */
 .week-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; margin-bottom: 14px; }
@@ -842,7 +863,54 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .premium-collapse-body .premium-preview-block:first-child { border-top: none; }
 .premium-collapse-body .premium-preview-block + .premium-preview-block { border-top: 1px solid var(--border); }
 
-/* ═══ RESPONSIVE ═════════════════════════════════════════════ */
+/* ═══ ONBOARDING ════════════════════════════════════════════ */
+#screen-onboarding { overflow-y: auto; padding: 0; background: var(--bg); }
+.onboard-inner { max-width: 480px; margin: 0 auto; padding: 32px 20px 60px; }
+.onboard-header { text-align: center; margin-bottom: 28px; }
+.onboard-logo { font-size: 44px; margin-bottom: 10px; }
+.onboard-title { font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; margin-bottom: 6px; }
+.onboard-sub { font-size: 13px; color: var(--muted); line-height: 1.6; max-width: 300px; margin: 0 auto; }
+.onboard-step { margin-bottom: 28px; }
+.onboard-step-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.onboard-step-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.onboard-step-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.onboard-step-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.onboard-habits { display: flex; flex-direction: column; gap: 6px; }
+.onboard-habit { display: flex; align-items: flex-start; gap: 10px; padding: 11px 13px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.18s; }
+.onboard-habit.selected { border-color: var(--ac, #4a9e82); background: color-mix(in srgb, var(--ac, #4a9e82) 8%, var(--surface)); }
+.onboard-habit-check { width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: all 0.15s; }
+.onboard-habit.selected .onboard-habit-check { background: var(--ac, #4a9e82); border-color: var(--ac, #4a9e82); }
+.onboard-habit-body { flex: 1; min-width: 0; }
+.onboard-habit-label { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; }
+.onboard-habit-desc { font-size: 11.5px; color: var(--muted); line-height: 1.4; margin-top: 3px; }
+.onboard-habit-tag { font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 4px; margin-top: 4px; display: inline-block; }
+.onboard-habit-tag.core { background: color-mix(in srgb, var(--ac, #4a9e82) 15%, transparent); color: var(--ac, #4a9e82); }
+.onboard-habit-tag.secondary { background: var(--surface2); color: var(--muted); }
+.onboard-habit-tag.bonus { background: var(--surface3); color: var(--muted); }
+.onboard-section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); margin: 12px 0 6px; }
+.onboard-divider { height: 1px; background: var(--border); margin: 16px 0; }
+.onboard-lock-note { background: color-mix(in srgb, var(--serotonin) 10%, var(--surface2)); border: 1px solid color-mix(in srgb, var(--serotonin) 25%, transparent); border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 20px; font-size: 12.5px; color: var(--text); line-height: 1.6; }
+.onboard-lock-note strong { color: var(--serotonin); }
+.onboard-cta { margin-top: 24px; }
+.onboard-cta-btn { width: 100%; padding: 14px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-family: 'Geist', sans-serif; font-size: 15px; font-weight: 600; background: var(--coach); color: var(--text); transition: all 0.2s; }
+.onboard-cta-btn:active { transform: scale(0.97); }
+.onboard-cta-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.onboard-cta-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px; line-height: 1.5; }
+.onboard-error { font-size: 12px; color: var(--warning); text-align: center; margin-top: 6px; display: none; }
+.onboard-error.show { display: block; }
+
+/* ═══ HABIT SET MANAGEMENT STYLES ═══════════════════════════ */
+.habit-unselected { opacity: 0.55; }
+.habit-unsel-badge { font-size: 9px; color: var(--muted); background: var(--surface3); border-radius: 4px; padding: 1px 5px; margin-left: 4px; }
+.habit-add-btn { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border2); background: var(--surface2); color: var(--muted); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+.habit-add-btn:hover { background: var(--surface3); color: var(--text); }
+.habit-rem-btn { font-size: 11px; padding: 2px 6px; border-radius: 4px; border: none; background: transparent; color: var(--muted); cursor: pointer; transition: color 0.15s; }
+.habit-rem-btn:hover { color: var(--text); }
+.habit-core-tag { font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 4px; margin-left: 4px; display: inline-block; }
+.lock-status-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: color-mix(in srgb, var(--coach) 10%, var(--surface2)); border: 1px solid color-mix(in srgb, var(--coach) 25%, transparent); border-radius: var(--radius-sm); margin: 0 0 10px; font-size: 11.5px; color: var(--muted); }
+.lock-status-bar strong { color: var(--coach); }
+
+/* ═══ RESPONSIVE ════════════════════════════════════════════ */
 @media (min-width: 520px) {
   .habit-list, .pips-row { padding-left: 20px; padding-right: 20px; }
   .page-hero, .coach-page-inner { padding-left: 22px; padding-right: 22px; }
@@ -859,6 +927,28 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 <!-- ══════════════════════════════════════════════════════════
      LOGIN
      ══════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════════
+     ONBOARDING — Habit selection
+     ══════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-onboarding" style="display:none">
+  <div class="onboard-inner">
+    <div class="onboard-header">
+      <div class="onboard-logo">🧠</div>
+      <div class="onboard-title">Build your NeuroHabit set</div>
+      <div class="onboard-sub">Choose at least one core habit per category. You can add more anytime — but your choices are locked for 28 days so the science can work.</div>
+    </div>
+    <div id="onboard-steps"></div>
+    <div class="onboard-lock-note">
+      <strong>28-day habit lock</strong> — Research shows 28 days is the minimum needed to know if a habit works for you (Lally et al. 2010, Keller et al. 2021). You can <em>add</em> habits at any time, but <em>removals</em> open after day 28. The recommended wait is 42 days.
+    </div>
+    <div class="onboard-cta">
+      <button class="onboard-cta-btn" id="onboardDoneBtn" onclick="finishOnboarding()" disabled>Start my habit journey →</button>
+      <div class="onboard-error" id="onboardError">Please select at least one core habit in each category.</div>
+      <div class="onboard-cta-note">You can always discover more habits inside the app.</div>
+    </div>
+  </div>
+</div>
+
 <div class="screen screen-active" id="screen-login">
   <div class="login-logo"><img src="icon-192.png" alt="NeuroHabit" style="width:80px;height:80px;border-radius:20px;"></div>
   <div class="login-title">NeuroHabit</div>
@@ -910,7 +1000,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
           <div class="brain-phase-sub" id="brainvatarSub">Log your first habit to begin</div>
         </div>
 
-        <!-- Core Day Badge / Nudge -->
+        <!-- Core Day Badge / Nudge / Pips -->
         <div id="coreDayBadge" class="core-day-badge" style="display:none">Core Day</div>
         <div id="coreNudge" class="core-nudge-text" style="display:none"></div>
         <div class="core-pips-row" id="corePipsRow"></div>
@@ -946,7 +1036,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
                 <span class="beta-tag">⭐ Premium</span>
               </div>
               <div class="premium-chart-live" id="weeklyTrendChart"></div>
-              <p class="premium-preview-desc">Your neurochemical activity across this week. Spot patterns and understand what a strong day looks like for your brain.</p>
+              <p class="premium-preview-desc">Your neurochemical activity across this week. Spot patterns and protect your streak.</p>
             </div>
             <div class="premium-preview-block">
               <div class="premium-preview-header">
@@ -954,7 +1044,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
                 <span class="beta-tag">⭐ Premium</span>
               </div>
               <div class="premium-cat-streaks" id="catStreaksPanel"></div>
-              <p class="premium-preview-desc">Consecutive days you activated each neurochemical system. See where you're consistent and where you need more focus.</p>
+              <p class="premium-preview-desc">Consecutive days you activated each neurochemical system.</p>
             </div>
             <div class="premium-preview-block">
               <div class="premium-preview-header">
@@ -962,36 +1052,32 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
                 <span class="beta-tag">⭐ Premium</span>
               </div>
               <div class="premium-milestones" id="milestonesPanel"></div>
-              <p class="premium-preview-desc">Your best recorded moments — tracked automatically as you use the app each day.</p>
+              <p class="premium-preview-desc">Your best recorded moments — tracked automatically each day.</p>
             </div>
             <div class="premium-preview-block">
               <div class="premium-preview-header">
                 <span class="premium-preview-title">🕸 Brain Balance Radar</span>
                 <span class="beta-tag">⭐ Premium</span>
               </div>
-              <canvas id="radarCanvas" class="radar-canvas" width="200" height="200"></canvas>
-              <p class="premium-preview-desc">Today's neurochemical shape at a glance. A balanced brain shows an even polygon — lopsided shapes reveal which systems need attention.</p>
+              <div class="premium-radar-wrap">
+                <svg id="radarChart" viewBox="0 0 220 200" width="220" height="200"></svg>
+                <div class="radar-legend" id="radarLegend"></div>
+              </div>
+              <p class="premium-preview-desc">Today's neurochemical shape at a glance.</p>
             </div>
             <div class="premium-preview-block">
               <div class="premium-preview-header">
                 <span class="premium-preview-title">🧠 Advanced NeuroCoach</span>
                 <span class="beta-tag">⭐ Premium</span>
               </div>
-              <div class="adv-insights-panel" id="advInsightsPanel"></div>
-              <p class="premium-preview-desc">Pattern analysis, habit correlations, and proactive nudges based on your actual data — not generic advice.</p>
+              <div class="premium-adv-insights" id="advInsightsPanel"></div>
+              <p class="premium-preview-desc">Pattern analysis and proactive nudges based on your actual data.</p>
             </div>
           </div>
         </div>
 
       </div>
     </div>
-
-            <!-- 3. Personal bests & milestones -->
-            <div class="premium-preview-block">
-              <div class="premium-preview-header">
-                <span class="premium-preview-title">🏅 Personal Bests</span>
-                <span class="beta-tag">⭐ Premium</span>
-              </div>
     <!-- DOPAMINE PAGE -->
     <div class="page" id="page-dopamine">
       <div class="page-hero" style="--ac:var(--dopamine)">
@@ -1097,7 +1183,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
         <!-- Today's snapshot stats -->
         <div class="profile-stats">
           <div class="profile-stat">
-            <div class="profile-stat-val" id="statHeroScore">—</div>
+            <div class="profile-stat-val" id="statHeroScore">0%</div>
             <div class="profile-stat-lbl">Brain State</div>
           </div>
           <div class="profile-stat">
@@ -1224,7 +1310,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
   </div>
   <div class="grade-screen-content">
     <h2>How You're Graded</h2>
-    <p>Your brain phase reflects the proportion of foundational core habits completed today. Completing at least 50% of core habits across all four categories activates Phase 3 — Foundation Active.</p>
+    <p>Your Hero Score is the average of all four category percentages. Foundational habits (⭐⭐⭐) gate the gauge — complete at least one to unlock above 50%.</p>
     <div class="grade-row"><div class="grade-letter" style="color:#4a9e82">S</div><div class="grade-info"><strong>100% — Perfect Day</strong><span>All four neurochemicals fully activated.</span></div></div>
     <div class="grade-row"><div class="grade-letter" style="color:#4a9e82">A</div><div class="grade-info"><strong>80–99% — Excellent</strong><span>Strong across the board. All foundational habits done.</span></div></div>
     <div class="grade-row"><div class="grade-letter" style="color:#5a82c0">B</div><div class="grade-info"><strong>60–79% — Good</strong><span>Foundational habits complete in most categories.</span></div></div>
@@ -1237,7 +1323,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
       <p><strong>Foundational Gate</strong>: Any single ⭐⭐⭐ habit unlocks the full gauge. Until then, gauge is capped at 50%.</p>
       <p><strong>Serotonin exception</strong>: Has 3 foundational habits — completing ANY ONE of them unlocks the full gauge.</p>
       <p><strong>Flex Mode</strong>: Long-press or tap Flex to reduce a habit's weight on harder days.</p>
-      <p><strong>Brain Phase</strong> = foundational habit completion rate across all four neurochemical categories.</p>
+      <p><strong>Hero Score</strong> = average of all four effective category percentages.</p>
     </div>
   </div>
 </div>
@@ -1374,256 +1460,311 @@ const gprov = new firebase.auth.GoogleAuthProvider();
 const HABITS = {
   dopamine: {
     color: '#c8712a',
-    /* OR-gate: ANY ONE foundational unlocks cap */
     gate: 'any',
+    /* foundationalIds — the habits eligible to be selected as foundational */
+    foundationalIds: ['dw','mp','sun'],
     habits: [
+      /* ── FOUNDATIONAL OPTIONS (user picks ≥1) ─────────────────── */
       {
+        id: 'dw',
         label: 'Deep Work / Main Goal',
         weight: 3, foundational: true, type: 'foundational',
         flex: { multiSession: true, tiers: [
-          { label: 'Deep Work — 1 session (45 min)',   weight: 1, sessions: 1 },
-          { label: 'Deep Work — 2 sessions (90 min)',  weight: 2, sessions: 2 },
+          { label: 'Deep Work — 1 session (45 min)',      weight: 1, sessions: 1 },
+          { label: 'Deep Work — 2 sessions (90 min)',     weight: 2, sessions: 2 },
           { label: 'Deep Work — 3+ sessions (135+ min)', weight: 3, sessions: 3 },
         ]},
-        info: { body: 'Dedicated, distraction-free work on your most important goal. Each session is 45+ minutes of uninterrupted focus. Use the session cycler to log how many blocks you completed today.', examples: ['1 session (45 min) = ⭐ — a focused start', '2 sessions (90 min) = ⭐⭐ — a strong productive day', '3+ sessions (135+ min) = ⭐⭐⭐ — deep work elite output'] },
-        tooltip: { icon: '⚡', title: 'Deep Work activates Dopamine', body: 'Sustained focused effort on a meaningful goal is the strongest natural dopamine trigger. Each session compounds the reward signal.' }
+        info: { body: "Dedicated, distraction-free work on your most important goal. Each session is 45+ minutes of uninterrupted focus.", examples: ["1 session (45 min) = a focused start", "2 sessions (90 min) = a strong productive day", "3+ sessions = elite deep work output"] },
+        tooltip: { icon: "⚡", title: "Deep Work activates Dopamine", body: "Sustained focused effort is the strongest natural dopamine trigger. Each session compounds the reward signal." }
       },
       {
+        id: 'mp',
+        label: 'Meaningful Progress',
+        weight: 3, foundational: true, type: 'foundational',
+        flex: null,
+        info: { body: "Completing a meaningful step on any important goal or responsibility — work, caregiving, a creative project, or a physical task. The key word is meaningful progress, not cognitive intensity.", examples: ["Completing a key task on your to-do list for the day", "Finishing a caregiving or household responsibility you planned", "Taking a meaningful step on a creative or personal project"] },
+        tooltip: { icon: "🎯", title: "Progress activates Dopamine", body: "The Progress Principle (Amabile & Kramer, replicated 2022): logging meaningful forward progress is the single strongest daily predictor of intrinsic motivation. Valid for any role or lifestyle." }
+      },
+      {
+        id: 'sun',
         label: 'Morning Sunlight (10–15 min)',
         weight: 2, foundational: true, type: 'foundational', flex: null,
-        info: { body: 'Direct outdoor light exposure within 60 minutes of waking — no sunglasses, no glass in the way. Either foundational habit (Deep Work or Sunlight) unlocks your full Dopamine gauge.', examples: ['Walking outside barefoot or on a balcony', 'Eating breakfast near an open window', 'A short walk to a coffee shop without sunglasses'] },
-        tooltip: { icon: '🌅', title: 'Sunlight primes Dopamine', body: 'Morning light increases dopamine receptor sensitivity — setting the motivational tone for the entire day. Do this within 30–60 mins of waking.' }
+        info: { body: "Direct outdoor light within 60 minutes of waking — no sunglasses, no glass in the way. The most accessible foundational: anyone can do it regardless of cognitive state, work type, or neurodivergence.", examples: ["Walk outside barefoot or on a balcony", "Eat breakfast near an open window", "Short walk outside within the first hour of waking"] },
+        tooltip: { icon: "🌅", title: "Sunlight primes Dopamine", body: "Morning light increases dopamine receptor sensitivity via the retinal-hypothalamic-VTA pathway (Leung et al. Nature Neuroscience 2020) — setting motivational tone for the day." }
       },
+      /* ── SECONDARY & BONUS ─────────────────────────────────────── */
       {
-        label: 'Task List Completion (Admin/To-dos)',
+        id: 'tl',
+        label: 'Task List Completion',
         weight: 1, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Clearing short, planned tasks from your list — emails, admin, errands — that create mental "open loops" if left undone.', examples: ['Replying to all pending emails', 'Paying a bill or filing a form', 'Scheduling next week\'s appointments'] },
-        tooltip: { icon: '✅', title: 'Checkmarks trigger Dopamine', body: 'Each completed task releases a small dopamine hit. Breaking big goals into smaller tasks creates a cascade of micro-rewards.' }
+        info: { body: "Clearing short planned tasks — emails, admin, errands — that create mental open loops if left undone.", examples: ["Replying to all pending emails", "Paying a bill or filing a form", "Scheduling appointments"] },
+        tooltip: { icon: "✅", title: "Checkmarks trigger Dopamine", body: "Each completed task releases a small dopamine hit." }
       },
       {
+        id: 'sk',
         label: 'Active Skill Practice (20+ min)',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'Deliberate practice of a skill you are actively trying to improve — not passive consumption, but active doing.', examples: ['Practising an instrument or sport drill', 'Writing, drawing, or coding for improvement', 'Language learning with active speaking/writing'] },
-        tooltip: { icon: '🎯', title: 'Learning grows your reward system', body: 'Skill acquisition activates dopaminergic pathways. Each "aha" moment signals progress — one of the most potent natural dopamine triggers.' }
+        info: { body: "Deliberate practice of a skill you are actively improving — not passive consumption, but active doing.", examples: ["Practising an instrument or sport drill", "Writing, drawing, or coding for improvement", "Language learning with active speaking"] },
+        tooltip: { icon: "🎸", title: "Learning grows your reward system", body: "Skill acquisition activates dopaminergic pathways." }
       },
       {
+        id: 'jn',
         label: 'Goal-Focused Journaling',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'Writing specifically about your goals, priorities, or progress — not general diary writing.', examples: ['Reviewing your 3 priorities for the day', 'Reflecting on what worked and why', 'Writing out a problem you\'re trying to solve'] },
-        tooltip: { icon: '📓', title: 'Journaling clarifies the reward target', body: 'Writing goals activates the prefrontal cortex and reinforces your brain\'s directional focus, increasing anticipatory dopamine.' }
+        info: { body: "Writing specifically about your goals, priorities, or progress — not general diary writing.", examples: ["Reviewing your 3 priorities for the day", "Reflecting on what worked and why", "Writing out a problem you are trying to solve"] },
+        tooltip: { icon: "📓", title: "Journaling clarifies the reward target", body: "Writing goals activates the prefrontal cortex and increases anticipatory dopamine." }
       },
       {
+        id: 'sc',
         label: 'Screen-Free Block (2+ hrs)',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'Protecting at least 2 continuous hours from passive scrolling or social media. This is a removal habit — the absence of dopamine-depleting behaviour is itself a neurochemical act.', examples: ['Phone in another room during a meal and the hour after', 'No social media before completing your deep work session', 'A screen-free evening from dinner onwards'] },
-        tooltip: { icon: '📵', title: 'Protect your Dopamine baseline', body: 'Passive scrolling exploits the same dopamine reward loops as substance dependence, causing receptor desensitisation. Protecting 2+ hours daily restores baseline sensitivity.' }
+        info: { body: "Protecting at least 2 continuous hours from passive scrolling or social media.", examples: ["Phone in another room during a meal and the hour after", "No social media before completing your main task", "Screen-free evening from dinner onwards"] },
+        tooltip: { icon: "📵", title: "Protect your Dopamine baseline", body: "Passive scrolling exploits dopamine reward loops. Protecting 2+ hrs daily restores baseline sensitivity." }
       },
       {
+        id: 'ty',
         label: 'Tyrosine-Rich Meal',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'Eating a meal containing tyrosine-rich foods — the dietary precursor to dopamine. Mirrors the Serotonin/tryptophan logic: your brain needs raw materials.', examples: ['Eggs with a protein source at breakfast', 'Chicken or beef with lunch or dinner', 'A handful of almonds, pumpkin seeds, or walnuts as a snack'] },
-        tooltip: { icon: '🥚', title: 'Feed your Dopamine system', body: 'Tyrosine is the amino acid your brain converts into dopamine. Without adequate dietary tyrosine, your brain lacks the raw material to sustain motivation and drive.' }
+        info: { body: "Eating a meal containing tyrosine-rich foods — the dietary precursor to dopamine.", examples: ["Eggs with protein at breakfast", "Chicken or beef with lunch or dinner", "Almonds, pumpkin seeds, or walnuts as a snack"] },
+        tooltip: { icon: "🥚", title: "Feed your Dopamine system", body: "Tyrosine is the amino acid your brain converts into dopamine." }
       },
     ]
   },
 
   serotonin: {
     color: '#4a9e82',
-    /* gate 'sleepOrPrayer': Sleep OR Prayer must be done to unlock cap */
     gate: 'sleepOrPrayer',
+    foundationalIds: ['sl','pr','rm'],
     habits: [
+      /* ── FOUNDATIONAL OPTIONS (user picks ≥1) ─────────────────── */
       {
-        label: 'Solat 5 Waktu / Daily Prayer',
-        weight: 3, foundational: true, type: 'foundational',
-        flex: { multiSession: true, tiers: [
-          { label: 'Prayer — 1 session',     weight: 1, sessions: 1 },
-          { label: 'Prayer — 3 sessions',    weight: 2, sessions: 3 },
-          { label: 'Prayer — 5 sessions ✓',  weight: 2, sessions: 5 },
-        ]},
-        info: { body: 'Track each prayer or structured devotional session individually. Completing Sleep or Prayer unlocks your full Serotonin gauge — both foundationals completing earns maximum points.', examples: ['1 session = ⭐ — at least one prayer completed', '3 sessions = ⭐⭐ — Fajr, Dhuhr, Asar done', '5 sessions = ⭐⭐ — all 5 on time (Fajr, Dhuhr, Asar, Maghrib, Isyak)'] },
-        tooltip: { icon: '🕌', title: 'Prayer stabilises Serotonin', body: 'Structured prayer combines breathwork, body movement, rhythmic repetition, and gratitude — all independently proven to upregulate serotonin and support circadian rhythm.' }
-      },
-      {
+        id: 'sl',
         label: 'Sleep (7–9 hrs)',
         weight: 2, foundational: true, type: 'foundational',
         flex: { multiSession: true, tiers: [
-          { label: 'Restful sleep — any duration',  weight: 1, sessions: 1 },
-          { label: 'Sleep hygiene done',             weight: 1, sessions: 2 },
-          { label: '7–9 hrs restful sleep ✓',        weight: 2, sessions: 3 },
+          { label: 'Restful sleep — any duration', weight: 1, sessions: 1 },
+          { label: 'Sleep hygiene done',            weight: 1, sessions: 2 },
+          { label: '7–9 hrs restful sleep',         weight: 2, sessions: 3 },
         ]},
-        info: { body: 'A full night of restful sleep. For shift workers or those with disrupted sleep: tier 1 (restful any duration) and tier 2 (sleep hygiene: no screens 1hr before, consistent bedtime) still earn points. You are not penalised for circumstances outside your control.', examples: ['Restful any hrs = ⭐ — did what you could', 'Sleep hygiene done = ⭐ — protected the conditions for sleep', '7–9 hrs restful = ⭐⭐ — full recovery sleep'] },
-        tooltip: { icon: '😴', title: 'Sleep is the master regulator', body: 'During deep sleep, tryptophan converts to serotonin and melatonin. Chronic sleep deprivation depletes serotonin reserves faster than anything else.' }
+        info: { body: "A full night of restful sleep. For shift workers: restful any duration or sleep hygiene (no screens 1hr before, consistent bedtime) still earn points.", examples: ["Restful any hrs = did what you could", "Sleep hygiene done = protected the conditions for sleep", "7–9 hrs restful = full recovery sleep"] },
+        tooltip: { icon: "😴", title: "Sleep is the master regulator", body: "During deep sleep, tryptophan converts to serotonin and melatonin. Nothing replaces this pathway fully." }
       },
       {
-        label: '5-a-Day (Veg & Fruit)',
-        weight: 2, foundational: true, type: 'foundational',
+        id: 'pr',
+        label: 'Solat / Daily Prayer / Mindfulness',
+        weight: 3, foundational: true, type: 'foundational',
         flex: { multiSession: true, tiers: [
-          { label: '1–2 servings',      weight: 1, sessions: 1 },
-          { label: '3–4 servings',      weight: 2, sessions: 2 },
-          { label: '5+ servings ✓',     weight: 2, sessions: 3 },
+          { label: 'Prayer / Mindfulness — 1 session',   weight: 1, sessions: 1 },
+          { label: 'Prayer / Mindfulness — 3 sessions',  weight: 2, sessions: 3 },
+          { label: 'Prayer / Mindfulness — 5 sessions',  weight: 2, sessions: 5 },
         ]},
-        info: { body: 'Track whole-food plant servings. A serving is roughly one cupped hand of vegetables or fruit. Juice does not count. 95% of serotonin is produced in the gut — plant diversity directly fuels it.', examples: ['1–2 servings = ⭐ — a start', '3–4 servings = ⭐⭐ — good gut input', '5+ servings = ⭐⭐ — full 5-a-day achieved'] },
-        tooltip: { icon: '🥦', title: 'Gut-brain axis & Serotonin', body: '95% of serotonin is produced in the gut. Fibre-rich vegetables and fruit feed beneficial gut bacteria that synthesise serotonin precursors.' }
+        info: { body: "Structured prayer or mindfulness practice. Both activate the HPA axis downregulation pathway that protects serotonin from cortisol depletion (Matousek et al. Psychoneuroendocrinology 2020).", examples: ["1 session = at least one prayer or 5-min meditation", "3 sessions = Fajr, Dhuhr, Asar or 3 mindfulness blocks", "5 sessions = all 5 solat on time, or 5 mindfulness sessions"] },
+        tooltip: { icon: "🕌", title: "Prayer and mindfulness protect Serotonin", body: "8-week mindfulness programmes produce significant increases in urinary 5-HIAA (primary serotonin metabolite). The mechanism is HPA axis downregulation reducing cortisol competition for brain tryptophan entry." }
       },
       {
+        id: 'rm',
+        label: 'Rhythmic Movement (20+ min)',
+        weight: 2, foundational: true, type: 'foundational', flex: null,
+        info: { body: "Any sustained rhythmic physical movement for 20+ minutes — walking, swimming, cycling, gentle jogging, tai chi. The rhythm itself is the serotonin mechanism, not the intensity.", examples: ["A 20-minute walk at any pace", "Swimming laps for 20+ minutes", "Tai chi, qi gong, or gentle cycling"] },
+        tooltip: { icon: "🚶", title: "Rhythmic movement activates Serotonin", body: "Rhythmic motor activity directly increases raphe nuclei firing rate — the brain's primary serotonin production site (Jacobs & Fornal 1999, confirmed via PET by Aan het Rot et al. 2016). This is independent of the endorphin and BDNF pathways from exercise." }
+      },
+      /* ── SECONDARY & BONUS ─────────────────────────────────────── */
+      {
+        id: 'vf',
+        label: '5-a-Day (Veg & Fruit)',
+        weight: 2, foundational: false, type: 'secondary',
+        flex: { multiSession: true, tiers: [
+          { label: '1–2 servings',  weight: 1, sessions: 1 },
+          { label: '3–4 servings',  weight: 2, sessions: 2 },
+          { label: '5+ servings',   weight: 2, sessions: 3 },
+        ]},
+        info: { body: "Track whole-food plant servings. A serving is roughly one cupped hand of vegetables or fruit. Juice does not count.", examples: ["1–2 servings = a start", "3–4 servings = good gut input", "5+ servings = full 5-a-day achieved"] },
+        tooltip: { icon: "🥦", title: "Gut feeds Serotonin", body: "95% of serotonin is produced in the gut. Plant diversity directly fuels it." }
+      },
+      {
+        id: 'nw',
         label: 'Nature Walk (20+ min)',
         weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'An outdoor walk in a natural or semi-natural environment for at least 20 minutes — not treadmill, not indoors.', examples: ['A park walk or trail during lunch break', 'Morning walk around a green neighbourhood', 'Beach or riverside walk without headphones'] },
-        tooltip: { icon: '🌿', title: 'Nature walks boost Serotonin', body: 'Outdoor walking combines three powerful serotonin activators: sunlight, rhythmic movement, and exposure to natural environments.' }
+        info: { body: "An outdoor walk in a natural or semi-natural environment — not treadmill, not indoors.", examples: ["A park walk or trail during lunch break", "Morning walk in a green neighbourhood", "Beach or riverside walk"] },
+        tooltip: { icon: "🌿", title: "Nature amplifies Serotonin", body: "Outdoor walking combines sunlight, rhythmic movement, and nature exposure — three independent serotonin activators." }
       },
       {
+        id: 'pm',
         label: 'Protein-Rich Meals',
         weight: 2, foundational: false, type: 'secondary',
         flex: { multiSession: true, tiers: [
-          { label: '1 palm-sized protein',       weight: 1, sessions: 1 },
-          { label: '2 palm-sized proteins',       weight: 2, sessions: 2 },
-          { label: '3+ palm-sized proteins ✓',   weight: 2, sessions: 3 },
+          { label: '1 palm-sized protein',   weight: 1, sessions: 1 },
+          { label: '2 palm-sized proteins',  weight: 2, sessions: 2 },
+          { label: '3+ palm-sized proteins', weight: 2, sessions: 3 },
         ]},
-        info: { body: 'A "palm-sized protein" is a portion of protein roughly the size and thickness of your palm. Tryptophan — the amino acid your brain converts to serotonin — is found only in protein. Track palm-sized servings across the day.', examples: ['1 palm = ⭐ — e.g. one chicken breast at lunch', '2 palms = ⭐⭐ — e.g. eggs at breakfast + fish at dinner', '3+ palms = ⭐⭐ — protein at every main meal'] },
-        tooltip: { icon: '🥩', title: 'Protein provides tryptophan', body: 'Serotonin is synthesised from tryptophan — an amino acid found only in protein. Without adequate dietary protein, your brain lacks the raw material to produce serotonin.' }
+        info: { body: "A palm-sized protein portion at each main meal. Tryptophan — the precursor to serotonin — is found only in protein.", examples: ["1 palm = one chicken breast at lunch", "2 palms = eggs at breakfast + fish at dinner", "3+ palms = protein at every main meal"] },
+        tooltip: { icon: "🥩", title: "Protein provides Tryptophan", body: "Without adequate dietary protein, your brain lacks the raw material to produce serotonin." }
       },
       {
+        id: 'gr',
         label: 'Gratitude / Muhasabah',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'A brief, intentional practice of listing or reflecting on specific things you are genuinely grateful for.', examples: ['Writing 3 specific things you\'re thankful for today', 'Reflecting during prayer or quiet time on blessings', 'Telling someone something you appreciate about them'] },
-        tooltip: { icon: '🤲', title: 'Gratitude elevates Serotonin', body: 'Consciously recalling positive experiences increases serotonin production and rewires neural pathways toward a positive baseline mood.' }
+        info: { body: "A brief intentional practice of listing specific things you are genuinely grateful for.", examples: ["Writing 3 specific things you are thankful for today", "Reflecting during prayer or quiet time on blessings", "Telling someone what you appreciate about them"] },
+        tooltip: { icon: "🤲", title: "Gratitude elevates Serotonin", body: "Consciously recalling positive experiences increases serotonin production." }
       },
       {
-        label: 'Breathwork / Meditation / Dhikr',
+        id: 'bw',
+        label: 'Breathwork / Dhikr',
         weight: 1, foundational: false, type: 'bonus',
         flex: { multiSession: true, tiers: [
-          { label: 'Mindfulness — 1 session (5+ min)',  weight: 1, sessions: 1 },
-          { label: 'Mindfulness — 3+ sessions',         weight: 2, sessions: 3 },
-          { label: 'Mindfulness — 5+ sessions',         weight: 2, sessions: 5 },
+          { label: 'Breathwork / Dhikr — 1 session', weight: 1, sessions: 1 },
+          { label: 'Breathwork / Dhikr — 3 sessions', weight: 2, sessions: 3 },
+          { label: 'Breathwork / Dhikr — 5 sessions', weight: 2, sessions: 5 },
         ]},
-        info: { body: 'Any intentional practice of breathwork, meditation, dhikr (remembrance of Allah), or contemplative prayer. Single sessions of 5+ minutes count. Dhikr and silent meditation are equally valid.', examples: ['1 session: 5-min box breathing or morning dhikr — ⭐', '3 sessions: breathwork + midday dhikr + night reflection — ⭐⭐', '5 sessions: structured dhikr after each solat — ⭐⭐'] },
-        tooltip: { icon: '🧘', title: 'Mindfulness & Dhikr calm the nervous system', body: 'Breathwork activates the parasympathetic nervous system and reduces cortisol. Dhikr adds spiritual grounding — both upregulate serotonin through rhythmic, repetitive calming practice.' }
+        info: { body: "Intentional breathwork or dhikr practice. If you selected Prayer as foundational, this is the top-up habit for additional sessions.", examples: ["Box breathing or 4-7-8 technique", "Tasbih, subhanallah, alhamdulillah sequences", "Guided breathwork session"] },
+        tooltip: { icon: "🧘", title: "Breathwork calms the nervous system", body: "Activates the parasympathetic nervous system and reduces cortisol." }
       },
       {
+        id: 'nap',
         label: 'Power Nap / Qailullah (10–25 min)',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'A short midday rest of 10–25 minutes. Any longer risks sleep inertia. This is a supplement to night sleep, not a replacement — it does not satisfy the Sleep foundational habit.', examples: ['A 15-min rest after Dhuhr prayer (Qailullah — Sunnah)', 'Eyes closed for 20 min during lunch break', 'A quiet rest in a dark room mid-afternoon'] },
-        tooltip: { icon: '💤', title: 'Qailullah resets alertness', body: 'A 10–20 min nap improves alertness and working memory. It aligns with the natural circadian dip at 1–3pm. The Prophet (s.a.w.) recommended Qailullah — modern sleep science agrees.' }
+        info: { body: "A short midday rest. This supplements night sleep — it does not replace the Sleep foundational.", examples: ["A 15-min rest after Dhuhr prayer (Qailullah — Sunnah)", "Eyes closed for 20 min during lunch break"] },
+        tooltip: { icon: "💤", title: "Qailullah resets alertness", body: "A 10-20 min nap aligns with the natural circadian dip at 1-3pm." }
       },
       {
+        id: 'rh',
         label: 'Restorative Hobby (20+ min)',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'A non-digital hobby that genuinely restores you — reading physical books, gardening, craft, drawing, or cooking for joy. Self-selected: you know what counts as restorative for you. Gaming does not qualify.', examples: ['Reading a physical book for 20+ min', 'Gardening or tending plants', 'Cooking a meal mindfully, without rushing'] },
-        tooltip: { icon: '📖', title: 'Restorative hobbies boost Serotonin', body: 'Reading reduces cortisol by up to 68% in 6 minutes (Sussex, 2009). Soil bacteria in gardening (M. vaccae) directly upregulate serotonin. Non-digital rest is a genuine neurochemical intervention.' }
+        info: { body: "A non-digital hobby that genuinely restores you — reading, gardening, craft, drawing, or cooking for joy. Gaming does not qualify.", examples: ["Reading a physical book for 20+ min", "Gardening or tending plants", "Cooking a meal mindfully"] },
+        tooltip: { icon: "📖", title: "Restorative hobbies boost Serotonin", body: "Reading reduces cortisol by up to 68% in 6 minutes (Sussex 2009)." }
       },
       {
+        id: 'ns',
         label: 'No Added Sugar Today',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'No added sugar in food or drinks today. Natural sugars in whole fruit are fine — this targets ultra-processed foods, sugary drinks, and desserts with added sugar. Frame this as an achievement, not a restriction.', examples: ['No sugary drinks, juice, or energy drinks', 'No biscuits, cakes, or confectionery', 'Chose water, teh o kosong, or black coffee instead'] },
-        tooltip: { icon: '🍬', title: 'Stable blood sugar = stable Serotonin', body: 'Added sugar spikes then crashes dopamine, directly destabilising your serotonin baseline. Multiple longitudinal studies associate high sugar intake with depression and anxiety.' }
+        info: { body: "No added sugar in food or drinks. Natural sugars in whole fruit are fine.", examples: ["No sugary drinks, juice, or energy drinks", "No biscuits, cakes, or confectionery"] },
+        tooltip: { icon: "🍬", title: "Stable blood sugar stabilises Serotonin", body: "Added sugar spikes then crashes dopamine, directly destabilising your serotonin baseline." }
       },
     ]
   },
 
   oxytocin: {
     color: '#b85070',
-    /* OR-gate: Active Socialising OR Sincere Appreciation unlocks cap */
     gate: 'any',
+    foundationalIds: ['as','pt','sa'],
     habits: [
+      /* ── FOUNDATIONAL OPTIONS (user picks ≥1) ─────────────────── */
       {
+        id: 'as',
         label: 'Active Socialising (20+ min)',
         weight: 3, foundational: true, type: 'foundational', flex: null,
-        info: { body: 'A real, focused in-person or voice conversation lasting at least 20 minutes — phone in pocket, full presence. Either foundational habit (Socialising or Appreciation) unlocks your full Oxytocin gauge.', examples: ['Lunch with a friend or colleague without phones', 'A genuine catch-up call (voice, not texting)', 'Family dinner with real conversation, no screens'] },
-        tooltip: { icon: '🤝', title: 'Face-to-face is irreplaceable', body: 'In-person social interaction is the gold standard for oxytocin release. Eye contact, body language, and vocal tone trigger oxytocin in ways digital communication cannot replicate.' }
+        info: { body: "A real focused in-person or voice conversation lasting at least 20 minutes — phone in pocket, full presence.", examples: ["Lunch with a friend without phones", "A genuine catch-up call (voice, not texting)", "Family dinner with real conversation"] },
+        tooltip: { icon: "🤝", title: "Face-to-face is the gold standard", body: "In-person social interaction is the highest-evidence oxytocin trigger. Eye contact and vocal tone activate pathways digital communication cannot replicate." }
       },
       {
-        label: 'Sincere Appreciation (Express to someone)',
+        id: 'pt',
+        label: 'Physical Touch / Oxytocin Anchor',
         weight: 2, foundational: true, type: 'foundational', flex: null,
-        info: { body: 'Telling someone — clearly and specifically — what you appreciate about them. Genuine appreciation activates oxytocin in both giver and receiver. Achievable even on isolated days. Either foundational unlocks the gauge.', examples: ['Thanking a colleague for their specific help today', 'Texting a friend to say what they mean to you', 'Expressing gratitude to a family member directly'] },
-        tooltip: { icon: '💛', title: 'Appreciation is a bonding signal', body: 'Genuine appreciation activates oxytocin in both giver and receiver. Sincerity creates stronger neurochemical responses than generic praise.' }
+        info: { body: "Sustained physical touch — a hug with a family member or partner, petting an animal, or a hand on the shoulder during a difficult conversation. Best for introverts, those with social anxiety, isolated individuals, and parents.", examples: ["A long hug with a family member or partner", "Petting or stroking an animal for a few minutes", "A genuine hand on the shoulder during a tough moment"] },
+        tooltip: { icon: "🫂", title: "Physical touch triggers Oxytocin", body: "Sustained physical contact produces oxytocin release comparable to verbal social interaction (Inagaki et al. PNAS 2020). The most accessible foundational for isolated or introverted users." }
       },
       {
+        id: 'sa',
+        label: 'Sincere Appreciation (Expressed)',
+        weight: 2, foundational: true, type: 'foundational', flex: null,
+        info: { body: "Telling someone clearly and specifically what you appreciate about them. The expression to another person is the mechanism — private gratitude journaling does not count here.", examples: ["Thanking a colleague for their specific help today", "Texting a friend to say what they mean to you", "Expressing gratitude to a family member directly"] },
+        tooltip: { icon: "💛", title: "Appreciation bonds the brain", body: "Expressed appreciation activates oxytocin in both giver and receiver (Algoe et al. Psychological Science 2020, Williams & Bartlett Emotion 2015). Best for remote workers with limited in-person contact." }
+      },
+      /* ── SECONDARY & BONUS ─────────────────────────────────────── */
+      {
+        id: 'sm',
         label: 'Shared Meal (Eat Together)',
         weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Eating a meal with at least one other person, with genuine conversation — not side-by-side screens. Communal eating is one of the most reliably documented daily oxytocin habits across cultures.', examples: ['Lunch with a colleague without phones on the table', 'Family dinner with conversation', 'Breakfast with a housemate or partner'] },
-        tooltip: { icon: '🍽️', title: 'Shared meals bond the brain', body: 'Communal eating predicts social network strength more than almost any other daily behaviour (Dunbar et al. 2017). Food + presence = oxytocin.' }
+        info: { body: "Eating a meal with at least one other person, with genuine presence — not side-by-side screens.", examples: ["Lunch with a colleague without phones", "Family dinner with conversation", "Breakfast with a housemate or partner"] },
+        tooltip: { icon: "🍽️", title: "Shared meals bond the brain", body: "Communal eating predicts social network strength more than almost any other daily behaviour (Dunbar et al. 2017)." }
       },
       {
-        label: 'Oxytocin Anchor (Hug / Pet)',
-        weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Physical touch that is sustained and genuine — a hug, petting an animal, or a hand on the shoulder during a difficult conversation. Sustained contact (not rushed) is what triggers the oxytocin response.', examples: ['A long hug with a family member or partner', 'Petting or stroking an animal', 'A genuine hand on the shoulder during a difficult conversation'] },
-        tooltip: { icon: '🫂', title: 'Physical touch is the fastest route', body: 'Sustained physical contact triggers a significant oxytocin surge. Touch — with people or animals — is one of the fastest ways to activate the bonding system.' }
-      },
-      {
+        id: 'rc',
         label: 'Receive Care / Be Vulnerable',
-        weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'Asking for help, accepting support, or sharing something real with someone you trust. Oxytocin flows in both directions — receiving care activates it as strongly as giving it.', examples: ['Asking a friend or colleague for help with something', 'Sharing how you\'re feeling with someone you trust', 'Accepting an offer of help without deflecting it'] },
-        tooltip: { icon: '🙏', title: 'Receiving care activates Oxytocin', body: 'Inagaki et al. 2020 confirmed that receiving social support triggers oxytocin as strongly as giving it. Vulnerability is a neurological act of bonding, not weakness.' }
+        weight: 1, foundational: false, type: 'secondary', flex: null,
+        info: { body: "Asking for help, accepting support, or sharing something real with someone you trust.", examples: ["Asking a friend for help with something", "Sharing how you are feeling with someone you trust", "Accepting an offer of help without deflecting"] },
+        tooltip: { icon: "🙏", title: "Receiving care activates Oxytocin", body: "Receiving social support triggers oxytocin as strongly as giving it (Inagaki et al. 2020)." }
       },
       {
+        id: 'gs',
         label: 'Group Singing / Shared Music',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'Singing together with others, or playing or listening to music in a genuinely shared social context — not alone with headphones. The group element is what triggers the neurochemical response.', examples: ['Singing nasheeds or hymns in a group', 'Playing music with others (jam, class, or practice)', 'Attending a live concert or communal musical event'] },
-        tooltip: { icon: '🎵', title: 'Group singing releases Oxytocin', body: 'Weinstein et al. 2016 confirmed that group singing triggers oxytocin and endorphin release simultaneously. The mechanism is interpersonal synchrony — the shared rhythm of voice and breath.' }
+        info: { body: "Singing together with others, or playing music in a shared social context — not alone with headphones.", examples: ["Singing nasheeds or hymns in a group", "Playing music with others", "Attending a live musical event"] },
+        tooltip: { icon: "🎵", title: "Group singing releases Oxytocin", body: "Group singing triggers oxytocin and endorphin simultaneously through interpersonal synchrony (Weinstein et al. 2016)." }
       },
       {
+        id: 'ch',
         label: 'Community Help / Act of Kindness',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'Doing something for someone without expecting anything in return — voluntary and without obligation. The helper\'s high is neurologically real.', examples: ['Helping a neighbour carry something', 'Paying for someone\'s coffee anonymously', 'Volunteering time at a community event or mosque'] },
-        tooltip: { icon: '🌱', title: 'Giving is neurologically rewarding', body: 'Acts of genuine kindness trigger oxytocin release and lower cortisol. The "helper\'s high" is mesolimbic activation confirmed by fMRI (Moll et al. 2006).' }
+        info: { body: "Doing something for someone without expecting anything in return — voluntary and without obligation.", examples: ["Helping a neighbour carry something", "Paying for someone's coffee anonymously", "Volunteering time at a community event"] },
+        tooltip: { icon: "🌱", title: "Giving triggers Oxytocin", body: "Acts of genuine kindness trigger oxytocin release and lower cortisol." }
       },
       {
+        id: 'sl2',
         label: 'Social Laughter / Humor',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'Genuine, sustained laughter shared with another person — not scrolling memes alone, but real social humour. The social element is what makes laughter a bonding habit.', examples: ['A genuinely funny conversation with a friend or colleague', 'Watching a comedy together and laughing', 'Playing a silly game with someone'] },
-        tooltip: { icon: '😂', title: 'Laughter bonds the brain', body: 'Laughter\'s primary neurochemical effect is social bonding via oxytocin and endorphin — it is a bonding behaviour first, a physical one second.' }
+        info: { body: "Genuine sustained laughter shared with another person — not scrolling memes alone.", examples: ["A genuinely funny conversation with a friend", "Watching a comedy together and laughing", "Playing a silly game with someone"] },
+        tooltip: { icon: "😂", title: "Laughter bonds the brain", body: "Laughter triggers oxytocin and endorphin — it is a bonding behaviour first." }
       },
     ]
   },
 
   endorphin: {
     color: '#5a82c0',
-    /* OR-gate: Exercise OR Active Day unlocks cap */
     gate: 'any',
+    foundationalIds: ['ex','nt'],
     habits: [
+      /* ── FOUNDATIONAL OPTIONS (user picks ≥1) ─────────────────── */
       {
+        id: 'ex',
         label: 'Exercise (Dedicated Session)',
         weight: 3, foundational: true, type: 'foundational',
         flex: { multiSession: true, tiers: [
-          { label: 'Light — 15–20 min (walk, yoga)',   weight: 1, sessions: 1 },
-          { label: 'Moderate — 30 min sustained',       weight: 2, sessions: 2 },
-          { label: 'Vigorous — 45+ min / HIIT / weights', weight: 3, sessions: 3 },
+          { label: 'Light — 15–20 min (walk, yoga)',        weight: 1, sessions: 1 },
+          { label: 'Moderate — 30 min sustained',           weight: 2, sessions: 2 },
+          { label: 'Vigorous — 45+ min / HIIT / weights',   weight: 3, sessions: 3 },
         ]},
-        info: { body: 'A dedicated exercise session — intentional, with elevated heart rate. Use the intensity cycler to log your level. Either Exercise or Active Day unlocks your Endorphin gauge. If you log Exercise, the Active Day habit locks automatically (steps from your workout already count).', examples: ['Light = ⭐: 15–20 min walk, yoga, or easy swim', 'Moderate = ⭐⭐: 30 min jog, cycling, or brisk swim', 'Vigorous = ⭐⭐⭐: 45+ min HIIT, weights, or intense sport'] },
-        tooltip: { icon: '🏃', title: 'Exercise is the endorphin king', body: 'Sustained exercise triggers the largest natural endorphin release. It also produces BDNF, reduces cortisol, and improves both depression (SMD -0.43) and anxiety (Singh et al. BJSM 2023).' }
+        info: { body: "A dedicated exercise session — intentional, with elevated heart rate. Can be logged alongside Active Day: they are independent neurochemical events (Stamatakis et al. BJSM 2024).", examples: ["Light = 15–20 min walk, yoga, or easy swim", "Moderate = 30 min jog, cycling, or brisk swim", "Vigorous = 45+ min HIIT, weights, or intense sport"] },
+        tooltip: { icon: "🏃", title: "Exercise is the endorphin king", body: "Sustained exercise triggers endorphin release, produces BDNF, reduces cortisol, and improves both depression and anxiety (Singh et al. BJSM 2023)." }
       },
       {
-        label: 'Active Day (No Workout Today)',
+        id: 'nt',
+        label: 'Active Day (Incidental Steps)',
         weight: 3, foundational: true, type: 'foundational',
         flex: { multiSession: true, tiers: [
-          { label: '3,000–4,999 incidental steps',  weight: 1, sessions: 1 },
-          { label: '5,000–7,499 incidental steps',  weight: 2, sessions: 2 },
+          { label: '3,000–4,999 incidental steps',   weight: 1, sessions: 1 },
+          { label: '5,000–7,499 incidental steps',   weight: 2, sessions: 2 },
           { label: '7,500–10,000+ incidental steps', weight: 3, sessions: 3 },
         ]},
-        info: { body: 'For days when a dedicated workout is not possible. Log incidental steps from daily life only — stairs, walking errands, standing — NOT steps from your exercise session. If you logged Exercise today, this habit is automatically locked.', examples: ['3k–5k steps = ⭐: took stairs, parked further away', '5k–7.5k steps = ⭐⭐: walked to meetings, active errands', '7.5k–10k+ steps = ⭐⭐⭐: consistently active all day without a workout'] },
-        tooltip: { icon: '🚶', title: 'Movement is medicine, any amount', body: 'Paluch et al. JAMA 2022 (n=47,471): step count has a clear dose-response mortality benefit, with most of the gain captured at 7,000–8,000 daily steps — even without a formal exercise session.' }
+        info: { body: "Incidental steps from daily life — stairs, walking errands, standing. Independent from and additive to exercise: structured exercise and incidental movement have separate neurochemical effects (Stamatakis et al. BJSM 2024, Paluch et al. JAMA 2022).", examples: ["3k–5k steps = took stairs, parked further away", "5k–7.5k steps = walked to meetings, active errands", "7.5k–10k+ steps = consistently active all day"] },
+        tooltip: { icon: "🚶", title: "Movement is medicine, any amount", body: "Step count has a clear dose-response mortality and mental health benefit — independent of any exercise session (Paluch et al. JAMA 2022)." }
       },
+      /* ── SECONDARY & BONUS ─────────────────────────────────────── */
       {
+        id: 'cs',
         label: 'Cold Shower / Contrast Therapy',
         weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Deliberate cold water exposure — at minimum a cold shower, ideally ending on cold after a hot shower. The noradrenaline surge is the primary mechanism; endorphin is a secondary effect.', examples: ['2-minute cold shower at the end of your normal shower', 'Alternating hot and cold in 1-min intervals (3 rounds)', 'Cold plunge or outdoor swim in cool water'] },
-        tooltip: { icon: '🚿', title: 'Cold triggers a noradrenaline surge', body: 'Cold water immersion triggers a significant noradrenaline response and secondary endorphin release. Within minutes of getting out, you feel calmer, sharper, and more resilient.' }
+        info: { body: "Deliberate cold water exposure — at minimum a cold shower, ideally ending on cold.", examples: ["2-minute cold shower at the end of your normal shower", "Alternating hot and cold in 1-min intervals (3 rounds)"] },
+        tooltip: { icon: "🚿", title: "Cold triggers a noradrenaline surge", body: "Cold water immersion triggers noradrenaline and secondary endorphin release." }
       },
       {
+        id: 'cp',
         label: 'Creative Play / Dancing',
         weight: 2, foundational: false, type: 'secondary', flex: null,
-        info: { body: 'Physical creative expression — dancing, movement arts, or active play — that combines joy with motion. The rhythm, music, and social elements are all neurochemically active.', examples: ['Dancing to music for 10+ minutes', 'Improv or drama class', 'Playing a physically active game with children or friends'] },
-        tooltip: { icon: '💃', title: 'Dance triggers multiple pathways', body: 'Dancing combines rhythmic movement, social bonding, music, and creativity — each independently triggering endorphin and dopamine release. DMN suppression during flow is neuroimaging-confirmed.' }
+        info: { body: "Physical creative expression — dancing, movement arts, or active play — that combines joy with motion.", examples: ["Dancing to music for 10+ minutes", "Improv or drama class", "Playing a physically active game with children"] },
+        tooltip: { icon: "💃", title: "Dance triggers multiple pathways", body: "Dancing combines rhythmic movement, social bonding, and creativity — each independently triggering endorphin release." }
       },
       {
+        id: 'ym',
         label: 'Yoga / Mobility / Stretching (10+ min)',
         weight: 1, foundational: false, type: 'bonus', flex: null,
-        info: { body: 'A dedicated yoga, tai chi, mobility, or stretching session — not just a quick stretch after sitting. Yoga and tai chi have strong RCT evidence for mental health; static stretching adds musculoskeletal benefit. Self-select what counts.', examples: ['10-min morning yoga or sun salutation', 'A tai chi or qi gong session', 'Post-workout static stretching (hold 30s each)'] },
-        tooltip: { icon: '🧘', title: 'Yoga and mobility calm the system', body: 'Yoga and tai chi reduce cortisol, improve vagal tone, and trigger mild endorphin release. RCTs show efficacy for both anxiety and depression (Frontiers Psychology 2025).' }
+        info: { body: "A dedicated yoga, tai chi, mobility, or stretching session — not just a quick stretch after sitting.", examples: ["10-min morning yoga or sun salutation", "A tai chi or qi gong session", "Post-workout static stretching"] },
+        tooltip: { icon: "🧘", title: "Yoga and mobility calm the system", body: "Yoga and tai chi reduce cortisol, improve vagal tone, and trigger mild endorphin release." }
       },
     ]
   }
 };
+
 
 /* ═══════════════════════════════════════════════════════════
    STORAGE & STATE
@@ -1632,123 +1773,174 @@ const SK  = 'nh_pwa_state';
 const STK = 'nh_pwa_streak';
 const WK  = 'nh_pwa_week';
 const UK  = 'nh_pwa_user';
+const HCK = 'nh_pwa_habitconfig';  // user habit selection
+const HLK = 'nh_pwa_habitlock';    // habit lock metadata
 
 const ld = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
 const sv = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
-let appState  = ld(SK)  || {};
-let streak    = ld(STK) || { count: 0, lastDate: null };
-let weekData  = ld(WK)  || {};
-let userData  = ld(UK)  || { name: null, skipAuth: false };
+let appState       = ld(SK)  || {};
+let streak         = ld(STK) || { count: 0, lastDate: null };
+let weekData       = ld(WK)  || {};
+let userData       = ld(UK)  || { name: null, skipAuth: false };
+let userHabitConfig = ld(HCK) || null;   // null = not yet configured (triggers onboarding)
+let habitLockMeta   = ld(HLK) || null;   // { startDate, lockUntil, lockedSelection }
+
+/* ── Default config applied when user skips onboarding ─────────────── */
+const DEFAULT_HABIT_CONFIG = {
+  dopamine:  { selected: ['dw','sun','tl'] },
+  serotonin: { selected: ['sl','pr','vf','nw'] },
+  oxytocin:  { selected: ['as','sa','sm'] },
+  endorphin: { selected: ['ex','nt','cs'] }
+};
+
+/* ── Habit config helpers ───────────────────────────────────────────── */
+function getConfig() {
+  return userHabitConfig || DEFAULT_HABIT_CONFIG;
+}
+
+function isSelected(type, habitId) {
+  return getConfig()[type].selected.includes(habitId);
+}
+
+function getSelectedHabits(type) {
+  const cfg = getConfig()[type].selected;
+  return HABITS[type].habits.filter(h => cfg.includes(h.id));
+}
+
+function getSelectedFoundationals(type) {
+  return getSelectedHabits(type).filter(h => h.foundational);
+}
+
+/* ── Habit lock helpers (28-day minimum, 42-day recommendation) ─────── */
+const LOCK_MIN_DAYS  = 28;
+const LOCK_REC_DAYS  = 42;
+
+function initHabitLock(config) {
+  const startDate = new Date().toISOString().slice(0, 10);
+  const lockUntil = new Date(Date.now() + LOCK_MIN_DAYS * 86400000).toISOString().slice(0, 10);
+  habitLockMeta = {
+    startDate,
+    lockUntil,
+    lockedSelection: JSON.parse(JSON.stringify(config))
+  };
+  sv(HLK, habitLockMeta);
+}
+
+function isLockActive() {
+  if (!habitLockMeta) return false;
+  return today <= habitLockMeta.lockUntil;
+}
+
+function daysIntoLock() {
+  if (!habitLockMeta) return 0;
+  return Math.floor((new Date(today) - new Date(habitLockMeta.startDate)) / 86400000);
+}
+
+function daysUntilUnlock() {
+  if (!habitLockMeta) return 0;
+  return Math.max(0, Math.floor((new Date(habitLockMeta.lockUntil) - new Date(today)) / 86400000));
+}
+
+function canAddHabit(type, habitId) {
+  // Can always add during lock period
+  if (!isSelected(type, habitId)) return true;
+  return false; // already selected
+}
+
+function canRemoveHabit(type, habitId) {
+  if (isLockActive()) return false;
+  // Must keep at least one foundational per category
+  const h = HABITS[type].habits.find(x => x.id === habitId);
+  if (!h || !h.foundational) return true;
+  const selectedFdns = getSelectedFoundationals(type);
+  return selectedFdns.length > 1; // can only remove if ≥2 foundationals selected
+}
 
 const today = new Date().toISOString().slice(0, 10);
 if (!appState[today]) appState[today] = {};
 
 /* ═══════════════════════════════════════════════════════════
-   SCORING ENGINE v2
-   ── Method A: Multiplicative gate (foundation rate × raw score)
-   ── Method B: Square-root dampening on internal score (balance incentive, never shown to user)
-   ── isHabitLocked: Exercise/Active Day mutual exclusion
+   SCORING ENGINE
+   ── REVISION 2: foundationDone uses category gate type
+   ── REVISION 3: Social Laughter weight now 2 in HABITS obj
    ═══════════════════════════════════════════════════════════ */
 
 function habitWeight(type, i) {
   const h = HABITS[type].habits[i];
-  if (h.flex?.multiSession) {
-    const tierKey = `${type}_${i}_tier`;
+  if (h.flex && h.flex.multiSession) {
+    const tierKey = type + '_' + i + '_tier';
     const tierIdx = appState[today][tierKey] || 0;
-    // If a tier is selected, use that tier's weight
     if (tierIdx > 0) return h.flex.tiers[tierIdx - 1].weight;
-    // No tier selected: base weight (habit counts at ⭐1 if manually ticked)
     return 1;
   }
-  const flexKey = `${type}_${i}_flex`;
+  const flexKey = type + '_' + i + '_flex';
   if (h.flex && appState[today][flexKey]) return h.flex.weight;
   return h.weight;
 }
 
+/* habitWeightById — same as habitWeight but looks up by habit ID */
+function habitWeightById(type, hid) {
+  const idx = HABITS[type].habits.findIndex(h => h.id === hid);
+  if (idx === -1) return 0;
+  return habitWeight(type, idx);
+}
+
+/* isDoneById — is a habit (by ID) logged today */
+function isDoneById(type, hid) {
+  const idx = HABITS[type].habits.findIndex(h => h.id === hid);
+  if (idx === -1) return false;
+  return !!appState[today][type + '_' + idx];
+}
+
 function catMaxPts(type) {
-  return HABITS[type].habits.reduce((s, h, i) => {
-    // For multi-session habits, max possible = highest tier weight
-    if (h.flex?.multiSession) {
-      const maxTierWeight = h.flex.tiers[h.flex.tiers.length - 1].weight;
-      return s + maxTierWeight;
+  return getSelectedHabits(type).reduce((s, h) => {
+    const i = HABITS[type].habits.indexOf(h);
+    if (h.flex && h.flex.multiSession) {
+      return s + h.flex.tiers[h.flex.tiers.length - 1].weight;
     }
     return s + habitWeight(type, i);
   }, 0);
 }
 
 function catRawPts(type) {
-  return HABITS[type].habits.reduce((s, h, i) =>
-    s + (appState[today][`${type}_${i}`] ? habitWeight(type, i) : 0), 0);
+  return getSelectedHabits(type).reduce((s, h) => {
+    const i = HABITS[type].habits.indexOf(h);
+    return s + (appState[today][type + '_' + i] ? habitWeight(type, i) : 0);
+  }, 0);
 }
 
-/**
- * foundationDone — gate logic per category:
- *   'any'            — ANY ONE foundational done (dopamine, oxytocin, endorphin)
- *   'sleepOrPrayer'  — Sleep (index 1) OR Prayer (index 0) done (serotonin)
- *   'all'            — ALL foundationals done (fallback)
- *
- * Endorphin special case: Exercise (index 0) and Active Day (index 1)
- * are mutually exclusive. Active Day is locked when Exercise is done.
- * Either one satisfies the gate.
- */
 function foundationDone(type) {
-  const gate = HABITS[type].gate || 'all';
-  const fdns = HABITS[type].habits
-    .map((h, i) => ({ h, i }))
-    .filter(({ h }) => h.foundational);
-
-  if (type === 'endorphin') {
-    // Exercise OR Active Day — either satisfies gate
-    const exDone   = !!appState[today]['endorphin_0'];
-    const neatDone = !!appState[today]['endorphin_1'];
-    return exDone || neatDone;
-  }
-
-  if (gate === 'sleepOrPrayer') {
-    // Serotonin: Prayer (idx 0) OR Sleep (idx 1) must be done
-    const prayerDone = !!appState[today]['serotonin_0'];
-    const sleepDone  = !!appState[today]['serotonin_1'];
-    return prayerDone || sleepDone;
-  }
-
-  if (gate === 'any') {
-    return fdns.some(({ i }) => !!appState[today][`${type}_${i}`]);
-  }
-
-  // 'all': every foundational done
-  return fdns.every(({ i }) => !!appState[today][`${type}_${i}`]);
+  // A category gate is satisfied when ANY selected foundational habit is done
+  const selFdns = getSelectedFoundationals(type);
+  return selFdns.some(h => {
+    const i = HABITS[type].habits.indexOf(h);
+    return !!appState[today][type + '_' + i];
+  });
 }
 
-/**
- * isHabitLocked — returns true when a habit should be non-interactive.
- * Active Day (endorphin index 1) locks when Exercise (index 0) is done.
- */
 function isHabitLocked(type, i) {
-  if (type === 'endorphin' && i === 1) {
-    return !!appState[today]['endorphin_0'];
-  }
-  return false;
+  // No mutual exclusion anymore — Exercise and Active Day are independent
+  // A habit is UI-locked only if it is not in the user's selected set
+  const h = HABITS[type].habits[i];
+  if (!h) return false;
+  return !isSelected(type, h.id);
 }
 
 function catEffectivePct(type) {
   const max = catMaxPts(type);
   if (max === 0) return 0;
   const rawPct = (catRawPts(type) / max) * 100;
-  const fdns = HABITS[type].habits.filter(h => h.foundational);
+  // Foundation rate uses only the user's selected foundational habits
+  const selFdns = getSelectedFoundationals(type);
   let fdnMax = 0, fdnEarned = 0;
-  fdns.forEach(h => {
+  selFdns.forEach(h => {
     const ri = HABITS[type].habits.indexOf(h);
-    if (h.flex && h.flex.multiSession) {
-      fdnMax += h.flex.tiers[h.flex.tiers.length - 1].weight;
-    } else {
-      fdnMax += h.weight;
-    }
+    fdnMax += (h.flex && h.flex.multiSession) ? h.flex.tiers[h.flex.tiers.length - 1].weight : h.weight;
     fdnEarned += appState[today][type + '_' + ri] ? habitWeight(type, ri) : 0;
   });
   const foundationRate = fdnMax > 0 ? Math.min(fdnEarned / fdnMax, 1) : 0;
-  const multiplier     = 0.5 + 0.5 * foundationRate;
-  return Math.min(rawPct * multiplier, 100);
+  return Math.min(rawPct * (0.5 + 0.5 * foundationRate), 100);
 }
 
 function catRawPct(type) {
@@ -1758,166 +1950,180 @@ function catRawPct(type) {
 
 function heroScore() {
   const types = Object.keys(HABITS);
-  // Square-root dampening: rewards balance across categories naturally
-  // without subtracting points. A category at 0% costs more than
-  // raising a strong category further.
   const avg = types.reduce((s, t) => s + Math.sqrt(catEffectivePct(t) / 100), 0) / types.length;
   return avg * avg * 100;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   RENDER: HABIT LIST
-   Handles both classic flex (boolean) and multiSession flex (tier)
+   RENDER: HABIT LIST — shows selected habits + discoverable unselected
    ═══════════════════════════════════════════════════════════ */
 function renderSection(type) {
-  const list = document.getElementById(`list-${type}`);
+  const list = document.getElementById('list-' + type);
   list.innerHTML = '';
+  const cfg = getConfig();
+  const selected = cfg[type].selected;
 
   HABITS[type].habits.forEach((h, i) => {
-    const key      = `${type}_${i}`;
-    const flexKey  = `${type}_${i}_flex`;
-    const tierKey  = `${type}_${i}_tier`;
+    const key      = type + '_' + i;
+    const tierKey  = type + '_' + i + '_tier';
+    const isInSet  = selected.includes(h.id);
     const isDone   = !!appState[today][key];
-    const isMulti  = !!(h.flex?.multiSession);
+    const isMulti  = !!(h.flex && h.flex.multiSession);
     const tierIdx  = isMulti ? (appState[today][tierKey] || 0) : 0;
-    const isFlex   = isMulti ? tierIdx > 0 : (h.flex && !!appState[today][flexKey]);
+    const isFlex   = isMulti ? tierIdx > 0 : false;
     const w        = habitWeight(type, i);
-    const typeMap  = { foundational: 'Foundational', secondary: 'Secondary', bonus: 'Bonus' };
+    const typeMap  = { foundational: 'Core', secondary: 'Secondary', bonus: 'Bonus' };
     const stars    = '⭐'.repeat(Math.max(1, Math.min(3, w)));
 
-    // Active Day (endorphin index 1) locks when Exercise (index 0) is done
-    const locked = isHabitLocked(type, i);
-
-    // Derive display label — swap when flex is active
     let displayLabel = h.label;
-    if (isMulti && tierIdx > 0) displayLabel = h.flex.tiers[tierIdx - 1].label;
-    else if (!isMulti && isFlex && h.flex?.label) displayLabel = h.flex.label;
-    if (locked) displayLabel = h.label + ' — exercise logged today ✓';
-
-    // Multi-session flex button label
-    let flexBtnLabel = '';
-    if (isMulti) {
-      const nextTier = tierIdx < h.flex.tiers.length ? h.flex.tiers[tierIdx] : null;
-      if (tierIdx === 0) flexBtnLabel = `Sessions: —`;
-      else flexBtnLabel = `${h.flex.tiers[tierIdx - 1].sessions}+ sessions`;
+    if (isMulti && tierIdx > 0 && h.flex.tiers[tierIdx - 1]) {
+      displayLabel = h.flex.tiers[tierIdx - 1].label;
     }
 
+    /* ── Unselected habit — show as discoverable ── */
+    if (!isInSet) {
+      const discRow = document.createElement('div');
+      discRow.className = 'habit-row habit-unselected';
+      discRow.style.setProperty('--ac', 'var(--' + type + ')');
+      const canAdd = canAddHabit(type, h.id);
+      discRow.innerHTML =
+        '<div class="habit-body" style="opacity:0.45">' +
+          '<span class="habit-label">' + h.label + '</span>' +
+          '<div class="habit-meta">' +
+            '<span class="habit-type-tag">' + typeMap[h.type] + '</span>' +
+            '<span class="habit-unsel-badge">Not in your set</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="habit-right" style="gap:5px;">' +
+          '<button class="habit-info-btn" title="Learn about this habit" aria-label="Info: ' + h.label + '">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' +
+          '</button>' +
+          (canAdd ? '<button class="habit-add-btn" data-type="' + type + '" data-id="' + h.id + '">+ Add</button>' : '') +
+        '</div>';
+
+      const infoBtn = discRow.querySelector('.habit-info-btn');
+      if (infoBtn) infoBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const existing = discRow.querySelector('.habit-inline-info');
+        if (existing) { existing.classList.toggle('show'); return; }
+        const div = document.createElement('div');
+        div.className = 'habit-inline-info show';
+        div.innerHTML = '<span>' + (h.info && h.info.body ? h.info.body : '') + '</span>';
+        discRow.querySelector('.habit-body').appendChild(div);
+      });
+      const addBtn = discRow.querySelector('.habit-add-btn');
+      if (addBtn) addBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        addHabitToSet(type, h.id);
+      });
+      list.appendChild(discRow);
+      return;
+    }
+
+    /* ── Selected habit — fully interactive ── */
     const row = document.createElement('div');
     row.className = [
       'habit-row',
       h.foundational ? 'foundational' : '',
       isDone ? 'done' : '',
-      isFlex ? 'flex-active' : '',
-      locked ? 'habit-locked-row' : ''
+      isFlex ? 'flex-active' : ''
     ].filter(Boolean).join(' ');
-    row.style.setProperty('--ac', `var(--${type})`);
-    if (locked) {
-      row.style.opacity = '0.45';
-      row.style.pointerEvents = 'none';
-    }
-    /* UX-05: Keyboard & screen reader accessibility */
+    row.style.setProperty('--ac', 'var(--' + type + ')');
     row.setAttribute('role', 'checkbox');
     row.setAttribute('aria-checked', isDone ? 'true' : 'false');
     row.setAttribute('aria-label', displayLabel);
-    row.setAttribute('tabindex', locked ? '-1' : '0');
-    row.addEventListener('keydown', (e) => {
-      if (locked) return;
-      if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        toggleHabit(key, type, i);
-      }
+    row.setAttribute('tabindex', '0');
+    row.addEventListener('keydown', function(e) {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleHabit(key, type, i); }
     });
-    // Build flex control HTML
+
     let flexCtrlHTML = '';
     if (isMulti) {
-      // Session tier cycler: shows current tier and arrows to cycle
-      const tierLabel = tierIdx === 0
-        ? 'Set sessions'
-        : `${h.flex.tiers[tierIdx-1].sessions}+ sessions`;
-      flexCtrlHTML = `
-        <div class="session-flex-ctrl">
-          <button class="session-tier-btn" data-dir="-1" title="Fewer sessions">‹</button>
-          <span class="session-tier-label">${tierLabel}</span>
-          <button class="session-tier-btn" data-dir="1" title="More sessions">›</button>
-        </div>`;
+      const tierLabel = tierIdx === 0 ? 'Set sessions' : h.flex.tiers[tierIdx-1].sessions + '+ sessions';
+      flexCtrlHTML = '<div class="session-flex-ctrl">' +
+        '<button class="session-tier-btn" data-dir="-1" title="Fewer sessions">‹</button>' +
+        '<span class="session-tier-label">' + tierLabel + '</span>' +
+        '<button class="session-tier-btn" data-dir="1" title="More sessions">›</button>' +
+        '</div>';
     } else if (h.flex) {
-      flexCtrlHTML = `<button class="flex-toggle-btn ${isFlex ? 'active' : ''}">Flex ${isFlex ? 'ON' : 'OFF'}</button>`;
+      const isFl = h.flex && !!appState[today][type + '_' + i + '_flex'];
+      flexCtrlHTML = '<button class="flex-toggle-btn ' + (isFl ? 'active' : '') + '">Flex ' + (isFl ? 'ON' : 'OFF') + '</button>';
     }
 
-    row.innerHTML = `
-      <div class="habit-check">
-        <svg width="11" height="9" viewBox="0 0 12 10" fill="none">
-          <path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="habit-body">
-        <span class="habit-label">${displayLabel}</span>
-        <div class="habit-meta">
-          <span class="habit-type-tag">${typeMap[h.type]}</span>
-          ${isFlex ? `<span class="flex-tag show">${isMulti ? 'SESSIONS' : 'FLEX'}</span>` : ''}
-        </div>
-      </div>
-      <div class="habit-right">
-        <div style="display:flex;align-items:center;gap:5px;">
-          <div class="weight-badge">${stars} ${w}</div>
-          <button class="habit-info-btn" title="What counts as this habit?" aria-label="Info: ${h.label}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
-            </svg>
-          </button>
-        </div>
-        ${flexCtrlHTML}
-      </div>`;
+    const canRem = canRemoveHabit(type, h.id);
+    const lockInfo = isLockActive() ? ' (unlocks in ' + daysUntilUnlock() + 'd)' : '';
+    const remBtn = '<button class="habit-rem-btn" data-type="' + type + '" data-id="' + h.id + '" title="' + (canRem ? 'Remove from your set' : 'Locked' + lockInfo) + '" style="opacity:' + (canRem ? '0.6' : '0.25') + ';cursor:' + (canRem ? 'pointer' : 'default') + '">✕</button>';
 
-    // Tap to toggle done state
-    row.addEventListener('click', (e) => {
-      if (e.target.closest('.habit-info-btn') ||
-          e.target.closest('.flex-toggle-btn') ||
-          e.target.closest('.session-flex-ctrl')) return;
+    row.innerHTML =
+      '<div class="habit-check">' +
+        '<svg width="11" height="9" viewBox="0 0 12 10" fill="none">' +
+          '<path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg>' +
+      '</div>' +
+      '<div class="habit-body">' +
+        '<span class="habit-label">' + displayLabel + '</span>' +
+        '<div class="habit-meta">' +
+          '<span class="habit-type-tag">' + typeMap[h.type] + '</span>' +
+          (h.foundational ? '<span class="habit-core-tag" style="background:var(--' + type + ')22;color:var(--' + type + ')">Core</span>' : '') +
+          (isFlex ? '<span class="flex-tag show">' + (isMulti ? 'SESSIONS' : 'FLEX') + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="habit-right">' +
+        '<div style="display:flex;align-items:center;gap:5px;">' +
+          '<div class="weight-badge">' + stars + ' ' + w + '</div>' +
+          '<button class="habit-info-btn" title="What counts as this habit?" aria-label="Info: ' + h.label + '">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' +
+          '</button>' +
+          remBtn +
+        '</div>' +
+        flexCtrlHTML +
+      '</div>';
+
+    row.addEventListener('click', function(e) {
+      if (e.target.closest('.habit-info-btn') || e.target.closest('.flex-toggle-btn') ||
+          e.target.closest('.session-flex-ctrl') || e.target.closest('.habit-rem-btn')) return;
       toggleHabit(key, type, i);
     });
-    // Long-press → neuro tooltip
+
     let pressTimer;
-    row.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('.habit-info-btn') ||
-          e.target.closest('.flex-toggle-btn') ||
-          e.target.closest('.session-flex-ctrl')) return;
-      pressTimer = setTimeout(() => showTooltip(h.tooltip), 500);
+    row.addEventListener('pointerdown', function(e) {
+      if (e.target.closest('.habit-info-btn') || e.target.closest('.flex-toggle-btn') ||
+          e.target.closest('.session-flex-ctrl') || e.target.closest('.habit-rem-btn')) return;
+      pressTimer = setTimeout(function() { showTooltip(h.tooltip); }, 500);
     });
-    row.addEventListener('pointerup',    () => clearTimeout(pressTimer));
-    row.addEventListener('pointerleave', () => clearTimeout(pressTimer));
+    row.addEventListener('pointerup',    function() { clearTimeout(pressTimer); });
+    row.addEventListener('pointerleave', function() { clearTimeout(pressTimer); });
 
-    // Classic flex toggle
     const flexBtn = row.querySelector('.flex-toggle-btn');
-    if (flexBtn) {
-      flexBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleFlex(flexKey, type, i);
-      });
-    }
+    if (flexBtn) flexBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleFlex(type + '_' + i + '_flex', type, i);
+    });
 
-    // Multi-session tier cycler buttons
-    row.querySelectorAll('.session-tier-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    row.querySelectorAll('.session-tier-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
         e.stopPropagation();
-        const dir = parseInt(btn.dataset.dir);
-        cycleTier(tierKey, type, i, dir);
+        cycleTier(type + '_' + i + '_tier', type, i, parseInt(btn.dataset.dir));
       });
     });
 
-    // Info button — inline expand instead of modal
     const infoBtn = row.querySelector('.habit-info-btn');
-    infoBtn.addEventListener('click', (e) => {
+    if (infoBtn) infoBtn.addEventListener('click', function(e) {
       e.stopPropagation();
       const existing = row.querySelector('.habit-inline-info');
       if (existing) { existing.classList.toggle('show'); return; }
       const div = document.createElement('div');
       div.className = 'habit-inline-info show';
-      div.innerHTML = `<span>${h.info?.body || ''}</span>` +
-        (h.info?.examples?.length
-          ? `<div class="habit-inline-examples">${h.info.examples.map(ex => `<span>${ex}</span>`).join('')}</div>`
-          : '');
+      div.innerHTML = '<span>' + (h.info && h.info.body ? h.info.body : '') + '</span>' +
+        (h.info && h.info.examples && h.info.examples.length ?
+          '<div class="habit-inline-examples">' + h.info.examples.map(function(ex) { return '<span>' + ex + '</span>'; }).join('') + '</div>' : '');
       row.querySelector('.habit-body').appendChild(div);
+    });
+
+    const remBtn2 = row.querySelector('.habit-rem-btn');
+    if (remBtn2) remBtn2.addEventListener('click', function(e) {
+      e.stopPropagation();
+      removeHabitFromSet(type, h.id);
     });
 
     list.appendChild(row);
@@ -2061,37 +2267,15 @@ function updateCatUI(type) {
 /* ═══════════════════════════════════════════════════════════
    HEADER UPDATE
    ═══════════════════════════════════════════════════════════ */
-function updateHeader() {
-  // No score displayed — just update the brain phase chip in the header
-  const phase = brainPhase();
-  drawBrainSvg(document.getElementById('headerBrainSvg'), phase, 28);
-  const labels = ['Ready','Awakening','Warming up','Foundation active','Thriving'];
-  document.getElementById('headerBrainLabel').textContent = labels[phase];
-}
-
-/* ═══════════════════════════════════════════════════════════
-   BRAINVATAR — SVG brain character that changes by score
-   ═══════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════════
-   BRAIN PHASE SYSTEM
-   Phase driven by foundational completion rate (≥50% = Phase 3 Active).
-   Score exists internally but is NEVER shown to the user.
-   ═══════════════════════════════════════════════════════════ */
-
+/* ── Brain phase helpers ── */
 function countFoundationals() {
-  /* Returns { done, total } across all four categories */
   let done = 0, total = 0;
   Object.keys(HABITS).forEach(type => {
-    HABITS[type].habits.forEach((h, i) => {
-      if (!h.foundational) return;
-      total++;
-      if (type === 'endorphin') {
-        // Either Exercise (idx 0) or Active Day (idx 1) counts
-        if (!!appState[today]['endorphin_0'] || !!appState[today]['endorphin_1']) done++;
-      } else {
-        if (!!appState[today][type + '_' + i]) done++;
-      }
+    const selFdns = getSelectedFoundationals(type);
+    total += selFdns.length;
+    selFdns.forEach(h => {
+      const i = HABITS[type].habits.indexOf(h);
+      if (!!appState[today][type + '_' + i]) done++;
     });
   });
   return { done, total };
@@ -2099,94 +2283,17 @@ function countFoundationals() {
 
 function brainPhase() {
   const totalHabits = Object.values(appState[today] || {}).filter(v => v === true).length;
-  if (totalHabits === 0) return 0; // Phase 0 — Dormant
-
+  if (totalHabits === 0) return 0;
   const { done, total } = countFoundationals();
   const rate = total > 0 ? done / total : 0;
-
-  if (rate >= 0.75) return 4;      // Phase 4 — Thriving
-  if (rate >= 0.50) return 3;      // Phase 3 — Active (key threshold)
-  if (rate >= 0.25) return 2;      // Phase 2 — Warming
-  if (totalHabits > 0) return 1;   // Phase 1 — Stirring
-  return 0;
+  if (rate >= 0.75) return 4;
+  if (rate >= 0.50) return 3;
+  if (rate >= 0.25) return 2;
+  return 1;
 }
 
-/* drawBrainSvg — renders the 5-phase cartoon brain into any SVG element.
-   size param scales the viewBox-based brain to the element's actual size. */
-function drawBrainSvg(svgEl, phase, size) {
-  if (!svgEl) return;
-  const bodyCol = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82'][phase];
-  const eyeCol  = ['#2e2b24','#3d3a33','#7a3800','#7a3800','#085041'][phase];
-  const glowCol = ['transparent','transparent','rgba(200,113,42,0.18)','rgba(184,80,112,0.15)','rgba(74,158,130,0.22)'][phase];
-
-  /* Glow ellipse behind brain (phases 2-4) */
-  const glow = phase >= 2
-    ? `<ellipse cx="48" cy="54" rx="34" ry="26" fill="${glowCol}"/>`
-    : '';
-
-  /* Sparkles / sparks (phase 3 = small arcs, phase 4 = full sparkles) */
-  let deco = '';
-  if (phase === 3) {
-    deco = `<path d="M72 18 Q74 22 70 24" fill="none" stroke="${bodyCol}" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
-            <path d="M16 26 Q14 30 18 31" fill="none" stroke="${bodyCol}" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>`;
-  } else if (phase === 4) {
-    deco = `<circle cx="74" cy="17" r="2.5" fill="${bodyCol}" opacity=".85"/>
-            <circle cx="15" cy="25" r="2"   fill="${bodyCol}" opacity=".75"/>
-            <circle cx="52" cy="8"  r="1.8" fill="${bodyCol}" opacity=".7"/>
-            <path d="M76 34 L72 41 L75 41 L71 50 L78 41 L74 41 Z" fill="#c8712a" opacity=".85"/>`;
-  }
-
-  /* ZZZ for phase 0 */
-  const zzz = phase === 0
-    ? `<text x="60" y="26" font-size="9" fill="#504c45" font-family="sans-serif" opacity=".6">z</text>
-       <text x="66" y="18" font-size="11" fill="#504c45" font-family="sans-serif" opacity=".4">z</text>`
-    : '';
-
-  /* Eyes: phase 0 = closed curves, phase 1 = half-open, 2-4 = open circles */
-  let leftEye, rightEye;
-  if (phase === 0) {
-    leftEye  = `<path d="M30 51 Q32 54 34 51" fill="none" stroke="${eyeCol}" stroke-width="1.5" stroke-linecap="round"/>`;
-    rightEye = `<path d="M58 51 Q60 54 62 51" fill="none" stroke="${eyeCol}" stroke-width="1.5" stroke-linecap="round"/>`;
-  } else if (phase === 1) {
-    leftEye  = `<ellipse cx="32" cy="51" rx="2.5" ry="1.5" fill="${eyeCol}" opacity=".7"/>`;
-    rightEye = `<ellipse cx="60" cy="51" rx="2.5" ry="1.5" fill="${eyeCol}" opacity=".7"/>`;
-  } else {
-    leftEye  = `<ellipse cx="32" cy="51" rx="3" ry="3.5" fill="${eyeCol}"/>`;
-    rightEye = `<ellipse cx="60" cy="51" rx="3" ry="3.5" fill="${eyeCol}"/>`;
-  }
-
-  /* Shine on eye for phase 4 */
-  const shine = phase === 4
-    ? `<circle cx="33.5" cy="49.5" r="1" fill="white" opacity=".7"/>
-       <circle cx="61.5" cy="49.5" r="1" fill="white" opacity=".7"/>`
-    : '';
-
-  /* Mouth: flat=0, neutral=1, smile=2+, big smile=4 */
-  let mouth;
-  if (phase === 0) {
-    mouth = `<path d="M38 62 Q48 60 58 62" fill="none" stroke="${eyeCol}" stroke-width="1.2" stroke-linecap="round" opacity=".4"/>`;
-  } else if (phase === 1) {
-    mouth = `<path d="M40 62 Q48 63 56 62" fill="none" stroke="${eyeCol}" stroke-width="1.3" stroke-linecap="round" opacity=".55"/>`;
-  } else if (phase <= 3) {
-    mouth = `<path d="M40 61 Q48 66 56 61" fill="none" stroke="${eyeCol}" stroke-width="1.5" stroke-linecap="round"/>`;
-  } else {
-    mouth = `<path d="M39 60 Q48 68 57 60" fill="none" stroke="${eyeCol}" stroke-width="1.8" stroke-linecap="round"/>`;
-  }
-
-  /* Brain highlight on higher phases */
-  const highlight = phase >= 3
-    ? `<ellipse cx="38" cy="33" rx="7" ry="5" fill="white" opacity=".1"/>`
-    : '';
-
-  svgEl.innerHTML =
-    glow + deco + zzz +
-    `<path d="M48 22 C34 22 22 31 22 45 C22 53 26 59 32 63 L32 72 L64 72 L64 63 C70 59 74 53 74 45 C74 31 62 22 48 22 Z" fill="${bodyCol}"/>` +
-    `<path d="M32 63 L64 63 L64 69 Q48 75 32 69 Z" fill="${bodyCol}" opacity=".7"/>` +
-    `<path d="M29 33 Q25 41 27 51" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity=".18"/>` +
-    `<path d="M53 23 Q59 29 57 37" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity=".15"/>` +
-    highlight + leftEye + rightEye + shine + mouth;
-}
-
+const BRAIN_PHASE_COLS   = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82'];
+const BRAIN_PHASE_EYECOL = ['#2e2b24','#3d3a33','#7a3800','#7a3800','#085041'];
 const BRAIN_LABELS = ['Ready','Awakening','Warming up','Foundation active','Thriving'];
 const BRAIN_SUBS   = [
   'Log your first habit to begin',
@@ -2196,19 +2303,64 @@ const BRAIN_SUBS   = [
   'All systems firing — outstanding day'
 ];
 
+function drawBrainSvg(svgEl, phase) {
+  if (!svgEl) return;
+  const c  = BRAIN_PHASE_COLS[phase];
+  const ey = BRAIN_PHASE_EYECOL[phase];
+  const glow   = phase >= 2 ? '<ellipse cx="48" cy="54" rx="34" ry="26" fill="' + c + '28"/>' : '';
+  let deco = '';
+  if (phase === 3) deco = '<path d="M72 18 Q74 22 70 24" fill="none" stroke="' + c + '" stroke-width="1.5" stroke-linecap="round" opacity=".7"/><path d="M16 26 Q14 30 18 31" fill="none" stroke="' + c + '" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>';
+  if (phase === 4) deco = '<circle cx="74" cy="17" r="2.5" fill="' + c + '" opacity=".85"/><circle cx="15" cy="25" r="2" fill="' + c + '" opacity=".75"/><circle cx="52" cy="8" r="1.8" fill="' + c + '" opacity=".7"/><path d="M76 34 L72 41 L75 41 L71 50 L78 41 L74 41 Z" fill="#c8712a" opacity=".85"/>';
+  const zzz = phase === 0 ? '<text x="60" y="26" font-size="9" fill="#504c45" font-family="sans-serif" opacity=".6">z</text><text x="66" y="18" font-size="11" fill="#504c45" font-family="sans-serif" opacity=".4">z</text>' : '';
+  let lEye, rEye;
+  if (phase === 0) {
+    lEye = '<path d="M30 51 Q32 54 34 51" fill="none" stroke="' + ey + '" stroke-width="1.5" stroke-linecap="round"/>';
+    rEye = '<path d="M58 51 Q60 54 62 51" fill="none" stroke="' + ey + '" stroke-width="1.5" stroke-linecap="round"/>';
+  } else if (phase === 1) {
+    lEye = '<ellipse cx="32" cy="51" rx="2.5" ry="1.5" fill="' + ey + '" opacity=".7"/>';
+    rEye = '<ellipse cx="60" cy="51" rx="2.5" ry="1.5" fill="' + ey + '" opacity=".7"/>';
+  } else {
+    lEye = '<ellipse cx="32" cy="51" rx="3" ry="3.5" fill="' + ey + '"/>';
+    rEye = '<ellipse cx="60" cy="51" rx="3" ry="3.5" fill="' + ey + '"/>';
+  }
+  const shine = phase === 4 ? '<circle cx="33.5" cy="49.5" r="1" fill="white" opacity=".7"/><circle cx="61.5" cy="49.5" r="1" fill="white" opacity=".7"/>' : '';
+  let mouth;
+  if (phase === 0)      mouth = '<path d="M38 62 Q48 60 58 62" fill="none" stroke="' + ey + '" stroke-width="1.2" stroke-linecap="round" opacity=".4"/>';
+  else if (phase === 1) mouth = '<path d="M40 62 Q48 63 56 62" fill="none" stroke="' + ey + '" stroke-width="1.3" stroke-linecap="round" opacity=".55"/>';
+  else if (phase <= 3)  mouth = '<path d="M40 61 Q48 66 56 61" fill="none" stroke="' + ey + '" stroke-width="1.5" stroke-linecap="round"/>';
+  else                  mouth = '<path d="M39 60 Q48 68 57 60" fill="none" stroke="' + ey + '" stroke-width="1.8" stroke-linecap="round"/>';
+  const highlight = phase >= 3 ? '<ellipse cx="38" cy="33" rx="7" ry="5" fill="white" opacity=".1"/>' : '';
+  svgEl.innerHTML = glow + deco + zzz
+    + '<path d="M48 22 C34 22 22 31 22 45 C22 53 26 59 32 63 L32 72 L64 72 L64 63 C70 59 74 53 74 45 C74 31 62 22 48 22 Z" fill="' + c + '"/>'
+    + '<path d="M32 63 L64 63 L64 69 Q48 75 32 69 Z" fill="' + c + '" opacity=".7"/>'
+    + '<path d="M29 33 Q25 41 27 51" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity=".18"/>'
+    + '<path d="M53 23 Q59 29 57 37" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity=".15"/>'
+    + highlight + lEye + rEye + shine + mouth;
+}
+
+function updateHeader() {
+  const phase = brainPhase();
+  drawBrainSvg(document.getElementById('headerBrainSvg'), phase);
+  document.getElementById('headerBrainLabel').textContent = BRAIN_LABELS[phase];
+}
+
 /* ═══════════════════════════════════════════════════════════
-   SCIENCE FACTS & QUOTES — rotating daily feed content
+   BRAINVATAR — SVG brain character that changes by score
+   ═══════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   NEUROCOACH FEED DATA
    ═══════════════════════════════════════════════════════════ */
 const SCIENCE_FACTS = [
-  { body: "Deep work creates a dopamine plateau — sustained focus trains your brain for long-term ambition rather than short-term distraction. This is neurologically different from the dopamine spike of checking your phone.", attr: "Berke & Gershman, dopamine research" },
-  { body: "95% of serotonin is produced in the gut, not the brain. Every fibre-rich meal is a direct act of mood regulation — your gut microbiome is always listening.", attr: "Gut-brain axis research" },
-  { body: "It takes roughly 66 days to form a habit — not 21. But the good news: missing one day has no meaningful impact on long-term habit formation.", attr: "Lally et al., European Journal of Social Psychology, 2010" },
-  { body: "Morning sunlight within 60 minutes of waking sets your circadian clock. It triggers a timed dopamine and cortisol release that determines how alert you feel that day — and how sleepy you'll feel 16 hours later.", attr: "Circadian biology research" },
-  { body: "Resistance training has an effect size of 0.66 for reducing depression — larger than cardio alone. Muscle is an endocrine organ that produces neuroprotective hormones.", attr: "Gordon et al., JAMA Psychiatry, 2018" },
+  { body: "Deep work creates a dopamine plateau — sustained focus trains your brain for long-term ambition, not short-term distraction.", attr: "Berke & Gershman, dopamine research" },
+  { body: "95% of serotonin is produced in the gut. Every fibre-rich meal is a direct act of mood regulation.", attr: "Gut-brain axis research" },
+  { body: "It takes roughly 66 days to form a habit — not 21. Missing one day has no meaningful impact on long-term habit formation.", attr: "Lally et al., European Journal of Social Psychology, 2010" },
+  { body: "Morning sunlight within 60 minutes of waking sets your circadian clock — shaping alertness now and sleep quality 16 hours later.", attr: "Circadian biology research" },
+  { body: "Resistance training has an effect size of 0.66 for reducing depression — larger than cardio alone. Muscle is an endocrine organ.", attr: "Gordon et al., JAMA Psychiatry, 2018" },
   { body: "Social connection predicts longevity as powerfully as not smoking. Loneliness carries a mortality risk comparable to obesity.", attr: "Holt-Lunstad, World Psychiatry, 2024" },
-  { body: "A 10–20 minute nap resets alertness and improves working memory. The Prophet's Qailullah aligns precisely with the natural circadian dip at 1–3pm — ancient wisdom confirmed by modern sleep science.", attr: "NASA nap research; circadian biology" },
-  { body: "Gratitude practice changes the baseline firing pattern of the prefrontal cortex — physically rewiring your brain toward a more positive default state.", attr: "Positive psychology neuroscience research" },
-  { body: "Walking 7,000–8,000 steps per day captures most of the all-cause mortality benefit of daily movement — even without a dedicated exercise session.", attr: "Paluch et al., JAMA Network Open, 2022" },
+  { body: "A 10 to 20 minute nap resets alertness and improves working memory — aligning with the natural circadian dip at 1 to 3pm.", attr: "NASA nap research; circadian biology" },
+  { body: "Gratitude practice changes the baseline firing pattern of the prefrontal cortex, physically rewiring toward a more positive default state.", attr: "Positive psychology neuroscience research" },
+  { body: "Walking 7,000 to 8,000 steps per day captures most of the all-cause mortality benefit of daily movement — even without a dedicated workout.", attr: "Paluch et al., JAMA Network Open, 2022" },
   { body: "Shared meals predict social network strength more strongly than almost any other daily behaviour. Food plus presence equals oxytocin.", attr: "Dunbar et al., 2017" },
 ];
 
@@ -2217,14 +2369,14 @@ const QUOTES = [
   { body: "The impediment to action advances action. What stands in the way becomes the way.", attr: "Marcus Aurelius" },
   { body: "We are what we repeatedly do. Excellence is not an act but a habit.", attr: "Aristotle" },
   { body: "Between stimulus and response there is a space. In that space is our power to choose our response.", attr: "Viktor Frankl" },
-  { body: "Small habits don't add up. They compound.", attr: "James Clear" },
+  { body: "Small habits do not add up. They compound.", attr: "James Clear" },
   { body: "Waste no more time arguing about what a good person should be. Be one.", attr: "Marcus Aurelius" },
   { body: "The two most powerful warriors are patience and time.", attr: "Leo Tolstoy" },
-  { body: "You have power over your mind — not outside events. Realise this, and you will find strength.", attr: "Marcus Aurelius" },
+  { body: "You have power over your mind, not outside events. Realise this, and you will find strength.", attr: "Marcus Aurelius" },
 ];
 
 /* ═══════════════════════════════════════════════════════════
-   RECOVERY BONUS — shown if user missed 2+ days
+   RECOVERY BONUS
    ═══════════════════════════════════════════════════════════ */
 const RBK = 'nh_recovery_seen';
 
@@ -2240,12 +2392,12 @@ function checkRecoveryBonus() {
   const lastActive = pastDays[pastDays.length - 1];
   const daysDiff = Math.round((new Date(today) - new Date(lastActive)) / 86400000);
   if (daysDiff >= 2) {
-    const msgs = [
-      `You were away for ${daysDiff} days. Every comeback is a data point, not a failure — your brain's neuroplasticity resets with your next action.`,
-      `${daysDiff} days off. Returning is the hard part — you've already done it. Research shows re-engagement restores habit circuits within 3 days.`,
-      `Gap of ${daysDiff} days. No shame. The prefrontal cortex doesn't punish pauses — it rewards re-activation. Start one habit and the system wakes up.`,
-    ];
     const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    const msgs = [
+      'You were away for ' + daysDiff + ' days. Every comeback is a data point, not a failure.',
+      '' + daysDiff + ' days off. Returning is the hard part — you have already done it.',
+      'Gap of ' + daysDiff + ' days. The prefrontal cortex rewards re-activation. Start one habit and the system wakes up.',
+    ];
     document.getElementById('recoveryBonusMsg').textContent = msgs[doy % msgs.length];
     banner.classList.add('show');
     sv(RBK, { date: today });
@@ -2257,163 +2409,155 @@ function checkRecoveryBonus() {
 /* ═══════════════════════════════════════════════════════════
    NEUROCOACH FEED — 5 card types, language-based, no scores
    ═══════════════════════════════════════════════════════════ */
-
 function buildCoachFeed() {
   const feed = document.getElementById('coachFeed');
   if (!feed) return;
   feed.innerHTML = '';
-
   const { done: fdnDone, total: fdnTotal } = countFoundationals();
   const fdnRate = fdnTotal > 0 ? fdnDone / fdnTotal : 0;
   const totalLogged = Object.values(appState[today] || {}).filter(v => v === true).length;
   const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-
-  /* Find which categories have their gate satisfied */
-  const gatesDone = Object.keys(HABITS).filter(t => foundationDone(t));
-  const gatesQuiet = Object.keys(HABITS).filter(t => !foundationDone(t));
   const catNames = { dopamine: 'Dopamine', serotonin: 'Serotonin', oxytocin: 'Oxytocin', endorphin: 'Endorphin' };
-  const catColors = { dopamine: 'var(--dopamine)', serotonin: 'var(--serotonin)', oxytocin: 'var(--oxytocin)', endorphin: 'var(--endorphin)' };
-
+  const gatesDone  = Object.keys(HABITS).filter(t => foundationDone(t));
+  const gatesQuiet = Object.keys(HABITS).filter(t => !foundationDone(t));
   const cards = [];
 
-  /* ── Card 1: Today's Reflection (always present, always affirming) ── */
+  // Card 1: Today's reflection — personalised to user's selected habits
   let reflectBody;
+  const doneHabitNames = [];
+  Object.keys(HABITS).forEach(function(type) {
+    getSelectedHabits(type).forEach(function(h) {
+      const i = HABITS[type].habits.indexOf(h);
+      if (appState[today][type + '_' + i]) doneHabitNames.push(h.label);
+    });
+  });
   if (totalLogged === 0) {
-    reflectBody = 'Your brain is ready. Start with whichever habit feels most accessible right now — there is no wrong first habit.';
+    reflectBody = 'Your brain is ready. Start with whichever habit from your set feels most accessible right now.';
   } else if (fdnRate >= 0.75) {
-    reflectBody = `Your foundation is fully active across all four systems today. Every habit you've completed has a direct neurochemical effect — your brain is well supported.`;
+    reflectBody = 'Your foundation is fully active across all four systems today. Every habit you have logged has a direct neurochemical effect on your brain.';
   } else if (fdnRate >= 0.5) {
-    const activeNames = gatesDone.map(t => catNames[t]).join(' and ');
-    reflectBody = `${activeNames} ${gatesDone.length > 1 ? 'are' : 'is'} active today. Your core foundation is set — everything else you add deepens that signal. Well done.`;
+    const names = gatesDone.map(function(t) { return catNames[t]; }).join(' and ');
+    reflectBody = names + (gatesDone.length > 1 ? ' are' : ' is') + ' active today. Your core foundation is set — everything else you add deepens that signal.';
   } else if (totalLogged >= 1) {
-    const activeNames = gatesDone.length > 0 ? gatesDone.map(t => catNames[t]).join(' and ') + ' are active. ' : '';
-    reflectBody = `${activeNames}Every habit you log today activates a neurochemical pathway. Your brain is already responding — keep going at whatever pace feels right.`;
+    const firstName = doneHabitNames.length > 0 ? doneHabitNames[0] : '';
+    const names = gatesDone.length > 0 ? gatesDone.map(function(t) { return catNames[t]; }).join(' and ') + ' active. ' : '';
+    reflectBody = names + 'Every habit you log activates a neurochemical pathway. ' + (firstName ? firstName + ' is already working on your brain.' : 'Keep going.');
   } else {
     reflectBody = 'One habit logged is one pathway activated. That is how all good days begin.';
   }
   cards.push({ type: 'reflect', eye: 'Today', body: reflectBody });
 
-  /* ── Card 2: Gentle Nudge (only if relevant, always optional) ── */
+  // Card 2: Gentle nudge — references user's actual selected core habit for that category
   if (gatesQuiet.length > 0 && totalLogged > 0) {
-    const quietCat = gatesQuiet[0];
+    const qCat = gatesQuiet[0];
+    const qFdns = getSelectedFoundationals(qCat);
+    const qHabitName = qFdns.length > 0 ? qFdns[0].label : catNames[qCat] + ' core habit';
     const nudgeMap = {
-      dopamine:  'Even 30 minutes of focused work — no phone, one task — activates your motivation pathway for the whole day.',
-      serotonin: 'A moment of prayer or a small step toward better sleep tonight would activate your mood regulation system.',
-      oxytocin:  'Even a two-minute voice message to someone you care about would activate your social bonding pathway right now.',
-      endorphin: 'A short walk — even 10 minutes — starts your body's natural stress-relief system. No gym required.'
+      dopamine:  'Even starting your first session activates your motivation pathway for the whole day.',
+      serotonin: 'Even a small step toward this tonight will activate your mood regulation system.',
+      oxytocin:  'Even a short moment of connection activates your social bonding pathway.',
+      endorphin: 'Even 10 minutes of movement starts your natural stress-relief system.'
     };
-    cards.push({ type: 'nudge', eye: 'One thing to consider', body: `Your ${catNames[quietCat]} system is quiet today. ${nudgeMap[quietCat]}` });
+    cards.push({ type: 'nudge', eye: 'One thing to consider', body: qHabitName + ' is your ' + catNames[qCat] + ' core habit and it is still quiet today. ' + nudgeMap[qCat] });
   }
 
-  /* ── Card 3: Science Fact (rotates daily, tied to a relevant habit) ── */
+  // Card 3: Science fact
   const factIdx = (doy + Math.floor(totalLogged / 2)) % SCIENCE_FACTS.length;
   const fact = SCIENCE_FACTS[factIdx];
   cards.push({ type: 'science', eye: 'Neuroscience', body: fact.body, attr: fact.attr });
 
-  /* ── Card 4: Weekly Pattern (only after 3+ days of data) ── */
+  // Card 4: Weekly pattern (after 3+ days)
   const weekKeys = Object.keys(weekData).filter(d => d <= today).sort().slice(-7);
-  const coreDaysThisWeek = weekKeys.filter(d => {
-    if (d === today) return fdnRate >= 0.5;
-    return (weekData[d] || 0) > 0; // any logged day counts as a pattern day
-  }).length;
   if (weekKeys.length >= 3) {
+    const activeDays = weekKeys.filter(d => (weekData[d] || 0) > 0).length;
+    const todayActive = totalLogged > 0 ? 1 : 0;
+    const total = Math.min(activeDays + todayActive, weekKeys.length);
     let weekBody;
-    if (coreDaysThisWeek >= 5) {
-      weekBody = `${coreDaysThisWeek} active days this week. You are building the kind of consistency that neurologically automates these habits — this is what identity change looks like.`;
-    } else if (coreDaysThisWeek >= 3) {
-      weekBody = `${coreDaysThisWeek} active days this week. Patterns compound — each day you show up makes the next one meaningfully easier for your brain.`;
-    } else if (coreDaysThisWeek >= 1) {
-      weekBody = `${coreDaysThisWeek} active ${coreDaysThisWeek === 1 ? 'day' : 'days'} this week. Every streak starts with a single day. You have started.`;
-    } else {
-      weekBody = 'A new week is a clean slate. One habit today begins a pattern your brain will want to continue.';
-    }
+    if (total >= 5)      weekBody = total + ' active days this week. You are building the kind of consistency that neurologically automates these habits.';
+    else if (total >= 3) weekBody = total + ' active days this week. Patterns compound — each day you show up makes the next one easier.';
+    else if (total >= 1) weekBody = total + ' active ' + (total === 1 ? 'day' : 'days') + ' this week. Every streak starts with a single day. You have started.';
+    else                 weekBody = 'A new week is a clean slate. One habit today begins a pattern your brain will want to continue.';
     cards.push({ type: 'week', eye: 'This week', body: weekBody });
   }
 
-  /* ── Card 5: Quote (rotates daily) ── */
+  // Card 5: Quote
   const quoteIdx = (doy + totalLogged) % QUOTES.length;
   const quote = QUOTES[quoteIdx];
   cards.push({ type: 'quote', eye: "Today's thought", body: quote.body, attr: quote.attr });
 
-  /* ── Render all cards ── */
-  cards.forEach(card => {
+  // Render
+  cards.forEach(function(card) {
     const el = document.createElement('div');
     el.className = 'coach-feed-card card-' + card.type;
-    el.innerHTML =
-      '<div class="coach-feed-eyebrow">' + card.eye + '</div>' +
-      '<div class="coach-feed-body">' + card.body + '</div>' +
-      (card.attr ? '<div class="coach-feed-attr">— ' + card.attr + '</div>' : '');
+    el.innerHTML = '<div class="coach-feed-eyebrow">' + card.eye + '</div>'
+      + '<div class="coach-feed-body">' + card.body + '</div>'
+      + (card.attr ? '<div class="coach-feed-attr">— ' + card.attr + '</div>' : '');
     feed.appendChild(el);
   });
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CORE PIPS — 4 dots, one per category, filled when gate done
-   ═══════════════════════════════════════════════════════════ */
+/* Core pips */
 function renderCorePips() {
   const row = document.getElementById('corePipsRow');
   if (!row) return;
   row.innerHTML = '';
-  const catColors = { dopamine: '#c8712a', serotonin: '#4a9e82', oxytocin: '#b85070', endorphin: '#5a82c0' };
-  Object.keys(HABITS).forEach(type => {
+  const cols = { dopamine:'#c8712a', serotonin:'#4a9e82', oxytocin:'#b85070', endorphin:'#5a82c0' };
+  Object.keys(HABITS).forEach(function(type) {
     const ok = foundationDone(type);
     const dot = document.createElement('div');
     dot.className = 'core-pip-dot';
-    dot.style.background = ok ? catColors[type] : 'var(--surface3)';
+    dot.style.background = ok ? cols[type] : 'var(--surface3)';
     dot.style.border = ok ? 'none' : '1.5px solid var(--border2)';
     row.appendChild(dot);
   });
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MAIN COACH RENDER — replaces old renderCoach
+   MAIN COACH RENDER
    ═══════════════════════════════════════════════════════════ */
 function renderCoach() {
-  /* Brain phase */
+  // Brain phase
   const phase = brainPhase();
-  const svg = document.getElementById('brainvatarSvg');
-  drawBrainSvg(svg, phase, 96);
+  drawBrainSvg(document.getElementById('brainvatarSvg'), phase);
   document.getElementById('brainvatarLabel').textContent = BRAIN_LABELS[phase];
   document.getElementById('brainvatarSub').textContent   = BRAIN_SUBS[phase];
 
-  /* Core Day Badge */
-  const { done: fdnDone, total: fdnTotal } = countFoundationals();
-  const fdnRate = fdnTotal > 0 ? fdnDone / fdnTotal : 0;
+  // Core day badge
+  const { done: fdnDone } = countFoundationals();
   const allGatesDone = Object.keys(HABITS).every(t => foundationDone(t));
+  const totalLogged  = Object.values(appState[today] || {}).filter(v => v === true).length;
   const badge = document.getElementById('coreDayBadge');
   const nudge = document.getElementById('coreNudge');
-  const totalLogged = Object.values(appState[today] || {}).filter(v => v === true).length;
+  const catNames = { dopamine:'Dopamine', serotonin:'Serotonin', oxytocin:'Oxytocin', endorphin:'Endorphin' };
 
   if (totalLogged === 0) {
     badge.style.display = 'none'; nudge.style.display = 'none';
   } else if (allGatesDone) {
     badge.style.display = 'block'; nudge.style.display = 'none';
   } else {
-    const quietCats = Object.keys(HABITS).filter(t => !foundationDone(t));
-    const catNames = { dopamine: 'Dopamine', serotonin: 'Serotonin', oxytocin: 'Oxytocin', endorphin: 'Endorphin' };
+    const quiet = Object.keys(HABITS).filter(t => !foundationDone(t));
     badge.style.display = 'none';
-    nudge.textContent = quietCats.map(t => catNames[t]).join(' and ') + ' core habit still to do';
+    nudge.textContent = quiet.map(t => catNames[t]).join(' and ') + ' core habit still to do';
     nudge.style.display = 'block';
   }
 
-  /* Core pips and NeuroCoach feed */
   renderCorePips();
   buildCoachFeed();
-
-  /* Recovery bonus */
   checkRecoveryBonus();
 
-  /* Premium panels (if open) */
+  // Update profile stats
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const name = userData.name ? ', ' + userData.name.split(' ')[0] : '';
+  const greetEl = document.getElementById('coachGreeting');
+  if (greetEl) greetEl.textContent = greeting + name + ' 🧠';
+
+  // Premium panels (if open)
   const premBody = document.getElementById('premiumCollapseBody');
   if (premBody && premBody.style.display !== 'none') {
-    renderWeeklyTrend();
-    renderCatStreaks();
-    renderMilestones();
-    renderRadar();
-    renderAdvInsights();
+    renderWeeklyTrend(); renderCatStreaks(); renderMilestones(); renderRadar(); renderAdvInsights();
   }
 }
-
 
 /* ═══════════════════════════════════════════════════════════
    BETA PREMIUM PANELS — live data renderers
@@ -2434,21 +2578,21 @@ function renderWeeklyTrend() {
     const key = d.toISOString().slice(0, 10);
     const isToday  = key === today;
     const isFuture = key > today;
-    const score = isToday ? (Object.values(appState[today]||{}).some(v=>v===true)?1:0) : ((weekData[key]??0)>0?1:0);
+    const score = isToday ? Math.round(heroScore()) : (weekData[key] ?? 0);
     return { label: labels[i], score, isFuture, isToday };
   });
 
-  // score-free: bars are binary active/inactive
+  const maxScore = Math.max(...days.map(d => d.score), 1);
 
   el.innerHTML = `
     <div class="live-chart-bars">
       ${days.map((d, i) => {
-        const h = d.isFuture ? 4 : (d.score > 0 ? 56 : 4);
+        const h = d.isFuture ? 4 : Math.max(4, (d.score / 100) * 72);
         const color = d.isFuture ? 'var(--border2)' : COLORS[i];
         const opacity = d.isFuture ? 0.3 : 0.85;
         return `
           <div class="live-bar-wrap">
-            <div class="live-bar-score">${d.isFuture ? '' : d.score > 0 ? d.score > 0 ? '✓' : ''}</div>
+            <div class="live-bar-score">${d.isFuture ? '' : d.score > 0 ? d.score + '%' : ''}</div>
             <div class="live-bar ${d.isToday ? 'today-bar' : ''}"
               style="height:${h}px;background:${color};opacity:${opacity};"></div>
           </div>`;
@@ -2544,9 +2688,9 @@ function renderMilestones() {
   const has21 = longestStreak >= 21;
 
   const milestones = [
-    { icon:'🥇', label:'Best Day',           val: bestScore > 0 ? 'Day ' + bestScore : '—', sub: 'Most foundationals in one day' },
+    { icon:'🥇', label:'Best Hero Score',    val: bestScore > 0 ? bestScore + '%' : '—',   sub: 'Highest single-day score' },
     { icon:'🔥', label:'Longest Streak',     val: longestStreak > 0 ? longestStreak + 'd' : '—', sub: 'Consecutive days ≥50%' },
-    { icon:'⭐', label:'Core Days',          val: perfectDays > 0 ? perfectDays : '—',     sub: 'Days with all 4 systems active' },
+    { icon:'⭐', label:'Perfect Days',       val: perfectDays > 0 ? perfectDays : '—',     sub: '100% Hero Score days' },
     { icon:'🧠', label:'21-Day Streak',      val: has21 ? '✓' : `${longestStreak}/21`,     sub: has21 ? 'Badge earned!' : 'Keep going — habit forming starts here' },
   ];
 
@@ -2672,16 +2816,16 @@ function renderAdvInsights() {
   if (score === 0) {
     insights.push({ icon:'🌅', text: `No habits tracked yet. Your brain is waiting. Even one completed habit today will activate a neurochemical pathway — start with whichever category feels most natural right now.` });
   } else if (score >= 80) {
-    insights.push({ icon:'🏆', text: `Outstanding day — all four systems active. Your neurochemical foundation is fully supported. This is the kind of day your future self will thank you for.` });
+    insights.push({ icon:'🏆', text: `Outstanding day — ${score}% Hero Score. You're in the top tier of neurochemical activation. This is the kind of day your future self will thank you for.` });
   } else if (score >= 50) {
-    insights.push({ icon:'📈', text: `Good day — you've activated most of your core systems. To deepen it, focus on completing the foundational habit in your quietest category: ${catNames[weakest[0]]}.` });
+    insights.push({ icon:'📈', text: `Solid day at ${score}%. You've cleared the halfway mark which earns your streak. To push higher, focus on completing the foundational habit in your weakest category: ${catNames[weakest[0]]}.` });
   } else {
-    insights.push({ icon:'💡', text: `Your core foundation is still building today. The fastest single move: complete the foundational habit in ${catNames[weakest[0]]} to activate that system.` });
+    insights.push({ icon:'⚠️', text: `Below 50% today (${score}%). Your streak is at risk. The fastest single move: complete the ⭐⭐⭐ habit in ${catNames[weakest[0]]} to unlock its full gauge.` });
   }
 
   // 2. Imbalance insight
   if (strongest[1] - weakest[1] > 35) {
-    insights.push({ icon:'⚖️', text: `Noticeable imbalance today: ${catNames[strongest[0]]} is well activated while ${catNames[weakest[0]]} is quiet. A well-balanced brain supports all four systems — even one habit in your weakest area compounds quickly.` });
+    insights.push({ icon:'⚖️', text: `Significant imbalance detected: ${catNames[strongest[0]]} is at ${strongest[1]}% while ${catNames[weakest[0]]} is only ${weakest[1]}%. A lopsided brain can mask deficits — even small wins in your weakest area compound quickly.` });
   }
 
   // 3. Streak insight
@@ -2693,10 +2837,10 @@ function renderAdvInsights() {
 
   // 4. Specific category nudge
   if (cats.serotonin < 40) {
-    insights.push({ icon:'🌸', text: `Your Serotonin system is quiet today. This is your mood stabilisation system. Inadequate sleep is the most common culprit — prioritise it tonight. Even one good night shifts tomorrow's baseline.` });
+    insights.push({ icon:'🌸', text: `Low Serotonin detected (${cats.serotonin}%). This is your mood stabilisation system. Inadequate sleep is the most common culprit — prioritise it tonight. Even one night of 7–9 hrs can meaningfully shift tomorrow's baseline.` });
   }
   if (cats.oxytocin < 30) {
-    insights.push({ icon:'🤝', text: `Your Oxytocin system is quiet today. Human connection is not a luxury — it's a physiological need. One meaningful conversation or a moment of genuine appreciation before day's end shifts your stress chemistry.` });
+    insights.push({ icon:'🤝', text: `Oxytocin is your lowest system today at ${cats.oxytocin}%. Human connection is not a luxury — it's a physiological need. One meaningful conversation or physical touch before day's end can shift your stress chemistry significantly.` });
   }
   if (cats.dopamine === 0) {
     insights.push({ icon:'⚡', text: `Dopamine is completely inactive today. Without at least one block of focused work, your brain's reward system has no anchor. Even 20 minutes of intentional effort on your most important task can break the inertia.` });
@@ -2708,9 +2852,9 @@ function renderAdvInsights() {
     const recent3 = dayScores.slice(-3).map(([,s]) => s);
     const trend   = recent3[2] - recent3[0];
     if (trend > 15) {
-      insights.push({ icon:'📊', text: `Your activity has been trending upward over the last 3 days. Momentum is building — this is the most powerful time to commit to a new foundational habit.` });
+      insights.push({ icon:'📊', text: `Your scores have been trending upward over the last 3 days (+${trend}%). Momentum is building. This is the most powerful time to commit to a new foundational habit.` });
     } else if (trend < -15) {
-      insights.push({ icon:'📊', text: `Your activity has been lower over the last 3 days. This is a normal dip — worth noticing, not worrying about. Check which category went quiet first; that's usually the trigger.` });
+      insights.push({ icon:'📊', text: `Your scores have declined over the last 3 days (${trend}%). This is a normal dip — but worth noticing. Check which category dropped first; that's usually the trigger.` });
     }
   }
 
@@ -2760,67 +2904,74 @@ function getBrainBalanceFeedback() {
 }
 
 function openShareModal() {
-  const phase  = brainPhase();
-  const labels = ['Ready','Awakening','Warming up','Foundation active','Thriving'];
+  const score  = heroScore();
   const now    = new Date();
   const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const grades = [[90,'S','#4a9e82'],[75,'A','#4a9e82'],[55,'B','#5a82c0'],[35,'C','#c8712a'],[15,'D','#b85070'],[0,'—','#7a7469']];
+  const [, g, c] = grades.find(([min]) => score >= min) || grades[5];
+
+  document.getElementById('shareDate').textContent    = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+  document.getElementById('shareScoreNum').textContent = Math.round(score);
+  document.getElementById('shareScoreNum').style.color = c;
+  document.getElementById('shareGrade').textContent    = `Grade ${g} · ${gradeLabel(g)}`;
+  document.getElementById('shareGrade').style.color    = c;
+
+  // Brain balance bars
   const barColors = { dopamine: '#c8712a', serotonin: '#4a9e82', oxytocin: '#b85070', endorphin: '#5a82c0' };
   const barNames  = { dopamine: 'Dopamine', serotonin: 'Serotonin', oxytocin: 'Oxytocin', endorphin: 'Endorphin' };
-
-  document.getElementById('shareDate').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
-  // Replace score number with brain phase label
-  const sn = document.getElementById('shareScoreNum');
-  if (sn) { sn.textContent = labels[phase]; sn.style.fontSize = '22px'; sn.style.color = '#e8e3d8'; }
-  const sg = document.getElementById('shareGrade');
-  if (sg) { sg.textContent = 'Brain State: ' + labels[phase]; sg.style.color = '#7a7469'; }
-
   document.getElementById('brainBars').innerHTML = Object.keys(HABITS).map(type => {
-    const ok  = foundationDone(type);
-    const col = barColors[type];
-    return `<div class="balance-row">
-      <div class="balance-name">${barNames[type]}</div>
-      <div class="balance-track"><div class="balance-fill" style="width:${ok ? 100 : 30}%;background:${col}${ok ? '' : '55'}"></div></div>
-      <div class="balance-pct" style="color:${col}">${ok ? 'Active' : 'Building'}</div>
-    </div>`;
+    const pct = catEffectivePct(type);
+    return `
+      <div class="balance-row">
+        <div class="balance-name">${barNames[type]}</div>
+        <div class="balance-track"><div class="balance-fill" style="width:${pct}%;background:${barColors[type]}"></div></div>
+        <div class="balance-pct" style="color:${barColors[type]}">${Math.round(pct)}%</div>
+      </div>`;
   }).join('');
 
+  // Brain balance feedback sentence (REVISION 6)
   document.getElementById('brainFeedback').textContent = getBrainBalanceFeedback();
 
+  // Category score tiles
   document.getElementById('shareCats').innerHTML = Object.keys(HABITS).map(type => {
-    const ok = foundationDone(type);
-    return `<div class="share-cat">
-      <div class="share-cat-name">${barNames[type]}</div>
-      <div class="share-cat-score" style="color:${barColors[type]}">${ok ? 'Active' : 'Building'}</div>
-    </div>`;
+    const pct = catEffectivePct(type);
+    return `<div class="share-cat"><div class="share-cat-name">${barNames[type]}</div><div class="share-cat-score" style="color:${barColors[type]}">${Math.round(pct)}%</div></div>`;
   }).join('');
 
   openModal('shareOverlay');
 }
 
+function gradeLabel(g) {
+  const map = { 'S': 'Perfect Day', 'A': 'Excellent', 'B': 'Good', 'C': 'Okay', 'D': 'Low', '—': 'Just Starting' };
+  return map[g] || '';
+}
+
 function buildShareText() {
-  const phase  = brainPhase();
-  const labels = ['Ready','Awakening','Warming up','Foundation active','Thriving'];
-  const now    = new Date();
-  const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const score = Math.round(heroScore());
+  const grades = [[90,'S'],[75,'A'],[55,'B'],[35,'C'],[15,'D'],[0,'—']];
+  const [, g] = grades.find(([min]) => score >= min) || grades[5];
+  const now   = new Date();
+  const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const catNames = { dopamine:'Dopamine', serotonin:'Serotonin', oxytocin:'Oxytocin', endorphin:'Endorphin' };
-  const lines = Object.keys(HABITS).map(t => `  ${catNames[t]}: ${foundationDone(t) ? 'Active' : 'Building'}`).join('\n');
-  return `🧠 NeuroHabit — ${days[now.getDay()]}\n\nBrain State: ${labels[phase]}\n\n${lines}\n\n${getBrainBalanceFeedback()}\n\nTracked with NeuroHabit by The Aufthority`;
+  const lines = Object.keys(HABITS).map(t => `  ${catNames[t]}: ${Math.round(catEffectivePct(t))}%`).join('\n');
+
+  return `🧠 NeuroHabit — ${days[now.getDay()]}\n\nHero Score: ${score}%  |  Grade: ${g}\n\n${lines}\n\n${getBrainBalanceFeedback()}\n\nTracked with NeuroHabit by The Aufthority`;
 }
 
 function copyShareText() {
   navigator.clipboard.writeText(buildShareText())
-    .then(() => showToast('Copied to clipboard!', 'success'))
+    .then(() => showToast('Score copied to clipboard!', 'success'))
     .catch(() => showToast(buildShareText(), 'info'));
 }
 
 function nativeShare() {
   const text = buildShareText();
   if (navigator.share) {
-    navigator.share({ title: 'My NeuroHabit Day', text }).catch(() => {});
+    navigator.share({ title: 'My NeuroHabit Score', text }).catch(() => {});
   } else {
     navigator.clipboard.writeText(text)
-      .then(() => showToast('Copied to clipboard!', 'success'))
+      .then(() => showToast('Score copied to clipboard!', 'success'))
       .catch(() => showToast('Could not copy. Try sharing manually.', 'error'));
   }
 }
@@ -2836,9 +2987,9 @@ async function generateShareImage() {
   const months    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dateStr   = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
 
-  // Score-free: use brain phase for all display
-  const _phaseColMap = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82'];
-  const phaseAccentColor = _phaseColMap[phase];
+  const grades     = [[90,'S','#4a9e82'],[75,'A','#4a9e82'],[55,'B','#5a82c0'],[35,'C','#c8712a'],[15,'D','#b85070'],[0,'—','#7a7469']];
+  const [, grade, gradeColor] = grades.find(([min]) => score >= min) || grades[5];
+  const gradeText  = { 'S':'Perfect Day','A':'Excellent','B':'Good','C':'Okay','D':'Low','—':'Just Starting' }[grade];
 
   const catData = [
     { name:'Dopamine',  pct: Math.round(catEffectivePct('dopamine')),  color:'#c8712a' },
@@ -2848,10 +2999,7 @@ async function generateShareImage() {
   ];
 
   // ── Build brainvatar SVG at 400×400 for canvas ──────────────
-  const phase = brainPhase();
-  const phaseLabels = ['Ready','Awakening','Warming up','Foundation Active','Thriving'];
-  const phaseCols = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82'];
-  const tier = ['zero','low','mid','good','elite'][phase];
+  const tier = getBrainvatarTier(score);
   const palettes = {
     elite: { primary: '#4a9e82', secondary: '#5a82c0', glow: 'rgba(74,158,130,0.35)', aura: true  },
     good:  { primary: '#c8712a', secondary: '#7c6ab8', glow: 'rgba(200,113,42,0.2)',  aura: false },
@@ -2915,7 +3063,7 @@ async function generateShareImage() {
 
   // Subtle glow
   const bgGrd = ctx.createRadialGradient(W * 0.5, H * 0.38, 60, W * 0.5, H * 0.38, 520);
-  bgGrd.addColorStop(0, phaseAccentColor + '18');
+  bgGrd.addColorStop(0, `${gradeColor}18`);
   bgGrd.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = bgGrd;
   ctx.fillRect(0, 0, W, H);
@@ -2970,15 +3118,26 @@ async function generateShareImage() {
     img.src = url;
   });
 
-  // Brain phase label (no score shown)
+  // Score number overlaid on brainvatar centre
+  const scoreStr = `${score}%`;
   ctx.textAlign = 'center';
-  ctx.font = '500 32px system-ui, sans-serif';
-  ctx.fillStyle = phaseCols[phase];
-  ctx.fillText(phaseLabels[phase].toUpperCase(), W / 2, 432);
+  ctx.font = `300 108px system-ui, sans-serif`;
+  ctx.fillStyle = gradeColor;
+  ctx.fillText(scoreStr, W / 2, 420);
+
+  // State label
+  ctx.font = '600 22px system-ui, sans-serif';
+  ctx.fillStyle = '#7a7469';
+  ctx.fillText(BRAINVATAR_CONTENT[tier].label.toUpperCase(), W / 2, 456);
   ctx.textAlign = 'left';
 
-  // Divider placeholder (shifted up)
+  // Grade pill area
   const pillY = 590;
+  ctx.fillStyle = gradeColor;
+  ctx.font = '600 28px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`Grade ${grade}  ·  ${gradeText}`, W / 2, pillY);
+  ctx.textAlign = 'left';
 
   // Divider
   ctx.strokeStyle = '#3d3a33'; ctx.lineWidth = 1;
@@ -3249,6 +3408,215 @@ function showToast(msg, type = 'info', duration = 3500) {
 let appLaunched = false;
 
 /* Listen for sign-in/out — replaces the DOMContentLoaded auto-login */
+/* ═══════════════════════════════════════════════════════════
+   ONBOARDING — habit selection flow
+   ═══════════════════════════════════════════════════════════ */
+
+const CAT_META = [
+  { type: 'dopamine',  label: 'Dopamine',  sub: 'Drive, motivation & reward',    color: '#c8712a' },
+  { type: 'serotonin', label: 'Serotonin', sub: 'Mood stability & regulation',    color: '#4a9e82' },
+  { type: 'oxytocin',  label: 'Oxytocin',  sub: 'Connection, trust & bonding',    color: '#b85070' },
+  { type: 'endorphin', label: 'Endorphin', sub: 'Movement, stress relief & recovery', color: '#5a82c0' },
+];
+
+/* tempConfig — built during onboarding, saved on finish */
+let tempConfig = null;
+
+function initTempConfig() {
+  tempConfig = {};
+  Object.keys(HABITS).forEach(function(type) {
+    tempConfig[type] = { selected: [] };
+  });
+}
+
+function showOnboarding() {
+  initTempConfig();
+  const screen = document.getElementById('screen-onboarding');
+  screen.style.display = 'flex';
+  screen.classList.add('screen-active');
+  renderOnboardSteps();
+}
+
+function renderOnboardSteps() {
+  const container = document.getElementById('onboard-steps');
+  container.innerHTML = '';
+
+  CAT_META.forEach(function(meta) {
+    const type  = meta.type;
+    const habits = HABITS[type].habits;
+    const fdnIds = HABITS[type].foundationalIds;
+
+    const step = document.createElement('div');
+    step.className = 'onboard-step';
+
+    const head = document.createElement('div');
+    head.className = 'onboard-step-head';
+    head.innerHTML =
+      '<div class="onboard-step-dot" style="background:' + meta.color + '"></div>' +
+      '<div>' +
+        '<div class="onboard-step-title">' + meta.label + '</div>' +
+        '<div class="onboard-step-sub">' + meta.sub + '</div>' +
+      '</div>';
+    step.appendChild(head);
+
+    /* Core habits */
+    const coreLabel = document.createElement('div');
+    coreLabel.className = 'onboard-section-label';
+    coreLabel.textContent = 'Core habits — choose at least one';
+    step.appendChild(coreLabel);
+
+    const coreList = document.createElement('div');
+    coreList.className = 'onboard-habits';
+    habits.filter(function(h) { return fdnIds.includes(h.id); }).forEach(function(h) {
+      coreList.appendChild(buildOnboardHabit(type, h, 'core', meta.color));
+    });
+    step.appendChild(coreList);
+
+    /* Secondary habits */
+    const secHabits = habits.filter(function(h) { return !fdnIds.includes(h.id) && h.type === 'secondary'; });
+    if (secHabits.length > 0) {
+      const secLabel = document.createElement('div');
+      secLabel.className = 'onboard-section-label';
+      secLabel.textContent = 'Secondary habits — optional, add as many as you like';
+      step.appendChild(secLabel);
+      const secList = document.createElement('div');
+      secList.className = 'onboard-habits';
+      secHabits.forEach(function(h) { secList.appendChild(buildOnboardHabit(type, h, 'secondary', meta.color)); });
+      step.appendChild(secList);
+    }
+
+    /* Bonus habits */
+    const bonusHabits = habits.filter(function(h) { return !fdnIds.includes(h.id) && h.type === 'bonus'; });
+    if (bonusHabits.length > 0) {
+      const bonLabel = document.createElement('div');
+      bonLabel.className = 'onboard-section-label';
+      bonLabel.textContent = 'Bonus habits — optional enrichment';
+      step.appendChild(bonLabel);
+      const bonList = document.createElement('div');
+      bonList.className = 'onboard-habits';
+      bonusHabits.forEach(function(h) { bonList.appendChild(buildOnboardHabit(type, h, 'bonus', meta.color)); });
+      step.appendChild(bonList);
+    }
+
+    const div = document.createElement('div');
+    div.className = 'onboard-divider';
+    step.appendChild(div);
+
+    container.appendChild(step);
+  });
+
+  updateOnboardCTA();
+}
+
+function buildOnboardHabit(type, h, tagType, color) {
+  const isCore = tagType === 'core';
+  const isSel  = tempConfig[type].selected.includes(h.id);
+
+  const row = document.createElement('div');
+  row.className = 'onboard-habit' + (isSel ? ' selected' : '');
+  row.style.setProperty('--ac', color);
+
+  row.innerHTML =
+    '<div class="onboard-habit-check">' +
+      (isSel ? '<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '') +
+    '</div>' +
+    '<div class="onboard-habit-body">' +
+      '<div class="onboard-habit-label">' + h.label + '</div>' +
+      '<div class="onboard-habit-desc">' + (h.info && h.info.body ? h.info.body.slice(0, 90) + (h.info.body.length > 90 ? '…' : '') : '') + '</div>' +
+      '<span class="onboard-habit-tag ' + tagType + '">' + (isCore ? 'Core — choose at least one' : tagType.charAt(0).toUpperCase() + tagType.slice(1)) + '</span>' +
+    '</div>';
+
+  row.addEventListener('click', function() {
+    toggleOnboardHabit(type, h.id, isCore, color);
+  });
+
+  return row;
+}
+
+function toggleOnboardHabit(type, hid, isCore, color) {
+  const sel = tempConfig[type].selected;
+  const idx = sel.indexOf(hid);
+  if (idx > -1) {
+    /* Deselecting core: only if another core is still selected */
+    if (isCore) {
+      const fdnIds = HABITS[type].foundationalIds;
+      const otherCoresSelected = sel.filter(function(id) { return fdnIds.includes(id) && id !== hid; });
+      if (otherCoresSelected.length === 0) {
+        showToast('At least one core habit required per category.', 'info');
+        return;
+      }
+    }
+    sel.splice(idx, 1);
+  } else {
+    sel.push(hid);
+  }
+  renderOnboardSteps();
+}
+
+function updateOnboardCTA() {
+  const allValid = CAT_META.every(function(meta) {
+    const fdnIds = HABITS[meta.type].foundationalIds;
+    const sel    = tempConfig[meta.type].selected;
+    return sel.some(function(id) { return fdnIds.includes(id); });
+  });
+  const btn = document.getElementById('onboardDoneBtn');
+  const err = document.getElementById('onboardError');
+  if (btn) btn.disabled = !allValid;
+  if (err) err.classList.toggle('show', !allValid && Object.values(tempConfig).some(function(c) { return c.selected.length > 0; }));
+}
+
+function finishOnboarding() {
+  /* Validate: at least one core per category */
+  const invalid = CAT_META.filter(function(meta) {
+    const fdnIds = HABITS[meta.type].foundationalIds;
+    return !tempConfig[meta.type].selected.some(function(id) { return fdnIds.includes(id); });
+  });
+  if (invalid.length > 0) {
+    document.getElementById('onboardError').classList.add('show');
+    return;
+  }
+  userHabitConfig = tempConfig;
+  sv(HCK, userHabitConfig);
+  initHabitLock(userHabitConfig);
+  showMainApp();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HABIT SET MANAGEMENT — add / remove from user's selected set
+   ═══════════════════════════════════════════════════════════ */
+function addHabitToSet(type, hid) {
+  if (!userHabitConfig) userHabitConfig = JSON.parse(JSON.stringify(DEFAULT_HABIT_CONFIG));
+  if (!userHabitConfig[type].selected.includes(hid)) {
+    userHabitConfig[type].selected.push(hid);
+    sv(HCK, userHabitConfig);
+    renderSection(type);
+    updateCatUI(type);
+    renderCoach();
+    showToast('Habit added to your set', 'success');
+  }
+}
+
+function removeHabitFromSet(type, hid) {
+  if (!canRemoveHabit(type, hid)) {
+    if (isLockActive()) {
+      showToast('Habit set locked for ' + daysUntilUnlock() + ' more days. Science shows ' + LOCK_MIN_DAYS + ' days is the minimum to know if a habit works for you.', 'info');
+    } else {
+      showToast('You need at least one core habit per category. Add another core habit first.', 'info');
+    }
+    return;
+  }
+  // Reflection prompt before removal (deliberate friction)
+  const reason = prompt('Before removing this habit — what made it difficult? (This helps you reflect, not a requirement)');
+  if (reason === null) return; // cancelled
+  if (!userHabitConfig) userHabitConfig = JSON.parse(JSON.stringify(DEFAULT_HABIT_CONFIG));
+  userHabitConfig[type].selected = userHabitConfig[type].selected.filter(function(id) { return id !== hid; });
+  sv(HCK, userHabitConfig);
+  renderSection(type);
+  updateCatUI(type);
+  renderCoach();
+  showToast('Habit removed from your set', 'success');
+}
+
 auth.onAuthStateChanged((user) => {
   if (user) {
     userData.name     = user.displayName || user.email.split('@')[0];
@@ -3305,12 +3673,11 @@ function renderProfile() {
   document.getElementById('profileName').textContent   = name.charAt(0).toUpperCase() + name.slice(1);
   document.getElementById('profileEmail').textContent  = email;
   document.getElementById('profilePlanBadge').textContent = userData.skipAuth ? 'Guest' : 'Free';
-  const phase = brainPhase();
-  const phaseLabels = ['Ready','Awakening','Warming up','Active','Thriving'];
-  document.getElementById('statHeroScore').textContent = phaseLabels[phase];
+  const phaseL = ['Ready','Awakening','Warming up','Active','Thriving'];
+  document.getElementById('statHeroScore').textContent = phaseL[brainPhase()];
   document.getElementById('statStreak').textContent    = streak.count || 0;
-  const { done: fdnD, total: fdnT } = countFoundationals();
-  document.getElementById('statGrade').textContent = fdnD + ' / ' + fdnT + ' done';
+  const { done: _fd, total: _ft } = countFoundationals();
+  document.getElementById('statGrade').textContent = _fd + ' / ' + _ft + ' done';
 }
 
 function editProfile() {
@@ -3358,6 +3725,17 @@ function launchApp() {
   appLaunched = true;
   document.getElementById('screen-login').classList.remove('screen-active');
   document.getElementById('screen-login').style.display = 'none';
+  // Show onboarding if no habit config yet, else go straight to app
+  if (!userHabitConfig) {
+    showOnboarding();
+    return;
+  }
+  showMainApp();
+}
+
+function showMainApp() {
+  const ob = document.getElementById('screen-onboarding');
+  if (ob) { ob.classList.remove('screen-active'); ob.style.display = 'none'; }
   document.getElementById('screen-app').style.display = 'flex';
   document.getElementById('screen-app').classList.add('screen-active');
   document.getElementById('appHeader').style.display = 'flex';
@@ -3383,9 +3761,27 @@ function initApp() {
   const now = new Date();
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  document.getElementById('headerDate').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
-  Object.keys(HABITS).forEach(t => { renderSection(t); });
+  document.getElementById('headerDate').textContent = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()];
+  renderLockStatusBars();
+  Object.keys(HABITS).forEach(function(t) { renderSection(t); });
   updateHeader(); renderCoach(); renderWeek(); checkStreak(); renderProfile();
+}
+
+function renderLockStatusBars() {
+  Object.keys(HABITS).forEach(function(type) {
+    const listEl = document.getElementById('list-' + type);
+    if (!listEl) return;
+    const existing = document.getElementById('lockbar-' + type);
+    if (existing) existing.remove();
+    if (!isLockActive()) return;
+    const bar = document.createElement('div');
+    bar.id = 'lockbar-' + type;
+    bar.className = 'lock-status-bar';
+    const d = daysIntoLock();
+    const rec = LOCK_REC_DAYS;
+    bar.innerHTML = '<strong>Day ' + d + ' of ' + rec + '</strong> — habit set locked. You can add habits freely. Removals unlock after day ' + LOCK_MIN_DAYS + '.';
+    listEl.parentNode.insertBefore(bar, listEl);
+  });
 }
 
 function confirmNewDay() {
@@ -3544,6 +3940,11 @@ window.dismissIosSheet    = dismissIosSheet;
 window.triggerInstall     = triggerInstall;
 window.showScreen         = showScreen;
 window.hideScreen         = hideScreen;
+window.showOnboarding      = showOnboarding;
+window.finishOnboarding    = finishOnboarding;
+window.addHabitToSet       = addHabitToSet;
+window.removeHabitFromSet  = removeHabitFromSet;
+window.showMainApp         = showMainApp;
 window.openShareModal     = openShareModal;
 window.generateShareImage = generateShareImage;
 window.nativeShare        = nativeShare;
