@@ -1491,7 +1491,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
       <div class="share-tagline">neurohabit.app · by The Aufthority</div>
     </div>
     <div class="share-actions">
-      <button class="share-action-btn primary" onclick="nativeShare()">⬆ Share</button>
+      <button class="share-action-btn primary" onclick="generateShareImage()">🖼 Save &amp; Share</button>
     </div>
   </div>
 </div>
@@ -2728,10 +2728,12 @@ function renderCoach() {
   const greetEl = document.getElementById('coachGreeting');
   if (greetEl) greetEl.textContent = greeting + name + ' 🧠';
 
+  // Always render the weekly trend chart (inline, not premium-gated)
+  renderWeeklyTrend();
   // Premium panels (if open)
   const premBody = document.getElementById('premiumCollapseBody');
   if (premBody && premBody.style.display !== 'none') {
-    renderWeeklyTrend(); renderCatStreaks(); renderMilestones(); renderRadar(); renderAdvInsights();
+    renderCatStreaks(); renderMilestones(); renderRadar(); renderAdvInsights();
   }
 }
 
@@ -2780,13 +2782,15 @@ function renderWeeklyTrend() {
     return { x: xAt(i), y: yAt(d.isFuture ? 0 : d.fdnRate), d: d };
   });
 
-  /* Smooth bezier path */
+  /* Smooth bezier path — always draws at least a flat baseline */
   function smoothPath(pts, future) {
     var activePts = pts.filter(function(p) { return !p.d.isFuture; });
-    if (activePts.length < 2) {
-      if (activePts.length === 1) return 'M ' + activePts[0].x + ' ' + activePts[0].y;
-      return '';
+    if (activePts.length === 0) {
+      // No data yet — draw flat baseline across all 7 points
+      var baseY = yAt(0);
+      return 'M ' + pts[0].x + ' ' + baseY + ' L ' + pts[pts.length - 1].x + ' ' + baseY;
     }
+    if (activePts.length === 1) return 'M ' + activePts[0].x + ' ' + activePts[0].y;
     var d = 'M ' + activePts[0].x + ' ' + activePts[0].y;
     for (var i = 1; i < activePts.length; i++) {
       var prev = activePts[i - 1], curr = activePts[i];
@@ -2800,10 +2804,11 @@ function renderWeeklyTrend() {
 
   /* Area fill path — close below the line */
   var activePts = pathPts.filter(function(p) { return !p.d.isFuture; });
-  var areaPath = linePath;
-  if (activePts.length >= 2) {
-    areaPath += ' L ' + activePts[activePts.length - 1].x + ' ' + (PAD_Y + chartH) +
-                ' L ' + activePts[0].x + ' ' + (PAD_Y + chartH) + ' Z';
+  var areaPath = '';
+  if (linePath.length > 2 && activePts.length >= 2) {
+    areaPath = linePath +
+      ' L ' + activePts[activePts.length - 1].x + ' ' + (PAD_Y + chartH) +
+      ' L ' + activePts[0].x + ' ' + (PAD_Y + chartH) + ' Z';
   }
 
   /* Grid lines at 25%, 50%, 75% */
@@ -3256,224 +3261,175 @@ function nativeShare() {
    1080×1080 px, matches app dark matte earthy theme
    ═══════════════════════════════════════════════════════════ */
 async function generateShareImage() {
-  const score     = Math.round(heroScore());
-  const now       = new Date();
-  const days      = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const months    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const dateStr   = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+  showToast('Generating image...', 'info', 2000);
 
-  const grades     = [[90,'S','#4a9e82'],[75,'A','#4a9e82'],[55,'B','#5a82c0'],[35,'C','#c8712a'],[15,'D','#b85070'],[0,'—','#7a7469']];
-  const [, grade, gradeColor] = grades.find(([min]) => score >= min) || grades[5];
-  const gradeText  = { 'S':'Perfect Day','A':'Excellent','B':'Good','C':'Okay','D':'Low','—':'Just Starting' }[grade];
+  var phase     = brainPhase();
+  var now       = new Date();
+  var days      = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var months    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var dateStr   = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()];
+  var phaseLabel = BRAIN_LABELS[phase];
+  var phaseSub   = BRAIN_SUBS[phase];
 
-  const catData = [
-    { name:'Dopamine',  pct: Math.round(catEffectivePct('dopamine')),  color:'#c8712a' },
-    { name:'Serotonin', pct: Math.round(catEffectivePct('serotonin')), color:'#4a9e82' },
-    { name:'Oxytocin',  pct: Math.round(catEffectivePct('oxytocin')),  color:'#b85070' },
-    { name:'Endorphin', pct: Math.round(catEffectivePct('endorphin')), color:'#5a82c0' },
-  ];
+  /* Pull NeuroCoach insight text from live feed */
+  var coachText = phaseSub;
+  var feedCards = document.querySelectorAll('#coachFeed .coach-feed-card.card-reflect');
+  feedCards.forEach(function(card) {
+    var body = card.querySelector('.coach-feed-body');
+    if (body && coachText === phaseSub) coachText = body.textContent.trim();
+  });
 
-  // ── Build brainvatar SVG at 400×400 for canvas ──────────────
-  const tier = getBrainvatarTier(score);
-  const palettes = {
-    elite: { primary: '#4a9e82', secondary: '#5a82c0', glow: 'rgba(74,158,130,0.35)', aura: true  },
-    good:  { primary: '#c8712a', secondary: '#7c6ab8', glow: 'rgba(200,113,42,0.2)',  aura: false },
-    mid:   { primary: '#7c6ab8', secondary: '#5a82c0', glow: 'rgba(124,106,184,0.15)',aura: false },
-    low:   { primary: '#4a4640', secondary: '#3d3a33', glow: 'rgba(90,80,70,0.1)',    aura: false },
-    zero:  { primary: '#383430', secondary: '#2e2b24', glow: 'rgba(0,0,0,0)',         aura: false },
-  };
-  const p = palettes[tier];
-  const expressions = {
-    elite: { le: 'M155,220 Q162,210 170,220', re: 'M230,220 Q237,210 244,220', mouth: 'M168,255 Q200,285 232,255' },
-    good:  { le: 'M157,222 Q164,212 172,222', re: 'M228,222 Q235,212 242,222', mouth: 'M170,260 Q200,278 230,260' },
-    mid:   { le: 'M158,223 A10,10 0 1,1 178,223', re: 'M222,223 A10,10 0 1,1 242,223', mouth: 'M172,264 Q200,272 228,264' },
-    low:   { le: 'M158,222 Q166,235 174,222', re: 'M226,222 Q234,235 242,222', mouth: 'M170,268 Q200,260 230,268' },
-    zero:  { le: 'M160,222 Q167,234 174,222', re: 'M226,222 Q233,234 240,222', mouth: 'M172,268 Q200,264 228,268' },
-  };
-  const ex = expressions[tier];
-  const wrO = { elite: 0.65, good: 0.45, mid: 0.28, low: 0.12, zero: 0.07 }[tier];
-  const cx = 200, cy = 180;
+  /* Category status */
+  var catColors = { dopamine:'#c8712a', serotonin:'#4a9e82', oxytocin:'#b85070', endorphin:'#5a82c0' };
+  var catNames  = { dopamine:'Dopamine', serotonin:'Serotonin', oxytocin:'Oxytocin', endorphin:'Endorphin' };
+  var catData   = Object.keys(HABITS).map(function(t) {
+    return { name: catNames[t], color: catColors[t], active: foundationDone(t) };
+  });
 
-  const blush = tier === 'elite' ? `<ellipse cx="148" cy="248" rx="20" ry="12" fill="${p.primary}" opacity="0.28"/><ellipse cx="252" cy="248" rx="20" ry="12" fill="${p.primary}" opacity="0.28"/>` : '';
-  const sparkles = tier === 'elite' ? `<text x="55" y="72" font-size="28" opacity="0.9">✨</text><text x="316" y="80" font-size="22" opacity="0.8">⭐</text><text x="36" y="140" font-size="18" opacity="0.6">✦</text><text x="342" y="138" font-size="20" opacity="0.55">✦</text>` : '';
-  const zzz = tier === 'zero' ? `<text x="272" y="106" fill="${p.primary}" font-size="22" opacity="0.4">z</text><text x="291" y="80" fill="${p.primary}" font-size="30" opacity="0.28">z</text><text x="314" y="50" fill="${p.primary}" font-size="36" opacity="0.18">z</text>` : '';
-  const aura = p.aura ? `<circle cx="${cx}" cy="${cy}" r="182" fill="none" stroke="${p.primary}" stroke-width="4" opacity="0.15"/><circle cx="${cx}" cy="${cy}" r="170" fill="none" stroke="${p.secondary}" stroke-width="2" opacity="0.1"/>` : '';
+  /* ── Draw brain SVG to image via off-screen SVG ── */
+  var svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svgEl.setAttribute('width', '300'); svgEl.setAttribute('height', '300');
+  svgEl.setAttribute('viewBox', '0 0 96 96');
+  svgEl.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  drawBrainSvg(svgEl, phase);
+  var svgStr = new XMLSerializer().serializeToString(svgEl);
 
-  const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
-    <defs>
-      <radialGradient id="g1" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="${p.glow}"/>
-        <stop offset="100%" stop-color="transparent"/>
-      </radialGradient>
-      <radialGradient id="g2" cx="40%" cy="35%" r="65%">
-        <stop offset="0%" stop-color="${p.primary}" stop-opacity="0.22"/>
-        <stop offset="100%" stop-color="${p.secondary}" stop-opacity="0.08"/>
-      </radialGradient>
-    </defs>
-    <circle cx="${cx}" cy="${cy}" r="185" fill="url(#g1)" opacity="0.8"/>
-    ${aura}
-    <path d="M${cx},75 C138,75 95,100 90,140 C80,145 65,160 70,185 C60,200 65,230 85,240 C85,270 105,295 135,300 C145,320 165,330 185,325 C190,335 200,340 200,340 C200,340 210,335 215,325 C235,330 255,320 265,300 C295,295 315,270 315,240 C335,230 340,200 330,185 C335,160 320,145 310,140 C305,100 262,75 ${cx},75 Z"
-      fill="url(#g2)" stroke="${p.primary}" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M130,130 Q145,115 165,125 Q180,110 200,120" fill="none" stroke="${p.primary}" stroke-width="3.5" stroke-linecap="round" opacity="${wrO}"/>
-    <path d="M235,125 Q250,110 270,125 Q280,140 265,155" fill="none" stroke="${p.secondary}" stroke-width="3.5" stroke-linecap="round" opacity="${wrO}"/>
-    <path d="M105,175 Q120,160 135,175 Q145,190 130,200" fill="none" stroke="${p.primary}" stroke-width="3" stroke-linecap="round" opacity="${wrO * 0.8}"/>
-    <path d="M275,170 Q290,155 300,175 Q305,195 290,205" fill="none" stroke="${p.secondary}" stroke-width="3" stroke-linecap="round" opacity="${wrO * 0.8}"/>
-    <path d="M155,140 Q170,130 185,140 Q195,155 180,165 Q165,175 155,160" fill="none" stroke="${p.primary}" stroke-width="2.5" stroke-linecap="round" opacity="${wrO * 0.7}"/>
-    <path d="${ex.le}" fill="none" stroke="${p.primary}" stroke-width="6" stroke-linecap="round"/>
-    <path d="${ex.re}" fill="none" stroke="${p.primary}" stroke-width="6" stroke-linecap="round"/>
-    <path d="${ex.mouth}" fill="none" stroke="${p.primary}" stroke-width="5.5" stroke-linecap="round"/>
-    ${blush}
-    ${sparkles}
-    ${zzz}
-  </svg>`;
-
-  const W = 1080, H = 1080, PAD = 72;
-  const canvas = document.createElement('canvas');
+  /* ── Canvas setup — 1080×1080 ── */
+  var W = 1080, H = 1080, PAD = 72;
+  var canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
+  var ctx = canvas.getContext('2d');
 
-  // Background
+  /* Background */
   ctx.fillStyle = '#1c1a17';
   ctx.fillRect(0, 0, W, H);
 
-  // Subtle glow
-  const bgGrd = ctx.createRadialGradient(W * 0.5, H * 0.38, 60, W * 0.5, H * 0.38, 520);
-  bgGrd.addColorStop(0, `${gradeColor}18`);
+  /* Subtle phase-coloured glow behind centre */
+  var phaseColors = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82'];
+  var phaseCol = phaseColors[phase];
+  var bgGrd = ctx.createRadialGradient(W/2, H*0.38, 60, W/2, H*0.38, 480);
+  bgGrd.addColorStop(0, phaseCol + '28');
   bgGrd.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = bgGrd;
   ctx.fillRect(0, 0, W, H);
 
-  // Top gradient bar
-  const accentGrd = ctx.createLinearGradient(0, 0, W, 0);
-  accentGrd.addColorStop(0, '#c8712a'); accentGrd.addColorStop(0.33, '#b85070');
-  accentGrd.addColorStop(0.66, '#4a9e82'); accentGrd.addColorStop(1, '#5a82c0');
-  ctx.fillStyle = accentGrd;
+  /* Top accent bar */
+  var acGrd = ctx.createLinearGradient(0, 0, W, 0);
+  acGrd.addColorStop(0, '#c8712a'); acGrd.addColorStop(0.33, '#b85070');
+  acGrd.addColorStop(0.66, '#4a9e82'); acGrd.addColorStop(1, '#5a82c0');
+  ctx.fillStyle = acGrd;
   ctx.fillRect(0, 0, W, 8);
 
-  // Card background
+  /* Card background */
   ctx.fillStyle = '#242119';
   roundRect(ctx, PAD - 20, 50, W - (PAD - 20) * 2, H - 110, 24);
   ctx.fill();
 
-  // Brand
+  /* Brand */
   ctx.fillStyle = '#e8e3d8';
   ctx.font = '600 38px system-ui, sans-serif';
   ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'left';
   ctx.fillText('NeuroHabit', PAD, 118);
   ctx.fillStyle = '#7a7469';
   ctx.font = '400 17px system-ui, sans-serif';
   ctx.fillText('BY THE AUFTHORITY', PAD, 144);
 
-  // Date
+  /* Date */
   ctx.fillStyle = '#7a7469';
   ctx.font = '400 20px system-ui, sans-serif';
   ctx.textAlign = 'right';
   ctx.fillText(dateStr, W - PAD, 118);
   ctx.textAlign = 'left';
 
-  // Divider
+  /* Divider */
   ctx.strokeStyle = '#3d3a33'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(PAD, 168); ctx.lineTo(W - PAD, 168); ctx.stroke();
 
-  // ── Brainvatar rendered from SVG into canvas ─────────────────
-  await new Promise((resolve) => {
-    const img = new Image();
-    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
-    const url  = URL.createObjectURL(blob);
-    img.onload = () => {
-      // Draw brainvatar centred in upper half of card
-      const bvSize = 420;
-      const bvX    = (W - bvSize) / 2;
-      const bvY    = 168;
-      ctx.drawImage(img, bvX, bvY, bvSize, bvSize);
+  /* ── Draw brain SVG into canvas ── */
+  await new Promise(function(resolve) {
+    var img  = new Image();
+    var blob = new Blob([svgStr], { type: 'image/svg+xml' });
+    var url  = URL.createObjectURL(blob);
+    img.onload = function() {
+      var bvSize = 360;
+      ctx.drawImage(img, (W - bvSize) / 2, 190, bvSize, bvSize);
       URL.revokeObjectURL(url);
       resolve();
     };
-    img.onerror = () => { URL.revokeObjectURL(url); resolve(); };
+    img.onerror = function() { URL.revokeObjectURL(url); resolve(); };
     img.src = url;
   });
 
-  // Score number overlaid on brainvatar centre
-  const scoreStr = `${score}%`;
+  /* Phase label */
   ctx.textAlign = 'center';
-  ctx.font = `300 108px system-ui, sans-serif`;
-  ctx.fillStyle = gradeColor;
-  ctx.fillText(scoreStr, W / 2, 420);
+  ctx.fillStyle = phaseCol;
+  ctx.font = '600 44px system-ui, sans-serif';
+  ctx.fillText(phaseLabel.toUpperCase(), W / 2, 590);
 
-  // State label
-  ctx.font = '600 22px system-ui, sans-serif';
+  /* Foundational count */
+  var cf = countFoundationals();
   ctx.fillStyle = '#7a7469';
-  ctx.fillText(BRAINVATAR_CONTENT[tier].label.toUpperCase(), W / 2, 456);
-  ctx.textAlign = 'left';
+  ctx.font = '400 22px system-ui, sans-serif';
+  ctx.fillText(cf.done + ' of ' + cf.total + ' core habits active', W / 2, 628);
 
-  // Grade pill area
-  const pillY = 590;
-  ctx.fillStyle = gradeColor;
-  ctx.font = '600 28px system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(`Grade ${grade}  ·  ${gradeText}`, W / 2, pillY);
-  ctx.textAlign = 'left';
-
-  // Divider
+  /* Divider */
   ctx.strokeStyle = '#3d3a33'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(PAD, pillY + 20); ctx.lineTo(W - PAD, pillY + 20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD, 658); ctx.lineTo(W - PAD, 658); ctx.stroke();
 
-  // Category bars (compact 2-column)
-  const colW  = (W - PAD * 2 - 40) / 2;
-  const barH  = 8;
-  const rowH  = 54;
-  const startY = pillY + 50;
-  catData.forEach((cat, i) => {
-    const col  = i % 2;
-    const row  = Math.floor(i / 2);
-    const x    = PAD + col * (colW + 40);
-    const y    = startY + row * rowH;
-    ctx.fillStyle = '#7a7469';
-    ctx.font = '400 20px system-ui, sans-serif';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(cat.name, x, y);
-    ctx.fillStyle = cat.color;
-    ctx.font = '600 20px system-ui, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${cat.pct}%`, x + colW, y);
-    ctx.textAlign = 'left';
-    const trackY = y + 8;
-    roundRect(ctx, x, trackY, colW, barH, 4);
-    ctx.fillStyle = '#2e2b24'; ctx.fill();
-    const fw = Math.max(0, (cat.pct / 100) * colW);
-    if (fw > 0) { roundRect(ctx, x, trackY, fw, barH, 4); ctx.fillStyle = cat.color; ctx.fill(); }
+  /* Category dots row */
+  var dotY = 698, dotR = 14, dotSpacing = (W - PAD * 2) / 4;
+  catData.forEach(function(cat, i) {
+    var x = PAD + i * dotSpacing + dotSpacing / 2;
+    ctx.beginPath();
+    ctx.arc(x, dotY, dotR, 0, Math.PI * 2);
+    ctx.fillStyle = cat.active ? cat.color : '#3d3a33';
+    ctx.fill();
+    ctx.fillStyle = cat.active ? cat.color : '#504c45';
+    ctx.font = '500 18px system-ui, sans-serif';
+    ctx.fillText(cat.name, x - ctx.measureText(cat.name).width / 2, dotY + dotR + 22);
+    ctx.fillStyle = cat.active ? cat.color : '#504c45';
+    ctx.font = '500 14px system-ui, sans-serif';
+    var statusTxt = cat.active ? 'Active' : 'Building';
+    ctx.fillText(statusTxt, x - ctx.measureText(statusTxt).width / 2, dotY + dotR + 42);
   });
 
-  // Brain balance feedback
-  const afterBarsY = startY + 2 * rowH + 18;
+  /* Divider */
   ctx.strokeStyle = '#3d3a33'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(PAD, afterBarsY); ctx.lineTo(W - PAD, afterBarsY); ctx.stroke();
-  ctx.fillStyle = '#e8e3d8';
-  ctx.font = 'italic 400 21px system-ui, sans-serif';
-  ctx.textBaseline = 'alphabetic';
-  wrapText(ctx, getBrainBalanceFeedback(), PAD, afterBarsY + 30, W - PAD * 2, 33);
+  ctx.beginPath(); ctx.moveTo(PAD, 762); ctx.lineTo(W - PAD, 762); ctx.stroke();
 
-  // Footer
+  /* NeuroCoach label */
+  ctx.fillStyle = '#4a9e82';
+  ctx.font = '600 16px system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('NEUROCOACH', PAD, 796);
+
+  /* Coach insight text — wrapped */
+  ctx.fillStyle = '#e8e3d8';
+  ctx.font = 'italic 400 22px system-ui, sans-serif';
+  wrapText(ctx, coachText, PAD, 830, W - PAD * 2, 34);
+
+  /* Footer */
   ctx.fillStyle = '#504c45';
   ctx.font = '400 18px system-ui, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('neurohabit.app  ·  by The Aufthority', W / 2, H - 46);
-  ctx.textAlign = 'left';
+  ctx.fillText('neurohabit.app  \xb7  by The Aufthority', W / 2, H - 46);
 
-  // Export
-  canvas.toBlob(async (blob) => {
-    const file = new File([blob], 'neurohabit-score.png', { type: 'image/png' });
+  /* Export */
+  canvas.toBlob(async function(blob) {
+    var file = new File([blob], 'neurohabit-brain-state.png', { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: 'My NeuroHabit Score', text: buildShareText() }); return; }
-      catch (e) { /* fall through */ }
+      try { await navigator.share({ files: [file], title: 'My Brain State - NeuroHabit', text: buildShareText() }); return; }
+      catch(e) { /* fall through to download */ }
     }
-    const a = document.createElement('a');
+    var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'neurohabit-score.png';
+    a.download = 'neurohabit-brain-state.png';
     a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    setTimeout(function() { URL.revokeObjectURL(a.href); }, 5000);
   }, 'image/png');
 }
+
 
 // Helper: rounded rect path
 function roundRect(ctx, x, y, w, h, r) {
@@ -3652,8 +3608,13 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
     btn.classList.add('active');
     document.getElementById(`page-${tab}`).classList.add('page-active');
     document.getElementById(`page-${tab}`).scrollTop = 0;
-    // Refresh profile stats whenever that tab is opened
     if (tab === 'profile') renderProfile();
+    // Advance thought bubble category each time user returns to coach tab
+    if (tab === 'coach') {
+      _categoryCounters[_categoryOrder[_catTapIdx % _categoryOrder.length]]++;
+      _catTapIdx++;
+      renderThoughtBubble();
+    }
   });
 });
 
@@ -4368,7 +4329,6 @@ function togglePremiumPanel() {
   btn.classList.toggle('open', !isOpen);
   // Render panels when opened for first time so they load on demand
   if (!isOpen) {
-    renderWeeklyTrend();
     renderCatStreaks();
     renderMilestones();
     renderRadar();
