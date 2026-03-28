@@ -208,7 +208,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 /* Body */
 .habit-body { flex: 1; min-width: 0; }
 .habit-label { font-size: 13.5px; line-height: 1.4; color: var(--text); transition: color 0.2s; display: block; }
-.habit-row.done .habit-label { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--subtle); }
+.habit-row.done .habit-label { color: var(--text); }
 .habit-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
 .habit-type-tag { font-size: 10px; color: var(--muted); }
 .habit-row.foundational .habit-type-tag { color: color-mix(in srgb, var(--ac) 70%, var(--muted)); }
@@ -380,7 +380,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .improve-body span { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
 .improve-pct { font-family: 'Instrument Serif', serif; font-size: 16px; font-weight: 400; flex-shrink: 0; }
 .improve-done { opacity: 0.45; }
-.improve-done .improve-body strong { text-decoration: line-through; text-decoration-color: var(--subtle); }
+.improve-done .improve-body strong { opacity: 0.5; }
 
 /* Week dots */
 .week-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; margin-bottom: 14px; }
@@ -740,7 +740,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 }
 .focus-habit-item:last-child { border-bottom: none; }
 .focus-habit-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.focus-habit-item.done-focus { color: var(--muted); text-decoration: line-through; }
+.focus-habit-item.done-focus { color: var(--muted); }
 
 /* Good enough banner */
 .good-enough-banner {
@@ -873,33 +873,39 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .phase-row-trigger { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 4px; }
 
 /* ═══ THOUGHT BUBBLE ═════════════════════════════════════════ */
-.brain-thought-wrap { position: relative; display: flex; align-items: flex-start; gap: 0; margin-bottom: 16px; }
-.thought-bubble { position: relative; background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 12px 14px; flex: 1; margin-left: 10px; }
-.thought-bubble::before {
+.thought-bubble { position: relative; background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 12px 14px; width: 100%; }
+.thought-bubble.thought-up::before {
   content: '';
   position: absolute;
-  left: -8px; top: 18px;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
   width: 0; height: 0;
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
-  border-right: 8px solid var(--border2);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid var(--border2);
 }
-.thought-bubble::after {
+.thought-bubble.thought-up::after {
   content: '';
   position: absolute;
-  left: -6px; top: 19px;
+  top: -6px; left: 50%;
+  transform: translateX(-50%);
   width: 0; height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-right: 7px solid var(--surface);
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 7px solid var(--surface);
 }
 .thought-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase; margin-bottom: 4px; }
 .thought-body { font-size: 13px; color: var(--text); line-height: 1.65; }
 .thought-attr { font-size: 11px; color: var(--subtle); margin-top: 4px; }
-.thought-bubble.tb-science .thought-eyebrow { color: var(--coach); }
-.thought-bubble.tb-quote   .thought-eyebrow { color: var(--muted); }
-.thought-bubble.tb-quote   .thought-body    { font-style: italic; color: var(--muted); }
+.thought-bubble.tb-science   .thought-eyebrow { color: var(--coach); }
+.thought-bubble.tb-nutrition .thought-eyebrow { color: var(--serotonin); }
+.thought-bubble.tb-quote     .thought-eyebrow { color: var(--muted); }
+.thought-bubble.tb-quote     .thought-body    { font-style: italic; color: var(--muted); }
+.thought-bubble.tb-fun       .thought-eyebrow { color: var(--dopamine); }
+.thought-bubble.tb-fun       .thought-body    { font-style: italic; }
 
+.week-trend-inline { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; margin-bottom: 14px; }
+.week-trend-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 .trend-chart-wrap { position: relative; width: 100%; }
 .trend-svg { width: 100%; overflow: visible; }
 .trend-day-label { font-size: 9px; fill: var(--muted); }
@@ -991,27 +997,31 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
       <div class="onboard-sub">Choose at least one core habit per category. You can add more anytime — but your choices are locked for 28 days so the science can work.</div>
     </div>
     <div id="onboard-steps"></div>
-    <!-- Avatar Picker -->
-    <div class="onboard-step" style="margin-top:24px">
-      <div class="onboard-step-head">
-        <div class="onboard-step-dot" style="background:var(--coach)"></div>
-        <div>
-          <div class="onboard-step-title">Choose your avatar</div>
-          <div class="onboard-step-sub">Pick the one that feels most like you right now</div>
-        </div>
-      </div>
-      <div class="avatar-grid" id="onboardAvatarGrid"></div>
-    </div>
-    <div class="onboard-divider"></div>
-
     <div class="onboard-lock-note">
       <strong>28-day habit lock</strong> — Research shows 28 days is the minimum needed to know if a habit works for you (Lally et al. 2010, Keller et al. 2021). You can <em>add</em> habits at any time, but <em>removals</em> open after day 28. The recommended wait is 42 days.
     </div>
     <div class="onboard-cta">
-      <button class="onboard-cta-btn" id="onboardDoneBtn" onclick="finishOnboarding()" disabled>Start my habit journey →</button>
+      <button class="onboard-cta-btn" id="onboardDoneBtn" onclick="proceedToAvatarStep()" disabled>Next — Choose your avatar →</button>
       <div class="onboard-error" id="onboardError">Please select at least one core habit in each category.</div>
       <div class="onboard-cta-note">You can always discover more habits inside the app.</div>
     </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     AVATAR STEP — shown after habit selection
+     ══════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-avatar" style="display:none">
+  <div class="onboard-inner">
+    <div class="onboard-header">
+      <div class="onboard-logo" id="avatarStepBrain" style="font-size:56px"></div>
+      <div class="onboard-title">Who are you today?</div>
+      <div class="onboard-sub">Pick the avatar that feels most like you right now. You can change it any time from your profile.</div>
+    </div>
+    <div class="avatar-grid" id="onboardAvatarGrid" style="margin-bottom:24px"></div>
+    <button class="onboard-cta-btn" onclick="finishOnboarding()">Start my habit journey →</button>
+    <div class="onboard-cta-note" style="margin-top:8px">Skip for now — you can choose later in your profile.</div>
+    <button onclick="finishOnboarding()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:6px;margin-top:4px">Skip →</button>
   </div>
 </div>
 
@@ -1065,12 +1075,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
           <div class="brain-phase-label" id="brainvatarLabel">Ready</div>
           <div class="brain-phase-sub" id="brainvatarSub">Log your first habit to begin</div>
         </div>
-        <!-- Thought Bubble — science fact or quote beside brain -->
-        <div class="brain-thought-wrap" id="brainThoughtWrap" style="display:none">
-          <div style="width:64px;flex-shrink:0;display:flex;align-items:flex-start;justify-content:center;padding-top:4px">
-            <svg width="32" height="32" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" id="thoughtBrainMini"></svg>
-          </div>
-          <div id="thoughtBubbleContent" class="thought-bubble" style="cursor:pointer" title="Tap for next thought"></div>
+        <!-- Thought Bubble — points upward toward the main brain -->
+        <div id="brainThoughtWrap" style="display:none;padding:0 4px;margin-bottom:14px">
+          <div id="thoughtBubbleContent" class="thought-bubble thought-up" style="cursor:pointer" title="Tap for next thought"></div>
         </div>
 
         <!-- Core Day Badge / Nudge / Pips -->
@@ -1090,10 +1097,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
           </div>
         </div>
 
-        <div class="week-section">
-          <h3>This Week</h3>
-          <div class="week-grid" id="weekGrid"></div>
+        <!-- Weekly trend chart — inline, not premium -->
+        <div class="week-trend-inline">
+          <div class="week-trend-label">This week</div>
+          <div id="weeklyTrendChart"></div>
         </div>
+
         <button class="new-day-btn" onclick="confirmNewDay()">🌅 New Day — Reset Today</button>
 
         <!-- Premium Insights (collapsed) -->
@@ -1105,11 +1114,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
           <div class="premium-collapse-body" id="premiumCollapseBody" style="display:none">
             <div class="premium-preview-block">
               <div class="premium-preview-header">
-                <span class="premium-preview-title">📈 Weekly Trend</span>
+                <span class="premium-preview-title">📅 This Week</span>
                 <span class="beta-tag">⭐ Premium</span>
               </div>
-              <div class="premium-chart-live" id="weeklyTrendChart"></div>
-              <p class="premium-preview-desc">Your neurochemical activity across this week. Spot patterns and protect your streak.</p>
+              <div class="week-section" style="border:none;margin:0;padding:8px 0 0">
+                <div class="week-grid" id="weekGrid"></div>
+              </div>
+              <p class="premium-preview-desc">Your daily habit completion pattern for the week.</p>
             </div>
             <div class="premium-preview-block">
               <div class="premium-preview-header">
@@ -1248,6 +1259,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
           <div class="profile-avatar" id="profileAvatar">?</div>
           <div style="flex:1;min-width:0;overflow:hidden;">
             <div class="profile-name" id="profileName">Guest</div>
+            <div id="profileAvatarLabel" style="font-size:11px;color:var(--coach);font-weight:500;margin-top:1px;display:none"></div>
             <div class="profile-email" id="profileEmail">Not signed in</div>
           </div>
           <div class="profile-badge" id="profilePlanBadge">Free</div>
@@ -1329,7 +1341,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
           <div class="profile-row" onclick="openShareModal()">
             <div class="profile-row-icon">⬆️</div>
             <div class="profile-row-body">
-              <strong>Share Today's Score</strong>
+              <strong>Share Brain State</strong>
               <span>Share your hero score as an image or text</span>
             </div>
             <svg class="profile-row-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1460,22 +1472,21 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
         <div class="share-card-brand">NeuroHabit <span>By The Aufthority</span></div>
         <div class="share-card-date" id="shareDate"></div>
       </div>
-      <div class="share-hero-score">
-        <div class="share-hero-num" id="shareScoreNum">0</div>
-        <div class="share-hero-pct">%</div>
+      <!-- Brain Phase display -->
+      <div style="display:flex;flex-direction:column;align-items:center;padding:16px 0 8px">
+        <svg id="shareBrainSvg" width="80" height="80" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div id="sharePhaseLabel" style="font-family:'Instrument Serif',serif;font-size:20px;font-weight:400;margin-top:8px;color:var(--text)"></div>
+        <div id="shareGrade" style="font-size:12px;color:var(--muted);margin-top:3px"></div>
       </div>
-      <div class="share-grade" id="shareGrade"></div>
-      <!-- Brain Balance -->
-      <div class="brain-balance">
-        <div class="brain-balance-label">Brain Balance</div>
-        <div class="brain-balance-bars" id="brainBars"></div>
-        <div class="brain-balance-feedback" id="brainFeedback"></div>
-      </div>
-      <div class="share-cats" id="shareCats"></div>
+      <!-- Core pips -->
+      <div style="display:flex;justify-content:center;gap:6px;margin-bottom:12px" id="sharePipsRow"></div>
+      <!-- NeuroCoach analysis -->
+      <div id="shareCoachAnalysis" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px"></div>
+      <!-- Category status -->
+      <div class="share-cats" id="shareCats" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px"></div>
       <div class="share-tagline">neurohabit.app · by The Aufthority</div>
     </div>
     <div class="share-actions">
-      <button class="share-action-btn" onclick="generateShareImage()">🖼 Save as Image</button>
       <button class="share-action-btn primary" onclick="nativeShare()">⬆ Share</button>
     </div>
   </div>
@@ -2041,7 +2052,25 @@ function renderSection(type) {
   const cfg = getConfig();
   const selected = cfg[type].selected;
 
-  HABITS[type].habits.forEach((h, i) => {
+  // Sort: selected habits first (in selection order), then unselected
+  const allHabits = HABITS[type].habits.map(function(h, i) { return { h: h, i: i }; });
+  const selectedHabits   = selected.map(function(id) { return allHabits.find(function(x) { return x.h.id === id; }); }).filter(Boolean);
+  const unselectedHabits = allHabits.filter(function(x) { return !selected.includes(x.h.id); });
+  const sortedHabits     = selectedHabits.concat(unselectedHabits);
+
+  // Separator before unselected section
+  var separatorAdded = false;
+
+  sortedHabits.forEach((entry) => {
+    const h = entry.h, i = entry.i;
+    // Add separator before first unselected habit
+    if (!selected.includes(h.id) && !separatorAdded) {
+      separatorAdded = true;
+      const sep = document.createElement('div');
+      sep.style.cssText = 'margin:10px 0 6px;font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:var(--muted);opacity:0.6';
+      sep.textContent = 'Discover more habits';
+      list.appendChild(sep);
+    }
     const key      = type + '_' + i;
     const tierKey  = type + '_' + i + '_tier';
     const isInSet  = selected.includes(h.id);
@@ -2427,31 +2456,62 @@ function updateHeader() {
    ═══════════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════════════
-   NEUROCOACH FEED DATA
+   THOUGHT BUBBLE CONTENT POOL
+   Four rotating categories: neuroscience, nutrition/behaviour,
+   stoic quotes, funny movie quotes
    ═══════════════════════════════════════════════════════════ */
-const SCIENCE_FACTS = [
-  { body: "Deep work creates a dopamine plateau — sustained focus trains your brain for long-term ambition, not short-term distraction.", attr: "Berke & Gershman, dopamine research" },
-  { body: "95% of serotonin is produced in the gut. Every fibre-rich meal is a direct act of mood regulation.", attr: "Gut-brain axis research" },
-  { body: "It takes roughly 66 days to form a habit — not 21. Missing one day has no meaningful impact on long-term habit formation.", attr: "Lally et al., European Journal of Social Psychology, 2010" },
-  { body: "Morning sunlight within 60 minutes of waking sets your circadian clock — shaping alertness now and sleep quality 16 hours later.", attr: "Circadian biology research" },
-  { body: "Resistance training has an effect size of 0.66 for reducing depression — larger than cardio alone. Muscle is an endocrine organ.", attr: "Gordon et al., JAMA Psychiatry, 2018" },
-  { body: "Social connection predicts longevity as powerfully as not smoking. Loneliness carries a mortality risk comparable to obesity.", attr: "Holt-Lunstad, World Psychiatry, 2024" },
-  { body: "A 10 to 20 minute nap resets alertness and improves working memory — aligning with the natural circadian dip at 1 to 3pm.", attr: "NASA nap research; circadian biology" },
-  { body: "Gratitude practice changes the baseline firing pattern of the prefrontal cortex, physically rewiring toward a more positive default state.", attr: "Positive psychology neuroscience research" },
-  { body: "Walking 7,000 to 8,000 steps per day captures most of the all-cause mortality benefit of daily movement — even without a dedicated workout.", attr: "Paluch et al., JAMA Network Open, 2022" },
-  { body: "Shared meals predict social network strength more strongly than almost any other daily behaviour. Food plus presence equals oxytocin.", attr: "Dunbar et al., 2017" },
+const THOUGHT_POOL = [
+  /* ── Neuroscience facts ───────────────────────────────── */
+  { cat: 'neuro', eye: 'Neuroscience', body: "Deep work creates a dopamine plateau — sustained focus trains your brain for long-term ambition, not short-term distraction.", attr: "Berke & Gershman, dopamine research" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Morning sunlight within 60 minutes of waking sets your circadian clock — shaping alertness now and sleep quality 16 hours later.", attr: "Circadian biology research" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Resistance training has an effect size of 0.66 for reducing depression — larger than cardio alone. Muscle is an endocrine organ.", attr: "Gordon et al., JAMA Psychiatry, 2018" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Social connection predicts longevity as powerfully as not smoking. Loneliness carries a mortality risk comparable to obesity.", attr: "Holt-Lunstad, World Psychiatry, 2024" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "A 10 to 20 minute nap resets alertness and working memory — aligning with the natural circadian dip at 1 to 3pm.", attr: "NASA nap research; circadian biology" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Gratitude practice physically rewires the prefrontal cortex toward a more positive default firing pattern.", attr: "Positive psychology neuroscience research" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Oxytocin released through genuine social connection also reduces cortisol — connection is literally stress medicine.", attr: "Uvnas-Moberg, oxytocin research" },
+  { cat: 'neuro', eye: 'Neuroscience', body: "Rhythmic physical movement — walking, swimming, cycling — directly increases raphe nuclei firing, your brain's primary serotonin production site.", attr: "Jacobs & Fornal 1999; Aan het Rot et al. 2016" },
+  /* ── Nutritional & behavioural science ────────────────── */
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "95% of serotonin is produced in the gut. Every fibre-rich meal is a direct act of mood regulation.", attr: "Gut-brain axis research" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "It takes roughly 66 days to form a habit — not 21. Missing one day has no meaningful impact on long-term formation.", attr: "Lally et al., European Journal of Social Psychology, 2010" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Walking 7,000 to 8,000 steps per day captures most of the all-cause mortality benefit — even without a dedicated workout.", attr: "Paluch et al., JAMA Network Open, 2022" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Shared meals predict social network strength more strongly than almost any other daily behaviour.", attr: "Dunbar et al., 2017" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Reading for just 6 minutes reduces cortisol by up to 68%. It is one of the fastest relaxation techniques ever measured.", attr: "University of Sussex, 2009" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "The Progress Principle: logging meaningful forward progress on any goal is the single strongest daily predictor of positive emotion.", attr: "Amabile & Kramer, Harvard Business Review" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Expressed appreciation activates oxytocin in both the giver and the receiver. Sincerity is the mechanism — generic praise does not trigger it.", attr: "Algoe et al., Psychological Science 2020" },
+  { cat: 'nutrition', eye: 'Behavioural Science', body: "Added sugar spikes then crashes dopamine — directly destabilising your serotonin baseline. Multiple studies link high sugar intake to depression.", attr: "Longitudinal metabolic and mood research" },
+  /* ── Stoic quotes ─────────────────────────────────────── */
+  { cat: 'stoic', eye: "Today's thought", body: "You do not rise to the level of your goals. You fall to the level of your systems.", attr: "James Clear" },
+  { cat: 'stoic', eye: "Today's thought", body: "The impediment to action advances action. What stands in the way becomes the way.", attr: "Marcus Aurelius" },
+  { cat: 'stoic', eye: "Today's thought", body: "We are what we repeatedly do. Excellence is not an act but a habit.", attr: "Aristotle" },
+  { cat: 'stoic', eye: "Today's thought", body: "Between stimulus and response there is a space. In that space is our power to choose our response.", attr: "Viktor Frankl" },
+  { cat: 'stoic', eye: "Today's thought", body: "Waste no more time arguing about what a good person should be. Be one.", attr: "Marcus Aurelius" },
+  { cat: 'stoic', eye: "Today's thought", body: "The two most powerful warriors are patience and time.", attr: "Leo Tolstoy" },
+  { cat: 'stoic', eye: "Today's thought", body: "You have power over your mind, not outside events. Realise this, and you will find strength.", attr: "Marcus Aurelius" },
+  { cat: 'stoic', eye: "Today's thought", body: "First say to yourself what you would be; then do what you have to do.", attr: "Epictetus" },
+  /* ── Funny movie/TV quotes ────────────────────────────── */
+  { cat: 'fun', eye: 'Random Wisdom', body: "Why so serious?", attr: "The Joker, The Dark Knight (2008)" },
+  { cat: 'fun', eye: 'Random Wisdom', body: "You is kind, you is smart, you is important.", attr: "The Help (2011)" },
+  { cat: 'fun', eye: 'Random Wisdom', body: "To infinity and beyond!", attr: "Buzz Lightyear, Toy Story (1995)" },
+  { cat: 'fun', eye: 'Random Wisdom', body: "Just keep swimming.", attr: "Dory, Finding Nemo (2003)" },
+  { cat: 'fun', eye: 'Random Wisdom', body: "Life is like a box of chocolates. You never know what you are gonna get.", attr: "Forrest Gump (1994)" },
+  { cat: 'fun', eye: 'Random Wisdom', body: "Why are you running?", attr: "Mr. Tawau, Polis Evo (2015)" },
+  { cat: 'fun', eye: 'Random Wisdom', body: "I am not superstitious, but I am a little stitious.", attr: "Michael Scott, The Office" },
+  { cat: 'fun', eye: 'Random Wisdom', body: "That is what she said.", attr: "Michael Scott, The Office" },
+  { cat: 'fun', eye: 'Random Wisdom', body: "I volunteer as tribute.", attr: "Katniss Everdeen, The Hunger Games (2012)" },
+  { cat: 'fun', eye: 'Random Wisdom', body: "Elementary, my dear Watson.", attr: "Sherlock Holmes (various)" },
 ];
 
-const QUOTES = [
-  { body: "You do not rise to the level of your goals. You fall to the level of your systems.", attr: "James Clear" },
-  { body: "The impediment to action advances action. What stands in the way becomes the way.", attr: "Marcus Aurelius" },
-  { body: "We are what we repeatedly do. Excellence is not an act but a habit.", attr: "Aristotle" },
-  { body: "Between stimulus and response there is a space. In that space is our power to choose our response.", attr: "Viktor Frankl" },
-  { body: "Small habits do not add up. They compound.", attr: "James Clear" },
-  { body: "Waste no more time arguing about what a good person should be. Be one.", attr: "Marcus Aurelius" },
-  { body: "The two most powerful warriors are patience and time.", attr: "Leo Tolstoy" },
-  { body: "You have power over your mind, not outside events. Realise this, and you will find strength.", attr: "Marcus Aurelius" },
-];
+/* Shorthand aliases for buildCoachFeed compatibility */
+const SCIENCE_FACTS = THOUGHT_POOL.filter(function(t) { return t.cat === 'neuro' || t.cat === 'nutrition'; });
+const QUOTES        = THOUGHT_POOL.filter(function(t) { return t.cat === 'stoic'; });
+
+/* Category display styles */
+const THOUGHT_STYLES = {
+  neuro:     { cls: 'tb-science',   eyeColor: 'var(--coach)' },
+  nutrition: { cls: 'tb-nutrition', eyeColor: 'var(--serotonin)' },
+  stoic:     { cls: 'tb-quote',     eyeColor: 'var(--muted)' },
+  fun:       { cls: 'tb-fun',       eyeColor: 'var(--dopamine)' },
+};
 
 /* ═══════════════════════════════════════════════════════════
    RECOVERY BONUS
@@ -2539,10 +2599,7 @@ function buildCoachFeed() {
     cards.push({ type: 'nudge', eye: 'One thing to consider', body: qHabitName + ' is your ' + catNames[qCat] + ' core habit and it is still quiet today. ' + nudgeMap[qCat] });
   }
 
-  // Card 3: Science fact
-  const factIdx = (doy + Math.floor(totalLogged / 2)) % SCIENCE_FACTS.length;
-  const fact = SCIENCE_FACTS[factIdx];
-  cards.push({ type: 'science', eye: 'Neuroscience', body: fact.body, attr: fact.attr });
+  // Science fact now in thought bubble — not in feed
 
   // Card 4: Weekly pattern (after 3+ days)
   const weekKeys = Object.keys(weekData).filter(d => d <= today).sort().slice(-7);
@@ -2558,20 +2615,12 @@ function buildCoachFeed() {
     cards.push({ type: 'week', eye: 'This week', body: weekBody });
   }
 
-  // Card 5: Quote
-  const quoteIdx = (doy + totalLogged) % QUOTES.length;
-  const quote = QUOTES[quoteIdx];
-  cards.push({ type: 'quote', eye: "Today's thought", body: quote.body, attr: quote.attr });
+  // Quote now in thought bubble — not in feed
 
-  // Render — science and quote go into the thought bubble, rest into the feed
-  var thoughtCards = cards.filter(function(c) { return c.type === 'science' || c.type === 'quote'; });
-  var feedCards    = cards.filter(function(c) { return c.type !== 'science' && c.type !== 'quote'; });
+  // All cards go into feed; thought bubble runs from THOUGHT_POOL independently
+  renderThoughtBubble();
 
-  // Update thought bubble (cycles through science/quote)
-  renderThoughtBubble(thoughtCards);
-
-  // Regular feed cards
-  feedCards.forEach(function(card) {
+  cards.forEach(function(card) {
     const el = document.createElement('div');
     el.className = 'coach-feed-card card-' + card.type;
     el.innerHTML = '<div class="coach-feed-eyebrow">' + card.eye + '</div>'
@@ -2581,23 +2630,26 @@ function buildCoachFeed() {
   });
 }
 
-var _thoughtIdx = 0;
-function renderThoughtBubble(cards) {
-  const wrap = document.getElementById('brainThoughtWrap');
-  if (!wrap || !cards || cards.length === 0) { if (wrap) wrap.style.display = 'none'; return; }
-  wrap.style.display = 'flex';
-  const card = cards[_thoughtIdx % cards.length];
-  const classMap = { science: 'tb-science', quote: 'tb-quote' };
-  const eyeColorMap = { science: 'var(--coach)', quote: 'var(--muted)' };
-  const bubble = document.getElementById('thoughtBubbleContent');
-  if (!bubble) return;
-  bubble.className = 'thought-bubble ' + (classMap[card.type] || '');
+var _thoughtIdx = Math.floor((Date.now() - new Date(new Date().getFullYear(),0,0)) / 86400000) % THOUGHT_POOL.length;
+function renderThoughtBubble() {
+  var wrap = document.getElementById('brainThoughtWrap');
+  var bubble = document.getElementById('thoughtBubbleContent');
+  if (!wrap || !bubble) return;
+  wrap.style.display = 'block';
+
+  var card = THOUGHT_POOL[_thoughtIdx % THOUGHT_POOL.length];
+  var style = THOUGHT_STYLES[card.cat] || THOUGHT_STYLES.stoic;
+
+  bubble.className = 'thought-bubble thought-up ' + style.cls;
   bubble.innerHTML =
-    '<div class="thought-eyebrow" style="color:' + (eyeColorMap[card.type] || 'var(--muted)') + '">' + card.eye + '</div>' +
+    '<div class="thought-eyebrow" style="color:' + style.eyeColor + '">' + card.eye + '</div>' +
     '<div class="thought-body">' + card.body + '</div>' +
     (card.attr ? '<div class="thought-attr">— ' + card.attr + '</div>' : '');
-  // Tap to cycle
-  bubble.onclick = function() { _thoughtIdx++; renderThoughtBubble(cards); };
+
+  bubble.onclick = function() {
+    _thoughtIdx++;
+    renderThoughtBubble();
+  };
 }
 
 /* Core pips */
@@ -2623,7 +2675,6 @@ function renderCoach() {
   // Brain phase
   const phase = brainPhase();
   drawBrainSvg(document.getElementById('brainvatarSvg'), phase);
-  drawBrainSvg(document.getElementById('thoughtBrainMini'), phase);
   document.getElementById('brainvatarLabel').textContent = BRAIN_LABELS[phase];
   document.getElementById('brainvatarSub').textContent   = BRAIN_SUBS[phase];
 
@@ -3091,59 +3142,83 @@ function getBrainBalanceFeedback() {
 }
 
 function openShareModal() {
-  const score  = heroScore();
-  const now    = new Date();
-  const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const grades = [[90,'S','#4a9e82'],[75,'A','#4a9e82'],[55,'B','#5a82c0'],[35,'C','#c8712a'],[15,'D','#b85070'],[0,'—','#7a7469']];
-  const [, g, c] = grades.find(([min]) => score >= min) || grades[5];
+  var phase = brainPhase();
+  var now   = new Date();
+  var days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var catColors = { dopamine:'#c8712a', serotonin:'#4a9e82', oxytocin:'#b85070', endorphin:'#5a82c0' };
+  var catNames  = { dopamine:'Dopamine', serotonin:'Serotonin', oxytocin:'Oxytocin', endorphin:'Endorphin' };
 
-  document.getElementById('shareDate').textContent    = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
-  document.getElementById('shareScoreNum').textContent = Math.round(score);
-  document.getElementById('shareScoreNum').style.color = c;
-  document.getElementById('shareGrade').textContent    = `Grade ${g} · ${gradeLabel(g)}`;
-  document.getElementById('shareGrade').style.color    = c;
+  document.getElementById('shareDate').textContent = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()];
 
-  // Brain balance bars
-  const barColors = { dopamine: '#c8712a', serotonin: '#4a9e82', oxytocin: '#b85070', endorphin: '#5a82c0' };
-  const barNames  = { dopamine: 'Dopamine', serotonin: 'Serotonin', oxytocin: 'Oxytocin', endorphin: 'Endorphin' };
-  document.getElementById('brainBars').innerHTML = Object.keys(HABITS).map(type => {
-    const pct = catEffectivePct(type);
-    return `
-      <div class="balance-row">
-        <div class="balance-name">${barNames[type]}</div>
-        <div class="balance-track"><div class="balance-fill" style="width:${pct}%;background:${barColors[type]}"></div></div>
-        <div class="balance-pct" style="color:${barColors[type]}">${Math.round(pct)}%</div>
-      </div>`;
-  }).join('');
+  // Brain SVG
+  drawBrainSvg(document.getElementById('shareBrainSvg'), phase);
 
-  // Brain balance feedback sentence (REVISION 6)
-  document.getElementById('brainFeedback').textContent = getBrainBalanceFeedback();
+  // Phase label
+  document.getElementById('sharePhaseLabel').textContent = BRAIN_LABELS[phase];
 
-  // Category score tiles
-  document.getElementById('shareCats').innerHTML = Object.keys(HABITS).map(type => {
-    const pct = catEffectivePct(type);
-    return `<div class="share-cat"><div class="share-cat-name">${barNames[type]}</div><div class="share-cat-score" style="color:${barColors[type]}">${Math.round(pct)}%</div></div>`;
-  }).join('');
+  // Sub label — foundational count
+  var cf = countFoundationals();
+  document.getElementById('shareGrade').textContent = cf.done + ' of ' + cf.total + ' core habits done today';
+
+  // Core pips
+  var pipsRow = document.getElementById('sharePipsRow');
+  if (pipsRow) {
+    pipsRow.innerHTML = '';
+    Object.keys(HABITS).forEach(function(type) {
+      var ok = foundationDone(type);
+      var dot = document.createElement('div');
+      dot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:' + (ok ? catColors[type] : 'var(--border2)') + ';border:' + (ok ? 'none' : '1.5px solid var(--border2)') + ';transition:background 0.3s';
+      pipsRow.appendChild(dot);
+    });
+  }
+
+  // NeuroCoach analysis — pull the current reflect card text
+  var coachEl = document.getElementById('shareCoachAnalysis');
+  if (coachEl) {
+    var feedCards = document.querySelectorAll('#coachFeed .coach-feed-card.card-reflect, #coachFeed .coach-feed-card.card-nudge');
+    var coachText = '';
+    feedCards.forEach(function(card) {
+      var body = card.querySelector('.coach-feed-body');
+      if (body && !coachText) coachText = body.textContent;
+    });
+    coachEl.innerHTML =
+      '<div style="font-size:10px;font-weight:600;letter-spacing:0.7px;text-transform:uppercase;color:var(--serotonin);margin-bottom:5px">NeuroCoach</div>' +
+      '<div style="font-size:12.5px;color:var(--text);line-height:1.6">' + (coachText || BRAIN_SUBS[phase]) + '</div>';
+  }
+
+  // Category tiles
+  var catsEl = document.getElementById('shareCats');
+  if (catsEl) {
+    catsEl.innerHTML = Object.keys(HABITS).map(function(type) {
+      var ok  = foundationDone(type);
+      var col = catColors[type];
+      return '<div style="background:var(--surface);border:1px solid ' + (ok ? col : 'var(--border)') + ';border-radius:var(--radius-sm);padding:8px 10px;text-align:center">' +
+        '<div style="font-size:11px;font-weight:600;color:' + col + '">' + catNames[type] + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (ok ? 'Active' : 'Building') + '</div>' +
+        '</div>';
+    }).join('');
+  }
 
   openModal('shareOverlay');
 }
 
-function gradeLabel(g) {
-  const map = { 'S': 'Perfect Day', 'A': 'Excellent', 'B': 'Good', 'C': 'Okay', 'D': 'Low', '—': 'Just Starting' };
-  return map[g] || '';
-}
-
 function buildShareText() {
-  const score = Math.round(heroScore());
-  const grades = [[90,'S'],[75,'A'],[55,'B'],[35,'C'],[15,'D'],[0,'—']];
-  const [, g] = grades.find(([min]) => score >= min) || grades[5];
-  const now   = new Date();
-  const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const catNames = { dopamine:'Dopamine', serotonin:'Serotonin', oxytocin:'Oxytocin', endorphin:'Endorphin' };
-  const lines = Object.keys(HABITS).map(t => `  ${catNames[t]}: ${Math.round(catEffectivePct(t))}%`).join('\n');
-
-  return `🧠 NeuroHabit — ${days[now.getDay()]}\n\nHero Score: ${score}%  |  Grade: ${g}\n\n${lines}\n\n${getBrainBalanceFeedback()}\n\nTracked with NeuroHabit by The Aufthority`;
+  var phase    = brainPhase();
+  var now      = new Date();
+  var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var catNames = { dopamine:'Dopamine', serotonin:'Serotonin', oxytocin:'Oxytocin', endorphin:'Endorphin' };
+  var catLines = Object.keys(HABITS).map(function(t) {
+    return '  ' + catNames[t] + ': ' + (foundationDone(t) ? 'Active' : 'Building');
+  });
+  var cf   = countFoundationals();
+  var parts = [
+    'NeuroHabit ' + String.fromCharCode(8212) + ' ' + dayNames[now.getDay()],
+    '',
+    'Brain State: ' + BRAIN_LABELS[phase],
+    cf.done + ' of ' + cf.total + ' core habits done'
+  ].concat(catLines).concat(['', 'Tracked with NeuroHabit by The Aufthority']);
+  return parts.join(String.fromCharCode(10));
 }
 
 function copyShareText() {
@@ -3652,18 +3727,18 @@ function showAvatarPicker() {
    AVATAR SYSTEM — relatable character identities
    ═══════════════════════════════════════════════════════════ */
 const AVATARS = [
-  { id: 'tired-parent',   emoji: '😮‍💨', label: 'Tired Parent',        desc: 'Running on love and coffee' },
-  { id: 'shift-worker',   emoji: '🌙',         label: 'Shift Worker',         desc: 'My schedule is a mystery' },
-  { id: 'neurodivergent', emoji: '🌀',         label: 'Neurodivergent',       desc: 'My brain works differently' },
-  { id: 'messy-student',  emoji: '📚',         label: 'Messy Student',        desc: 'Deadline? What deadline?' },
-  { id: 'gamer',          emoji: '🎮',         label: 'The Gamer',            desc: 'One more round, I promise' },
-  { id: 'man-child',      emoji: '🧸',         label: 'Man Child',            desc: 'Adulting is hard, okay?' },
-  { id: 'non-veggie',     emoji: '🍖',         label: 'Non-Veg Eater',        desc: 'Plants are for decoration' },
-  { id: 'workaholic',     emoji: '💼',         label: 'Workaholic',           desc: 'Sleep is overrated, right?' },
-  { id: 'anxious-one',    emoji: '🫠',         label: 'The Anxious One',      desc: 'Overthinking everything' },
-  { id: 'introvert',      emoji: '🏠',         label: 'Proud Introvert',      desc: 'People are exhausting' },
-  { id: 'gym-bro',        emoji: '💪',         label: 'Gym Bro',              desc: 'Did I mention I lift?' },
-  { id: 'creative',       emoji: '🎨',         label: 'The Creative',         desc: 'Living in my own world' },
+  { id: 'tired-parent',   emoji: '😪', label: 'Tired Parent',        desc: 'Running on love and coffee' },
+  { id: 'shift-worker',   emoji: '🥱', label: 'Shift Worker',         desc: 'My schedule is a mystery' },
+  { id: 'neurodivergent', emoji: '🤔', label: 'Neurodivergent',       desc: 'My brain works differently' },
+  { id: 'messy-student',  emoji: '😅', label: 'Messy Student',        desc: 'Deadline? What deadline?' },
+  { id: 'gamer',          emoji: '😎', label: 'The Gamer',            desc: 'One more round, I promise' },
+  { id: 'man-child',      emoji: '😜', label: 'Man Child',            desc: 'Adulting is hard, okay?' },
+  { id: 'non-veggie',     emoji: '😋', label: 'Non-Veg Eater',        desc: 'Plants are for decoration' },
+  { id: 'workaholic',     emoji: '😬', label: 'Workaholic',           desc: 'Sleep is overrated, right?' },
+  { id: 'anxious-one',    emoji: '😰', label: 'The Anxious One',      desc: 'Overthinking everything' },
+  { id: 'introvert',      emoji: '🙂', label: 'Proud Introvert',      desc: 'People are exhausting' },
+  { id: 'gym-bro',        emoji: '😤', label: 'Gym Bro',              desc: 'Did I mention I lift?' },
+  { id: 'creative',       emoji: '🤩', label: 'The Creative',         desc: 'Living in my own world' },
 ];
 
 const AVK = 'nh_pwa_avatar'; // localStorage key
@@ -3684,6 +3759,19 @@ function renderProfileAvatar() {
   } else {
     el.textContent = userData && userData.name ? userData.name.slice(0, 2).toUpperCase() : '?';
   }
+  // Show avatar label under display name
+  const lbl = document.getElementById('profileAvatarLabel');
+  if (lbl) {
+    if (userAvatar && userAvatar.label) {
+      lbl.textContent = userAvatar.emoji + ' ' + userAvatar.label;
+      lbl.style.display = 'block';
+    } else {
+      lbl.style.display = 'none';
+    }
+  }
+  // Update profile mini icon
+  const mini = document.getElementById('profileAvatarMini');
+  if (mini) mini.textContent = userAvatar ? userAvatar.emoji : '👤';
 }
 
 const CAT_META = [
@@ -3860,6 +3948,36 @@ function updateOnboardCTA() {
   if (err) err.classList.toggle('show', !allValid && Object.values(tempConfig).some(function(c) { return c.selected.length > 0; }));
 }
 
+function proceedToAvatarStep() {
+  /* Validate habits first */
+  var invalid = CAT_META.filter(function(meta) {
+    var fdnIds = HABITS[meta.type].foundationalIds;
+    return !tempConfig[meta.type].selected.some(function(id) { return fdnIds.includes(id); });
+  });
+  if (invalid.length > 0) {
+    document.getElementById('onboardError').classList.add('show');
+    return;
+  }
+  /* Move to avatar screen */
+  var habScreen = document.getElementById('screen-onboarding');
+  habScreen.classList.remove('screen-active');
+  habScreen.style.display = 'none';
+  var avScreen = document.getElementById('screen-avatar');
+  avScreen.style.display = 'flex';
+  avScreen.classList.add('screen-active');
+  /* Draw brain in avatar step header */
+  var brainEl = document.getElementById('avatarStepBrain');
+  if (brainEl) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '56'); svg.setAttribute('height', '56');
+    svg.setAttribute('viewBox', '0 0 96 96');
+    drawBrainSvg(svg, 1);
+    brainEl.innerHTML = '';
+    brainEl.appendChild(svg);
+  }
+  renderOnboardAvatarGrid();
+}
+
 function finishOnboarding() {
   /* Validate: at least one core per category */
   const invalid = CAT_META.filter(function(meta) {
@@ -3913,14 +4031,22 @@ function renderPhaseGuide() {
    ═══════════════════════════════════════════════════════════ */
 function addHabitToSet(type, hid) {
   if (!userHabitConfig) userHabitConfig = JSON.parse(JSON.stringify(DEFAULT_HABIT_CONFIG));
-  if (!userHabitConfig[type].selected.includes(hid)) {
-    userHabitConfig[type].selected.push(hid);
-    sv(HCK, userHabitConfig);
-    renderSection(type);
-    updateCatUI(type);
-    renderCoach();
-    showToast('Habit added to your set', 'success');
-  }
+  if (userHabitConfig[type].selected.includes(hid)) return;
+  var h = HABITS[type].habits.find(function(x) { return x.id === hid; });
+  if (!h) return;
+  var catNames = { dopamine: 'Dopamine', serotonin: 'Serotonin', oxytocin: 'Oxytocin', endorphin: 'Endorphin' };
+  var lockNote = isLockActive()
+    ? 'Once added, it is locked for ' + daysUntilUnlock() + ' more days.'
+    : 'You can remove it at any time after adding.';
+  var msgLine1 = 'Add this habit to your ' + (catNames[type] || type) + ' set?';
+  var msgLine2 = lockNote;
+  if (!confirm(msgLine1 + ' ' + msgLine2)) return;
+  userHabitConfig[type].selected.push(hid);
+  sv(HCK, userHabitConfig);
+  renderSection(type);
+  updateCatUI(type);
+  renderCoach();
+  showToast(h.label + ' added to your set', 'success');
 }
 
 function removeHabitFromSet(type, hid) {
@@ -4272,6 +4398,7 @@ window.showOnboarding      = showOnboarding;
 window.showAvatarPicker    = showAvatarPicker;
 window.renderPhaseGuide    = renderPhaseGuide;
 window.finishOnboarding    = finishOnboarding;
+window.proceedToAvatarStep = proceedToAvatarStep;
 window.addHabitToSet       = addHabitToSet;
 window.removeHabitFromSet  = removeHabitFromSet;
 window.showMainApp         = showMainApp;
