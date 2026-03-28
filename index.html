@@ -132,8 +132,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .ring-track { fill: none; stroke: var(--border2); stroke-width: 3; }
 .ring-fill  { fill: none; stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 0.55s cubic-bezier(.4,0,.2,1); }
 .score-ring-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--text); }
-.score-pill-info .val { font-size: 13px; font-weight: 600; line-height: 1; color: var(--text); }
-.score-pill-info .lbl { font-size: 10px; color: var(--muted); margin-top: 1px; }
+/* .score-pill-info removed — replaced by brain-state-chip */
+
 .grade-chip { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: 'Instrument Serif', serif; font-size: 16px; transition: all 0.35s; flex-shrink: 0; cursor: pointer; color: var(--muted); }
 
 /* ═══ BOTTOM NAV ══════════════════════════════════════════════ */
@@ -324,39 +324,42 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 /* ═══ COACH PAGE ═════════════════════════════════════════════ */
 #screen-app { overflow: hidden; }
 .coach-page-inner { padding: 20px 18px 0; }
-.coach-welcome { margin-bottom: 18px; }
-.coach-welcome h2 { font-family: 'Instrument Serif', serif; font-size: 21px; font-weight: 400; letter-spacing: -0.4px; margin-bottom: 3px; }
-.coach-welcome p { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
-.coach-hero-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; position: relative; overflow: hidden; }
-.coach-hero-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--dopamine), var(--oxytocin), var(--serotonin), var(--endorphin)); }
-.coach-hero-top { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-.coach-big-score { font-family: 'Instrument Serif', serif; font-size: 42px; font-weight: 400; line-height: 1; letter-spacing: -1px; }
-.coach-big-score span { font-size: 18px; color: var(--muted); }
-.coach-score-info strong { display: block; font-size: 14px; font-weight: 600; margin-bottom: 3px; }
-.coach-score-info em { font-size: 12px; color: var(--muted); font-style: normal; line-height: 1.4; }
-.coach-cat-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-.coach-cat-bar-item { }
-.coach-cat-bar-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-bottom: 3px; }
-.coach-cat-bar-label span:last-child { font-weight: 600; }
-.coach-cat-bar-track { height: 3px; border-radius: 2px; background: var(--surface2); overflow: hidden; }
-.coach-cat-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s cubic-bezier(.4,0,.2,1); width: 0%; }
 
-/* Share button on coach */
-.share-score-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
-.share-score-btn:hover { background: var(--surface2); }
+/* Brain Phase Block */
+.brain-phase-block { display: flex; flex-direction: column; align-items: center; padding: 18px 0 10px; margin-bottom: 8px; }
+.brain-phase-svg { margin-bottom: 10px; }
+.brain-phase-label { font-family: 'Instrument Serif', serif; font-size: 20px; font-weight: 400; color: var(--text); text-align: center; line-height: 1.2; margin-bottom: 3px; }
+.brain-phase-sub { font-size: 12.5px; color: var(--muted); text-align: center; line-height: 1.5; max-width: 280px; }
 
-/* Next-up improvement summary */
-.improve-summary { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; margin-bottom: 14px; }
-.improve-summary-head { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 9px; }
-.improve-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
-.improve-row:last-child { border-bottom: none; padding-bottom: 0; }
-.improve-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.improve-body { flex: 1; min-width: 0; }
-.improve-body strong { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.2; }
-.improve-body span { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
-.improve-pct { font-family: 'Instrument Serif', serif; font-size: 16px; font-weight: 400; flex-shrink: 0; }
-.improve-done { opacity: 0.45; }
-.improve-done .improve-body strong { text-decoration: line-through; text-decoration-color: var(--subtle); }
+/* Brain State Chip in Header */
+.brain-state-chip { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 30px; padding: 5px 11px 5px 7px; }
+.brain-state-chip span { font-size: 12px; font-weight: 500; color: var(--text); }
+
+/* Core pips row */
+.core-pips-row { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; }
+.core-pip-dot { width: 8px; height: 8px; border-radius: 50%; transition: background 0.3s, border 0.3s; }
+
+/* Core Day Badge / Nudge */
+.core-day-badge { text-align: center; font-size: 13px; font-weight: 600; color: #085041; background: color-mix(in srgb, var(--serotonin) 14%, var(--surface2)); border: 1px solid color-mix(in srgb, var(--serotonin) 30%, transparent); border-radius: var(--radius-sm); padding: 9px 16px; margin-bottom: 8px; }
+.core-nudge-text { text-align: center; font-size: 12px; color: var(--muted); line-height: 1.6; padding: 4px 0; margin-bottom: 8px; }
+
+/* NeuroCoach Feed */
+.coach-feed { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.coach-feed-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 13px 14px; border-left: 3px solid var(--border2); }
+.coach-feed-card.card-reflect { border-left-color: var(--serotonin); }
+.coach-feed-card.card-science  { border-left-color: var(--coach); }
+.coach-feed-card.card-nudge    { border-left-color: var(--dopamine); }
+.coach-feed-card.card-quote    { border-left-color: var(--subtle); background: var(--surface2); }
+.coach-feed-card.card-week     { border-left-color: var(--endorphin); }
+.coach-feed-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 5px; }
+.card-reflect .coach-feed-eyebrow { color: var(--serotonin); }
+.card-science .coach-feed-eyebrow { color: var(--coach); }
+.card-nudge   .coach-feed-eyebrow { color: var(--dopamine); }
+.card-quote   .coach-feed-eyebrow { color: var(--muted); }
+.card-week    .coach-feed-eyebrow { color: var(--endorphin); }
+.coach-feed-body { font-size: 13px; color: var(--text); line-height: 1.7; }
+.card-quote .coach-feed-body { font-style: italic; color: var(--muted); }
+.coach-feed-attr { font-size: 11px; color: var(--subtle); margin-top: 5px; }
 
 /* Week dots */
 .week-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; margin-bottom: 14px; }
@@ -883,28 +886,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
   </div>
   <div class="header-right">
     <div class="streak-badge"><span>🔥</span><span id="streakNum">0</span></div>
-    <div class="score-pill" onclick="showScreen('screen-grade')">
-      <div class="score-ring-wrap">
-        <svg viewBox="0 0 34 34" width="34" height="34">
-          <defs>
-            <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stop-color="#c8712a"/>
-              <stop offset="50%"  stop-color="#b85070"/>
-              <stop offset="100%" stop-color="#5a82c0"/>
-            </linearGradient>
-          </defs>
-          <circle class="ring-track" cx="17" cy="17" r="14"/>
-          <circle class="ring-fill" id="ringFill" cx="17" cy="17" r="14"
-            stroke="url(#rg)" stroke-dasharray="87.96" stroke-dashoffset="87.96"/>
-        </svg>
-        <div class="score-ring-num" id="ringNum">0%</div>
-      </div>
-      <div class="score-pill-info">
-        <div class="val" id="headerScoreVal">0%</div>
-        <div class="lbl">Hero Score</div>
-      </div>
+    <div class="brain-state-chip" id="brainStateChip">
+      <svg id="headerBrainSvg" width="28" height="28" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"></svg>
+      <span id="headerBrainLabel">Ready</span>
     </div>
-    <div class="grade-chip" id="gradeChip" onclick="showScreen('screen-grade')">—</div>
   </div>
 </header>
 
@@ -917,84 +902,89 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
     <!-- COACH PAGE -->
     <div class="page page-active" id="page-coach">
       <div class="coach-page-inner">
-        <div class="coach-welcome">
-          <h2 id="coachGreeting">Good morning 🧠</h2>
-          <p>Your neuroscience-based performance snapshot.</p>
+
+        <!-- Brain Phase Display -->
+        <div class="brain-phase-block">
+          <svg id="brainvatarSvg" class="brain-phase-svg" width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div class="brain-phase-label" id="brainvatarLabel">Ready</div>
+          <div class="brain-phase-sub" id="brainvatarSub">Log your first habit to begin</div>
         </div>
-        <!-- Recovery Bonus Banner -->
+
+        <!-- Core Day Badge / Nudge -->
+        <div id="coreDayBadge" class="core-day-badge" style="display:none">Core Day</div>
+        <div id="coreNudge" class="core-nudge-text" style="display:none"></div>
+        <div class="core-pips-row" id="corePipsRow"></div>
+
+        <!-- NeuroCoach Feed -->
+        <div class="coach-feed" id="coachFeed"></div>
+
+        <!-- Recovery Banner -->
         <div class="recovery-bonus-banner" id="recoveryBonusBanner">
           <div class="recovery-bonus-icon">🔄</div>
           <div class="recovery-bonus-body">
             <strong>Welcome back — no shame, just action.</strong>
-            <span id="recoveryBonusMsg">You missed a few days, but every streak starts with returning. The brain rewards re-engagement just as much as consistency.</span>
-            <div class="recovery-boost-chip">⚡ +5% Re-engagement Boost</div>
+            <span id="recoveryBonusMsg">Every streak starts with returning. The brain rewards re-engagement just as much as consistency.</span>
           </div>
         </div>
 
-        <!-- Brainvatar Card -->
-        <div class="brainvatar-card" id="brainvatarCard">
-          <div class="brainvatar-svg-wrap">
-            <svg id="brainvatarSvg" class="brainvatar-svg" width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-              <!-- Rendered dynamically by renderBrainvatar() -->
-            </svg>
-            <div class="brainvatar-score-overlay">
-              <div class="brainvatar-score-num" id="brainvatarScore">0<span>%</span></div>
-              <div class="brainvatar-state-label" id="brainvatarLabel">Starting up</div>
-            </div>
-          </div>
-          <div class="brainvatar-quote" id="brainvatarQuote">
-            <strong id="brainvatarQuoteType">Today's nudge</strong>
-            <span id="brainvatarQuoteText">Complete your first habit to activate your brain.</span>
-          </div>
-        </div>
-        <!-- REVISION 6: Share button -->
-        <button class="share-score-btn" onclick="openShareModal()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          Share Today's Score
-        </button>
-        <div class="improve-summary" id="improveSummary"></div>
-        <!-- ADHD: Daily Focus Mode -->
-        <div class="focus-mode-banner" id="focusModeBanner">
-          <h3>⚡ Today's Focus — Top 3 Habits</h3>
-          <div id="focusHabitList"></div>
-        </div>
-        <!-- ADHD: Good Enough banner -->
-        <div class="good-enough-banner" id="goodEnoughBanner">
-          🎉 Good enough! You've hit 60% — that's a solid day. Everything else is a bonus.
-        </div>
         <div class="week-section">
           <h3>This Week</h3>
           <div class="week-grid" id="weekGrid"></div>
         </div>
         <button class="new-day-btn" onclick="confirmNewDay()">🌅 New Day — Reset Today</button>
 
-        <!-- ── PREMIUM FEATURES — collapsible ── -->
+        <!-- Premium Insights (collapsed) -->
         <div class="premium-collapse-wrap">
           <button class="premium-collapse-btn" id="premiumToggleBtn" onclick="togglePremiumPanel()">
             <span>⭐ Premium Insights</span>
             <span class="premium-collapse-chevron" id="premiumChevron">▾</span>
           </button>
           <div class="premium-collapse-body" id="premiumCollapseBody" style="display:none">
-
-            <!-- 1. Weekly trend chart -->
             <div class="premium-preview-block">
               <div class="premium-preview-header">
-                <span class="premium-preview-title">📈 Weekly Score Trend</span>
+                <span class="premium-preview-title">📈 Weekly Trend</span>
                 <span class="beta-tag">⭐ Premium</span>
               </div>
               <div class="premium-chart-live" id="weeklyTrendChart"></div>
-              <p class="premium-preview-desc">Your Hero Score across this week. Spot patterns, protect your streak, and understand what a strong day looks like for your brain.</p>
+              <p class="premium-preview-desc">Your neurochemical activity across this week. Spot patterns and understand what a strong day looks like for your brain.</p>
             </div>
-
-            <!-- 2. Per-category streaks -->
             <div class="premium-preview-block">
               <div class="premium-preview-header">
                 <span class="premium-preview-title">🔥 Category Streaks</span>
                 <span class="beta-tag">⭐ Premium</span>
               </div>
               <div class="premium-cat-streaks" id="catStreaksPanel"></div>
-              <p class="premium-preview-desc">Consecutive days you hit each neurochemical category (≥50% score). See where you're consistent and where you need more focus.</p>
+              <p class="premium-preview-desc">Consecutive days you activated each neurochemical system. See where you're consistent and where you need more focus.</p>
             </div>
+            <div class="premium-preview-block">
+              <div class="premium-preview-header">
+                <span class="premium-preview-title">🏅 Personal Bests</span>
+                <span class="beta-tag">⭐ Premium</span>
+              </div>
+              <div class="premium-milestones" id="milestonesPanel"></div>
+              <p class="premium-preview-desc">Your best recorded moments — tracked automatically as you use the app each day.</p>
+            </div>
+            <div class="premium-preview-block">
+              <div class="premium-preview-header">
+                <span class="premium-preview-title">🕸 Brain Balance Radar</span>
+                <span class="beta-tag">⭐ Premium</span>
+              </div>
+              <canvas id="radarCanvas" class="radar-canvas" width="200" height="200"></canvas>
+              <p class="premium-preview-desc">Today's neurochemical shape at a glance. A balanced brain shows an even polygon — lopsided shapes reveal which systems need attention.</p>
+            </div>
+            <div class="premium-preview-block">
+              <div class="premium-preview-header">
+                <span class="premium-preview-title">🧠 Advanced NeuroCoach</span>
+                <span class="beta-tag">⭐ Premium</span>
+              </div>
+              <div class="adv-insights-panel" id="advInsightsPanel"></div>
+              <p class="premium-preview-desc">Pattern analysis, habit correlations, and proactive nudges based on your actual data — not generic advice.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
 
             <!-- 3. Personal bests & milestones -->
             <div class="premium-preview-block">
@@ -1002,39 +992,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
                 <span class="premium-preview-title">🏅 Personal Bests</span>
                 <span class="beta-tag">⭐ Premium</span>
               </div>
-              <div class="premium-milestones-live" id="milestonesPanel"></div>
-              <p class="premium-preview-desc">Your best recorded moments — tracked automatically as you use the app each day.</p>
-            </div>
-
-            <!-- 4. Brain Balance Radar -->
-            <div class="premium-preview-block">
-              <div class="premium-preview-header">
-                <span class="premium-preview-title">🕸 Brain Balance Radar</span>
-                <span class="beta-tag">⭐ Premium</span>
-              </div>
-              <div class="premium-radar-wrap">
-                <svg id="radarChart" viewBox="0 0 220 200" width="220" height="200"></svg>
-                <div class="radar-legend" id="radarLegend"></div>
-              </div>
-              <p class="premium-preview-desc">Today's neurochemical shape at a glance. A balanced brain shows an even polygon — lopsided shapes reveal which systems need attention.</p>
-            </div>
-
-            <!-- 5. Advanced NeuroCoach -->
-            <div class="premium-preview-block">
-              <div class="premium-preview-header">
-                <span class="premium-preview-title">🧠 Advanced NeuroCoach</span>
-                <span class="beta-tag">⭐ Premium</span>
-              </div>
-              <div class="premium-adv-insights" id="advInsightsPanel"></div>
-              <p class="premium-preview-desc">Pattern analysis, habit correlations, and proactive nudges based on your actual data — not generic advice.</p>
-            </div>
-
-          </div><!-- /premium-collapse-body -->
-        </div><!-- /premium-collapse-wrap -->
-
-      </div>
-    </div>
-
     <!-- DOPAMINE PAGE -->
     <div class="page" id="page-dopamine">
       <div class="page-hero" style="--ac:var(--dopamine)">
@@ -1140,8 +1097,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
         <!-- Today's snapshot stats -->
         <div class="profile-stats">
           <div class="profile-stat">
-            <div class="profile-stat-val" id="statHeroScore">0%</div>
-            <div class="profile-stat-lbl">Today's Score</div>
+            <div class="profile-stat-val" id="statHeroScore">—</div>
+            <div class="profile-stat-lbl">Brain State</div>
           </div>
           <div class="profile-stat">
             <div class="profile-stat-val" id="statStreak">0</div>
@@ -1149,7 +1106,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
           </div>
           <div class="profile-stat">
             <div class="profile-stat-val" id="statGrade">—</div>
-            <div class="profile-stat-lbl">Today's Grade</div>
+            <div class="profile-stat-lbl">Core habits</div>
           </div>
         </div>
 
@@ -1267,7 +1224,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
   </div>
   <div class="grade-screen-content">
     <h2>How You're Graded</h2>
-    <p>Your Hero Score is the average of all four category percentages. Foundational habits (⭐⭐⭐) gate the gauge — complete at least one to unlock above 50%.</p>
+    <p>Your brain phase reflects the proportion of foundational core habits completed today. Completing at least 50% of core habits across all four categories activates Phase 3 — Foundation Active.</p>
     <div class="grade-row"><div class="grade-letter" style="color:#4a9e82">S</div><div class="grade-info"><strong>100% — Perfect Day</strong><span>All four neurochemicals fully activated.</span></div></div>
     <div class="grade-row"><div class="grade-letter" style="color:#4a9e82">A</div><div class="grade-info"><strong>80–99% — Excellent</strong><span>Strong across the board. All foundational habits done.</span></div></div>
     <div class="grade-row"><div class="grade-letter" style="color:#5a82c0">B</div><div class="grade-info"><strong>60–79% — Good</strong><span>Foundational habits complete in most categories.</span></div></div>
@@ -1280,7 +1237,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
       <p><strong>Foundational Gate</strong>: Any single ⭐⭐⭐ habit unlocks the full gauge. Until then, gauge is capped at 50%.</p>
       <p><strong>Serotonin exception</strong>: Has 3 foundational habits — completing ANY ONE of them unlocks the full gauge.</p>
       <p><strong>Flex Mode</strong>: Long-press or tap Flex to reduce a habit's weight on harder days.</p>
-      <p><strong>Hero Score</strong> = average of all four effective category percentages.</p>
+      <p><strong>Brain Phase</strong> = foundational habit completion rate across all four neurochemical categories.</p>
     </div>
   </div>
 </div>
@@ -1690,7 +1647,7 @@ if (!appState[today]) appState[today] = {};
 /* ═══════════════════════════════════════════════════════════
    SCORING ENGINE v2
    ── Method A: Multiplicative gate (foundation rate × raw score)
-   ── Method B: Square-root dampening on Hero Score (balance incentive)
+   ── Method B: Square-root dampening on internal score (balance incentive, never shown to user)
    ── isHabitLocked: Exercise/Active Day mutual exclusion
    ═══════════════════════════════════════════════════════════ */
 
@@ -2105,270 +2062,191 @@ function updateCatUI(type) {
    HEADER UPDATE
    ═══════════════════════════════════════════════════════════ */
 function updateHeader() {
-  const score = heroScore();
-  const pct   = score / 100;
-  const circ  = 87.96;
-  document.getElementById('ringFill').style.strokeDashoffset = circ - pct * circ;
-  document.getElementById('ringNum').textContent        = Math.round(score) + '%';
-  document.getElementById('headerScoreVal').textContent  = Math.round(score) + '%';
-
-  const grades = [[90,'S','#4a9e82'],[75,'A','#4a9e82'],[55,'B','#5a82c0'],[35,'C','#c8712a'],[15,'D','#b85070'],[0,'—','#7a7469']];
-  const [, g, c] = grades.find(([min]) => score >= min) || grades[5];
-  const chip = document.getElementById('gradeChip');
-  chip.textContent = g;
-  chip.style.color = c;
-  chip.style.borderColor = g === '—' ? 'var(--border2)' : `color-mix(in srgb, ${c} 35%, transparent)`;
-  chip.style.background  = g === '—' ? 'var(--surface2)' : `color-mix(in srgb, ${c} 10%, var(--surface2))`;
+  // No score displayed — just update the brain phase chip in the header
+  const phase = brainPhase();
+  drawBrainSvg(document.getElementById('headerBrainSvg'), phase, 28);
+  const labels = ['Ready','Awakening','Warming up','Foundation active','Thriving'];
+  document.getElementById('headerBrainLabel').textContent = labels[phase];
 }
 
 /* ═══════════════════════════════════════════════════════════
    BRAINVATAR — SVG brain character that changes by score
    ═══════════════════════════════════════════════════════════ */
 
-/* Daily content pool — indexed by dayOfYear % pool.length for rotation */
-const BRAINVATAR_CONTENT = {
-  /* Score ≥ 80 — S/A tier: Glowing, peak state */
-  elite: {
-    label: 'Glowing Brain',
-    stateText: 'Peak State',
-    quotes: [
-      { type: '🧠 Neuro Fact',   text: 'Your prefrontal cortex is most active during high-dopamine states — this is when strategic thinking feels effortless.' },
-      { type: '⚡ Stoic Reminder', text: '"You have power over your mind — not outside events. Realize this, and you will find strength." — Marcus Aurelius' },
-      { type: '🧠 Neuro Fact',   text: 'High serotonin days correlate with better impulse control and emotional regulation — your decisions right now are your best.' },
-      { type: '⚡ Stoic Reminder', text: '"Waste no more time arguing about what a good person should be. Be one." — Marcus Aurelius' },
-      { type: '🧠 Neuro Fact',   text: 'Neuroplasticity peaks after exercise — whatever you learn or practice on a movement day sticks harder.' },
-      { type: '⚡ Stoic Reminder', text: '"He who lives in harmony with himself lives in harmony with the universe." — Marcus Aurelius' },
-      { type: '🧠 Neuro Fact',   text: 'Oxytocin released through genuine social connection also reduces cortisol — connection is literally stress medicine.' },
-    ]
-  },
-  /* Score 60–79 — B tier: Energised, doing well */
-  good: {
-    label: 'Energised Brain',
-    stateText: 'On Track',
-    quotes: [
-      { type: '🧠 Neuro Fact',   text: 'At 60%+ your dopamine and serotonin systems are co-activated — this is the neurological state associated with flow.' },
-      { type: '⚡ Stoic Reminder', text: '"It is not that I am so smart, it is just that I stay with problems longer." — inspired by consistent effort' },
-      { type: '🧠 Neuro Fact',   text: 'Habit completion triggers a dopamine hit that is 40% stronger when tied to identity ("I am someone who...") than to goal.' },
-      { type: '⚡ Stoic Reminder', text: '"Do not explain your philosophy. Embody it." — Epictetus' },
-      { type: '🧠 Neuro Fact',   text: 'Your streak activates the brain\'s reward anticipation circuit — breaking it costs 3× the energy to rebuild.' },
-      { type: '⚡ Stoic Reminder', text: '"Make the best use of what is in your power, and take the rest as it happens." — Epictetus' },
-      { type: '🧠 Neuro Fact',   text: 'Good enough is neurologically real — 60% activation across all systems is a stable, functional mood state.' },
-    ]
-  },
-  /* Score 40–59 — C tier: Waking up, some activity */
-  mid: {
-    label: 'Warming Up',
-    stateText: 'Building Up',
-    quotes: [
-      { type: '🧠 Neuro Fact',   text: 'Each completed habit releases a micro-dose of dopamine — these small signals compound into sustained motivation across the day.' },
-      { type: '⚡ Stoic Reminder', text: '"Begin at once to live, and count each separate day as a separate life." — Seneca' },
-      { type: '🧠 Neuro Fact',   text: 'The hardest part of any habit is the initiation — the brain\'s inertia cost drops 80% after you start.' },
-      { type: '⚡ Stoic Reminder', text: '"No man is free who is not master of himself." — Epictetus' },
-      { type: '🧠 Neuro Fact',   text: 'Mid-range serotonin states make you more open to trying new things — this is the perfect time to attempt a harder habit.' },
-      { type: '⚡ Stoic Reminder', text: '"How long are you going to wait before you demand the best for yourself?" — Epictetus' },
-      { type: '🧠 Neuro Fact',   text: 'Momentum compounds. Three habits done makes the fourth feel automatic — your brain is building a pattern right now.' },
-    ]
-  },
-  /* Score 20–39 — D tier: Tired, sluggish */
-  low: {
-    label: 'Tired Brain',
-    stateText: 'Low Energy',
-    quotes: [
-      { type: '🧠 Neuro Fact',   text: 'Low dopamine doesn\'t mean you lack willpower — it means your brain is under-stimulated. One action changes the chemistry.' },
-      { type: '⚡ Stoic Reminder', text: '"Every new beginning comes from some other beginning\'s end." — Seneca' },
-      { type: '🧠 Neuro Fact',   text: 'Sleep deprivation reduces dopamine receptor sensitivity by up to 20% — rest is not laziness, it is neurological maintenance.' },
-      { type: '⚡ Stoic Reminder', text: '"Difficulties strengthen the mind, as labour does the body." — Seneca' },
-      { type: '🧠 Neuro Fact',   text: 'Even 10 minutes of sunlight exposure raises serotonin production — step outside before doing anything else.' },
-      { type: '⚡ Stoic Reminder', text: '"We suffer more often in imagination than in reality." — Seneca' },
-      { type: '🧠 Neuro Fact',   text: 'The best antidepressant the brain knows is physical movement — it raises endorphins, serotonin, and BDNF simultaneously.' },
-    ]
-  },
-  /* Score 0–19 — Not started */
-  zero: {
-    label: 'Sleeping Brain',
-    stateText: 'Just Waking',
-    quotes: [
-      { type: '🧠 Neuro Fact',   text: 'The first habit of the day is the keystone — it sets off a cascade of neurochemical signals that raise baseline motivation for hours.' },
-      { type: '⚡ Stoic Reminder', text: '"The secret of getting ahead is getting started." — traced to ancient Stoic thought on action over deliberation' },
-      { type: '🧠 Neuro Fact',   text: 'Starting is the hardest neurological task — your brain treats new actions as threats. Push through the first 60 seconds.' },
-      { type: '⚡ Stoic Reminder', text: '"He who has a why to live can bear almost any how." — Nietzsche (echoing Stoic purpose)' },
-      { type: '🧠 Neuro Fact',   text: 'The act of deciding "I will do X now" is itself a dopamine event — commitment activates the same pathway as reward.' },
-      { type: '⚡ Stoic Reminder', text: '"Perfection is the enemy of done. A brain in motion stays in motion." — applied Stoic principle' },
-      { type: '🧠 Neuro Fact',   text: 'Your circadian rhythm peaks for motivation 1–4 hours after waking — this window is the most neurologically efficient.' },
-    ]
+/* ═══════════════════════════════════════════════════════════
+   BRAIN PHASE SYSTEM
+   Phase driven by foundational completion rate (≥50% = Phase 3 Active).
+   Score exists internally but is NEVER shown to the user.
+   ═══════════════════════════════════════════════════════════ */
+
+function countFoundationals() {
+  /* Returns { done, total } across all four categories */
+  let done = 0, total = 0;
+  Object.keys(HABITS).forEach(type => {
+    HABITS[type].habits.forEach((h, i) => {
+      if (!h.foundational) return;
+      total++;
+      if (type === 'endorphin') {
+        // Either Exercise (idx 0) or Active Day (idx 1) counts
+        if (!!appState[today]['endorphin_0'] || !!appState[today]['endorphin_1']) done++;
+      } else {
+        if (!!appState[today][type + '_' + i]) done++;
+      }
+    });
+  });
+  return { done, total };
+}
+
+function brainPhase() {
+  const totalHabits = Object.values(appState[today] || {}).filter(v => v === true).length;
+  if (totalHabits === 0) return 0; // Phase 0 — Dormant
+
+  const { done, total } = countFoundationals();
+  const rate = total > 0 ? done / total : 0;
+
+  if (rate >= 0.75) return 4;      // Phase 4 — Thriving
+  if (rate >= 0.50) return 3;      // Phase 3 — Active (key threshold)
+  if (rate >= 0.25) return 2;      // Phase 2 — Warming
+  if (totalHabits > 0) return 1;   // Phase 1 — Stirring
+  return 0;
+}
+
+/* drawBrainSvg — renders the 5-phase cartoon brain into any SVG element.
+   size param scales the viewBox-based brain to the element's actual size. */
+function drawBrainSvg(svgEl, phase, size) {
+  if (!svgEl) return;
+  const bodyCol = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82'][phase];
+  const eyeCol  = ['#2e2b24','#3d3a33','#7a3800','#7a3800','#085041'][phase];
+  const glowCol = ['transparent','transparent','rgba(200,113,42,0.18)','rgba(184,80,112,0.15)','rgba(74,158,130,0.22)'][phase];
+
+  /* Glow ellipse behind brain (phases 2-4) */
+  const glow = phase >= 2
+    ? `<ellipse cx="48" cy="54" rx="34" ry="26" fill="${glowCol}"/>`
+    : '';
+
+  /* Sparkles / sparks (phase 3 = small arcs, phase 4 = full sparkles) */
+  let deco = '';
+  if (phase === 3) {
+    deco = `<path d="M72 18 Q74 22 70 24" fill="none" stroke="${bodyCol}" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
+            <path d="M16 26 Q14 30 18 31" fill="none" stroke="${bodyCol}" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>`;
+  } else if (phase === 4) {
+    deco = `<circle cx="74" cy="17" r="2.5" fill="${bodyCol}" opacity=".85"/>
+            <circle cx="15" cy="25" r="2"   fill="${bodyCol}" opacity=".75"/>
+            <circle cx="52" cy="8"  r="1.8" fill="${bodyCol}" opacity=".7"/>
+            <path d="M76 34 L72 41 L75 41 L71 50 L78 41 L74 41 Z" fill="#c8712a" opacity=".85"/>`;
   }
-};
 
-function getBrainvatarTier(score) {
-  if (score >= 75) return 'elite';
-  if (score >= 55) return 'good';
-  if (score >= 35) return 'mid';
-  if (score >= 15) return 'low';
-  return 'zero';
+  /* ZZZ for phase 0 */
+  const zzz = phase === 0
+    ? `<text x="60" y="26" font-size="9" fill="#504c45" font-family="sans-serif" opacity=".6">z</text>
+       <text x="66" y="18" font-size="11" fill="#504c45" font-family="sans-serif" opacity=".4">z</text>`
+    : '';
+
+  /* Eyes: phase 0 = closed curves, phase 1 = half-open, 2-4 = open circles */
+  let leftEye, rightEye;
+  if (phase === 0) {
+    leftEye  = `<path d="M30 51 Q32 54 34 51" fill="none" stroke="${eyeCol}" stroke-width="1.5" stroke-linecap="round"/>`;
+    rightEye = `<path d="M58 51 Q60 54 62 51" fill="none" stroke="${eyeCol}" stroke-width="1.5" stroke-linecap="round"/>`;
+  } else if (phase === 1) {
+    leftEye  = `<ellipse cx="32" cy="51" rx="2.5" ry="1.5" fill="${eyeCol}" opacity=".7"/>`;
+    rightEye = `<ellipse cx="60" cy="51" rx="2.5" ry="1.5" fill="${eyeCol}" opacity=".7"/>`;
+  } else {
+    leftEye  = `<ellipse cx="32" cy="51" rx="3" ry="3.5" fill="${eyeCol}"/>`;
+    rightEye = `<ellipse cx="60" cy="51" rx="3" ry="3.5" fill="${eyeCol}"/>`;
+  }
+
+  /* Shine on eye for phase 4 */
+  const shine = phase === 4
+    ? `<circle cx="33.5" cy="49.5" r="1" fill="white" opacity=".7"/>
+       <circle cx="61.5" cy="49.5" r="1" fill="white" opacity=".7"/>`
+    : '';
+
+  /* Mouth: flat=0, neutral=1, smile=2+, big smile=4 */
+  let mouth;
+  if (phase === 0) {
+    mouth = `<path d="M38 62 Q48 60 58 62" fill="none" stroke="${eyeCol}" stroke-width="1.2" stroke-linecap="round" opacity=".4"/>`;
+  } else if (phase === 1) {
+    mouth = `<path d="M40 62 Q48 63 56 62" fill="none" stroke="${eyeCol}" stroke-width="1.3" stroke-linecap="round" opacity=".55"/>`;
+  } else if (phase <= 3) {
+    mouth = `<path d="M40 61 Q48 66 56 61" fill="none" stroke="${eyeCol}" stroke-width="1.5" stroke-linecap="round"/>`;
+  } else {
+    mouth = `<path d="M39 60 Q48 68 57 60" fill="none" stroke="${eyeCol}" stroke-width="1.8" stroke-linecap="round"/>`;
+  }
+
+  /* Brain highlight on higher phases */
+  const highlight = phase >= 3
+    ? `<ellipse cx="38" cy="33" rx="7" ry="5" fill="white" opacity=".1"/>`
+    : '';
+
+  svgEl.innerHTML =
+    glow + deco + zzz +
+    `<path d="M48 22 C34 22 22 31 22 45 C22 53 26 59 32 63 L32 72 L64 72 L64 63 C70 59 74 53 74 45 C74 31 62 22 48 22 Z" fill="${bodyCol}"/>` +
+    `<path d="M32 63 L64 63 L64 69 Q48 75 32 69 Z" fill="${bodyCol}" opacity=".7"/>` +
+    `<path d="M29 33 Q25 41 27 51" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity=".18"/>` +
+    `<path d="M53 23 Q59 29 57 37" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity=".15"/>` +
+    highlight + leftEye + rightEye + shine + mouth;
 }
 
-function getDailyQuote(tier) {
-  const pool = BRAINVATAR_CONTENT[tier].quotes;
-  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-  return pool[dayOfYear % pool.length];
-}
+const BRAIN_LABELS = ['Ready','Awakening','Warming up','Foundation active','Thriving'];
+const BRAIN_SUBS   = [
+  'Log your first habit to begin',
+  'Your brain is responding — keep going',
+  'Building momentum — some core habits done',
+  'Foundation active — your brain is set for the day',
+  'All systems firing — outstanding day'
+];
 
-function renderBrainvatar(score) {
-  const tier  = getBrainvatarTier(score);
-  const data  = BRAINVATAR_CONTENT[tier];
-  const quote = getDailyQuote(tier);
-  const pct   = Math.round(score);
+/* ═══════════════════════════════════════════════════════════
+   SCIENCE FACTS & QUOTES — rotating daily feed content
+   ═══════════════════════════════════════════════════════════ */
+const SCIENCE_FACTS = [
+  { body: "Deep work creates a dopamine plateau — sustained focus trains your brain for long-term ambition rather than short-term distraction. This is neurologically different from the dopamine spike of checking your phone.", attr: "Berke & Gershman, dopamine research" },
+  { body: "95% of serotonin is produced in the gut, not the brain. Every fibre-rich meal is a direct act of mood regulation — your gut microbiome is always listening.", attr: "Gut-brain axis research" },
+  { body: "It takes roughly 66 days to form a habit — not 21. But the good news: missing one day has no meaningful impact on long-term habit formation.", attr: "Lally et al., European Journal of Social Psychology, 2010" },
+  { body: "Morning sunlight within 60 minutes of waking sets your circadian clock. It triggers a timed dopamine and cortisol release that determines how alert you feel that day — and how sleepy you'll feel 16 hours later.", attr: "Circadian biology research" },
+  { body: "Resistance training has an effect size of 0.66 for reducing depression — larger than cardio alone. Muscle is an endocrine organ that produces neuroprotective hormones.", attr: "Gordon et al., JAMA Psychiatry, 2018" },
+  { body: "Social connection predicts longevity as powerfully as not smoking. Loneliness carries a mortality risk comparable to obesity.", attr: "Holt-Lunstad, World Psychiatry, 2024" },
+  { body: "A 10–20 minute nap resets alertness and improves working memory. The Prophet's Qailullah aligns precisely with the natural circadian dip at 1–3pm — ancient wisdom confirmed by modern sleep science.", attr: "NASA nap research; circadian biology" },
+  { body: "Gratitude practice changes the baseline firing pattern of the prefrontal cortex — physically rewiring your brain toward a more positive default state.", attr: "Positive psychology neuroscience research" },
+  { body: "Walking 7,000–8,000 steps per day captures most of the all-cause mortality benefit of daily movement — even without a dedicated exercise session.", attr: "Paluch et al., JAMA Network Open, 2022" },
+  { body: "Shared meals predict social network strength more strongly than almost any other daily behaviour. Food plus presence equals oxytocin.", attr: "Dunbar et al., 2017" },
+];
 
-  /* Score label */
-  document.getElementById('brainvatarScore').innerHTML = `${pct}<span>%</span>`;
-  document.getElementById('brainvatarLabel').textContent = data.stateText;
-
-  /* Quote */
-  document.getElementById('brainvatarQuoteType').textContent = quote.type;
-  document.getElementById('brainvatarQuoteText').textContent  = quote.text;
-
-  /* SVG brain character */
-  const svg = document.getElementById('brainvatarSvg');
-  const cx = 80, cy = 72; // brain centre
-
-  /* Colour palette per tier */
-  const palettes = {
-    elite: { primary: '#4a9e82', secondary: '#5a82c0', glow: 'rgba(74,158,130,0.35)', face: '#e8e3d8', eye: '#1c1a17', aura: true  },
-    good:  { primary: '#c8712a', secondary: '#7c6ab8', glow: 'rgba(200,113,42,0.2)',  face: '#e8e3d8', eye: '#1c1a17', aura: false },
-    mid:   { primary: '#7c6ab8', secondary: '#5a82c0', glow: 'rgba(124,106,184,0.12)',face: '#e8e3d8', eye: '#1c1a17', aura: false },
-    low:   { primary: '#4a4640', secondary: '#3d3a33', glow: 'rgba(90,80,70,0.1)',    face: '#7a7469', eye: '#504c45', aura: false },
-    zero:  { primary: '#383430', secondary: '#2e2b24', glow: 'rgba(0,0,0,0)',         face: '#504c45', eye: '#3d3a33', aura: false },
-  };
-  const p = palettes[tier];
-
-  /* Expression configs */
-  const expressions = {
-    elite: { leftEye: 'M62,88 Q65,84 68,88', rightEye: 'M92,88 Q95,84 98,88', mouth: 'M68,102 Q80,114 92,102', mouthFill: 'none', blush: true, sparkles: true },
-    good:  { leftEye: 'M63,89 Q66,85 69,89', rightEye: 'M91,89 Q94,85 97,89', mouth: 'M70,104 Q80,112 90,104', mouthFill: 'none', blush: false, sparkles: false },
-    mid:   { leftEye: 'M64,90 A4,4 0 1,1 72,90', rightEye: 'M88,90 A4,4 0 1,1 96,90', mouth: 'M70,106 Q80,110 90,106', mouthFill: 'none', blush: false, sparkles: false },
-    low:   { leftEye: 'M64,90 Q68,95 72,90', rightEye: 'M88,90 Q92,95 96,90', mouth: 'M70,108 Q80,104 90,108', mouthFill: 'none', blush: false, sparkles: false },
-    zero:  { leftEye: 'M65,90 Q68,94 71,90', rightEye: 'M89,90 Q92,94 95,90', mouth: 'M72,108 Q80,105 88,108', mouthFill: 'none', blush: false, sparkles: false },
-  };
-  const ex = expressions[tier];
-
-  /* Brain wrinkle activity — more = higher score */
-  const wrinkleOpacity = { elite: 0.7, good: 0.5, mid: 0.3, low: 0.15, zero: 0.08 }[tier];
-  const pulseAnim = tier === 'elite' ? `<animateTransform attributeName="transform" type="scale" values="1;1.018;1" dur="2.2s" repeatCount="indefinite" additive="sum"/>` : '';
-
-  /* Aura ring for elite */
-  const auraHTML = p.aura ? `
-    <circle cx="${cx}" cy="${cy}" r="74" fill="none" stroke="${p.primary}" stroke-width="2" opacity="0.18">
-      <animate attributeName="r" values="72;76;72" dur="2.5s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.18;0.06;0.18" dur="2.5s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="${cx}" cy="${cy}" r="68" fill="none" stroke="${p.secondary}" stroke-width="1" opacity="0.12">
-      <animate attributeName="r" values="66;70;66" dur="3s" repeatCount="indefinite"/>
-    </circle>` : '';
-
-  /* Sparkles for elite */
-  const sparkleHTML = ex.sparkles ? `
-    <text x="22" y="28" font-size="11" opacity="0.9">✨</text>
-    <text x="126" y="32" font-size="9" opacity="0.8">⭐</text>
-    <text x="14" y="56" font-size="7" opacity="0.7">✦</text>
-    <text x="136" y="54" font-size="8" opacity="0.6">✦</text>` : '';
-
-  /* Blush dots for elite/good */
-  const blushHTML = ex.blush ? `
-    <ellipse cx="58" cy="100" rx="8" ry="5" fill="${p.primary}" opacity="0.3"/>
-    <ellipse cx="102" cy="100" rx="8" ry="5" fill="${p.primary}" opacity="0.3"/>` : '';
-
-  /* Z indicators for sleeping */
-  const zzHTML = tier === 'zero' ? `
-    <text x="108" y="42" fill="${p.face}" font-size="9" opacity="0.4" font-family="Geist,sans-serif">z</text>
-    <text x="116" y="32" fill="${p.face}" font-size="12" opacity="0.3" font-family="Geist,sans-serif">z</text>
-    <text x="125" y="20" fill="${p.face}" font-size="14" opacity="0.2" font-family="Geist,sans-serif">z</text>` : '';
-
-  svg.innerHTML = `
-    <defs>
-      <radialGradient id="bvGlow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="${p.glow}"/>
-        <stop offset="100%" stop-color="transparent"/>
-      </radialGradient>
-      <radialGradient id="bvBrainGrad" cx="40%" cy="35%" r="65%">
-        <stop offset="0%" stop-color="${p.primary}" stop-opacity="0.22"/>
-        <stop offset="100%" stop-color="${p.secondary}" stop-opacity="0.08"/>
-      </radialGradient>
-    </defs>
-
-    <!-- Glow background -->
-    <circle cx="${cx}" cy="${cy}" r="72" fill="url(#bvGlow)" opacity="${tier === 'elite' ? 1 : 0.6}"/>
-    ${auraHTML}
-
-    <!-- Brain body group with optional pulse -->
-    <g transform-origin="${cx} ${cy}">
-      ${pulseAnim ? `<animateTransform attributeName="transform" type="scale" values="1;1.012;1" dur="2.4s" repeatCount="indefinite" additive="sum"/>` : ''}
-
-      <!-- Main brain shape -->
-      <path d="M${cx},30
-        C55,30 38,40 36,56 C32,58 26,64 28,74
-        C24,80 26,92 34,96 C34,108 42,118 54,120
-        C58,128 66,132 74,130 C76,134 80,136 80,136
-        C80,136 84,134 86,130 C94,132 102,128 106,120
-        C118,118 126,108 126,96 C134,92 136,80 132,74
-        C134,64 128,58 124,56 C122,40 105,30 ${cx},30 Z"
-        fill="url(#bvBrainGrad)" stroke="${p.primary}" stroke-width="2" stroke-linejoin="round"/>
-
-      <!-- Brain wrinkle lines — activity indicator -->
-      <path d="M52,52 Q58,46 66,50 Q72,44 80,48" fill="none" stroke="${p.primary}" stroke-width="1.5" stroke-linecap="round" opacity="${wrinkleOpacity}"/>
-      <path d="M94,50 Q100,44 108,50 Q112,56 106,62" fill="none" stroke="${p.secondary}" stroke-width="1.5" stroke-linecap="round" opacity="${wrinkleOpacity}"/>
-      <path d="M42,70 Q48,64 54,70 Q58,76 52,80" fill="none" stroke="${p.primary}" stroke-width="1.2" stroke-linecap="round" opacity="${wrinkleOpacity * 0.8}"/>
-      <path d="M110,68 Q116,62 120,70 Q122,78 116,82" fill="none" stroke="${p.secondary}" stroke-width="1.2" stroke-linecap="round" opacity="${wrinkleOpacity * 0.8}"/>
-      <path d="M62,56 Q68,52 74,56 Q78,62 72,66 Q66,70 62,64" fill="none" stroke="${p.primary}" stroke-width="1" stroke-linecap="round" opacity="${wrinkleOpacity * 0.7}"/>
-
-      <!-- Face area (lighter oval) -->
-      <ellipse cx="${cx}" cy="98" rx="24" ry="20" fill="${p.face}" opacity="0.08"/>
-
-      <!-- Eyes -->
-      <path d="${ex.leftEye}" fill="none" stroke="${p.eye === '#1c1a17' ? p.primary : p.eye}" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="${ex.rightEye}" fill="none" stroke="${p.eye === '#1c1a17' ? p.primary : p.eye}" stroke-width="2.5" stroke-linecap="round"/>
-
-      <!-- Mouth -->
-      <path d="${ex.mouth}" fill="${ex.mouthFill}" stroke="${p.primary}" stroke-width="2.2" stroke-linecap="round"/>
-
-      ${blushHTML}
-    </g>
-
-    ${sparkleHTML}
-    ${zzHTML}
-  `;
-}
+const QUOTES = [
+  { body: "You do not rise to the level of your goals. You fall to the level of your systems.", attr: "James Clear" },
+  { body: "The impediment to action advances action. What stands in the way becomes the way.", attr: "Marcus Aurelius" },
+  { body: "We are what we repeatedly do. Excellence is not an act but a habit.", attr: "Aristotle" },
+  { body: "Between stimulus and response there is a space. In that space is our power to choose our response.", attr: "Viktor Frankl" },
+  { body: "Small habits don't add up. They compound.", attr: "James Clear" },
+  { body: "Waste no more time arguing about what a good person should be. Be one.", attr: "Marcus Aurelius" },
+  { body: "The two most powerful warriors are patience and time.", attr: "Leo Tolstoy" },
+  { body: "You have power over your mind — not outside events. Realise this, and you will find strength.", attr: "Marcus Aurelius" },
+];
 
 /* ═══════════════════════════════════════════════════════════
    RECOVERY BONUS — shown if user missed 2+ days
    ═══════════════════════════════════════════════════════════ */
-const RBK = 'nh_recovery_seen'; // key: date when bonus was last shown
+const RBK = 'nh_recovery_seen';
 
 function checkRecoveryBonus() {
-  const banner  = document.getElementById('recoveryBonusBanner');
+  const banner = document.getElementById('recoveryBonusBanner');
   if (!banner) return;
-
   const seenData = ld(RBK) || { date: null };
-  // Only show once per day
   if (seenData.date === today) { banner.classList.add('show'); return; }
-
-  // Find last active day before today (has any habit completed)
   const pastDays = Object.keys(appState)
     .filter(d => d < today && Object.keys(appState[d] || {}).some(k => appState[d][k] === true))
     .sort();
-
   if (pastDays.length === 0) { banner.classList.remove('show'); return; }
-
   const lastActive = pastDays[pastDays.length - 1];
-  const daysDiff   = Math.round((new Date(today) - new Date(lastActive)) / 86400000);
-
+  const daysDiff = Math.round((new Date(today) - new Date(lastActive)) / 86400000);
   if (daysDiff >= 2) {
     const msgs = [
       `You were away for ${daysDiff} days. Every comeback is a data point, not a failure — your brain's neuroplasticity resets with your next action.`,
       `${daysDiff} days off. Returning is the hard part — you've already done it. Research shows re-engagement restores habit circuits within 3 days.`,
       `Gap of ${daysDiff} days. No shame. The prefrontal cortex doesn't punish pauses — it rewards re-activation. Start one habit and the system wakes up.`,
     ];
-    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    document.getElementById('recoveryBonusMsg').textContent = msgs[dayOfYear % msgs.length];
+    const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    document.getElementById('recoveryBonusMsg').textContent = msgs[doy % msgs.length];
     banner.classList.add('show');
     sv(RBK, { date: today });
   } else {
@@ -2377,106 +2255,155 @@ function checkRecoveryBonus() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   COACH RENDER
+   NEUROCOACH FEED — 5 card types, language-based, no scores
    ═══════════════════════════════════════════════════════════ */
-const COACH_TEXT = {
-  dopamine:  { capped:['🔒','Dopamine capped at 50%','Complete "Deep Work / Main Goal" (⭐⭐⭐) to unlock the full gauge.'], 0:['⚡','Dopamine inactive','Start with 45+ minutes of deep, focused work on your main goal.'], low:['⚡','Dopamine rising','Good start. Reward yourself after your next focus session.'], high:['⚡','Dopamine near max','Almost there — one more habit to lock in peak motivation.'], max:['✅','Dopamine maxed!','Full reward pathway activated. Your drive system is firing today.'] },
-  serotonin: { capped:['🔒','Serotonin capped at 50%','Complete any one foundational habit (Prayer, Sleep, or 5-a-Day) to unlock the gauge.'], 0:['🌸','Serotonin needs activation','Prioritise daily prayer and adequate sleep — the two biggest mood levers.'], low:['🌸','Serotonin stabilising','Good. Add a nature walk or breathwork to amplify mood regulation.'], high:['🌸','Serotonin near balance','One more habit to achieve full mood stability today.'], max:['✅','Serotonin maxed!','Mood fully regulated. Your emotional resilience is at its peak.'] },
-  oxytocin:  { capped:['🔒','Oxytocin capped at 50%','Complete "Active Socialising" (⭐⭐⭐) to unlock the full gauge.'], 0:['🤝','Oxytocin needs connection','Find someone for a real, focused conversation — 20 minutes minimum.'], low:['🤝','Oxytocin building','Connection initiated. A hug or sincere appreciation deepens the bond.'], high:['🤝','Oxytocin near peak','Strong connection day. One more act of kindness to top it off.'], max:['✅','Oxytocin maxed!','Full bonding system active. The people around you feel it.'] },
-  endorphin: { capped:['🔒','Endorphin capped at 50%','Complete "Exercise / High Movement" (⭐⭐⭐) to unlock the full gauge.'], 0:['🏃','Endorphin inactive','Your body is waiting to move. 30+ minutes of exercise unlocks everything.'], low:['🏃','Endorphin activating','Movement started. Add cold exposure or dancing to amplify the release.'], high:['🏃','Endorphin near peak','Almost at full physical recovery. One more habit closes the loop.'], max:['✅','Endorphin maxed!','Stress cleared, body activated. Natural pain relief fully online.'] }
-};
 
+function buildCoachFeed() {
+  const feed = document.getElementById('coachFeed');
+  if (!feed) return;
+  feed.innerHTML = '';
+
+  const { done: fdnDone, total: fdnTotal } = countFoundationals();
+  const fdnRate = fdnTotal > 0 ? fdnDone / fdnTotal : 0;
+  const totalLogged = Object.values(appState[today] || {}).filter(v => v === true).length;
+  const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+
+  /* Find which categories have their gate satisfied */
+  const gatesDone = Object.keys(HABITS).filter(t => foundationDone(t));
+  const gatesQuiet = Object.keys(HABITS).filter(t => !foundationDone(t));
+  const catNames = { dopamine: 'Dopamine', serotonin: 'Serotonin', oxytocin: 'Oxytocin', endorphin: 'Endorphin' };
+  const catColors = { dopamine: 'var(--dopamine)', serotonin: 'var(--serotonin)', oxytocin: 'var(--oxytocin)', endorphin: 'var(--endorphin)' };
+
+  const cards = [];
+
+  /* ── Card 1: Today's Reflection (always present, always affirming) ── */
+  let reflectBody;
+  if (totalLogged === 0) {
+    reflectBody = 'Your brain is ready. Start with whichever habit feels most accessible right now — there is no wrong first habit.';
+  } else if (fdnRate >= 0.75) {
+    reflectBody = `Your foundation is fully active across all four systems today. Every habit you've completed has a direct neurochemical effect — your brain is well supported.`;
+  } else if (fdnRate >= 0.5) {
+    const activeNames = gatesDone.map(t => catNames[t]).join(' and ');
+    reflectBody = `${activeNames} ${gatesDone.length > 1 ? 'are' : 'is'} active today. Your core foundation is set — everything else you add deepens that signal. Well done.`;
+  } else if (totalLogged >= 1) {
+    const activeNames = gatesDone.length > 0 ? gatesDone.map(t => catNames[t]).join(' and ') + ' are active. ' : '';
+    reflectBody = `${activeNames}Every habit you log today activates a neurochemical pathway. Your brain is already responding — keep going at whatever pace feels right.`;
+  } else {
+    reflectBody = 'One habit logged is one pathway activated. That is how all good days begin.';
+  }
+  cards.push({ type: 'reflect', eye: 'Today', body: reflectBody });
+
+  /* ── Card 2: Gentle Nudge (only if relevant, always optional) ── */
+  if (gatesQuiet.length > 0 && totalLogged > 0) {
+    const quietCat = gatesQuiet[0];
+    const nudgeMap = {
+      dopamine:  'Even 30 minutes of focused work — no phone, one task — activates your motivation pathway for the whole day.',
+      serotonin: 'A moment of prayer or a small step toward better sleep tonight would activate your mood regulation system.',
+      oxytocin:  'Even a two-minute voice message to someone you care about would activate your social bonding pathway right now.',
+      endorphin: 'A short walk — even 10 minutes — starts your body's natural stress-relief system. No gym required.'
+    };
+    cards.push({ type: 'nudge', eye: 'One thing to consider', body: `Your ${catNames[quietCat]} system is quiet today. ${nudgeMap[quietCat]}` });
+  }
+
+  /* ── Card 3: Science Fact (rotates daily, tied to a relevant habit) ── */
+  const factIdx = (doy + Math.floor(totalLogged / 2)) % SCIENCE_FACTS.length;
+  const fact = SCIENCE_FACTS[factIdx];
+  cards.push({ type: 'science', eye: 'Neuroscience', body: fact.body, attr: fact.attr });
+
+  /* ── Card 4: Weekly Pattern (only after 3+ days of data) ── */
+  const weekKeys = Object.keys(weekData).filter(d => d <= today).sort().slice(-7);
+  const coreDaysThisWeek = weekKeys.filter(d => {
+    if (d === today) return fdnRate >= 0.5;
+    return (weekData[d] || 0) > 0; // any logged day counts as a pattern day
+  }).length;
+  if (weekKeys.length >= 3) {
+    let weekBody;
+    if (coreDaysThisWeek >= 5) {
+      weekBody = `${coreDaysThisWeek} active days this week. You are building the kind of consistency that neurologically automates these habits — this is what identity change looks like.`;
+    } else if (coreDaysThisWeek >= 3) {
+      weekBody = `${coreDaysThisWeek} active days this week. Patterns compound — each day you show up makes the next one meaningfully easier for your brain.`;
+    } else if (coreDaysThisWeek >= 1) {
+      weekBody = `${coreDaysThisWeek} active ${coreDaysThisWeek === 1 ? 'day' : 'days'} this week. Every streak starts with a single day. You have started.`;
+    } else {
+      weekBody = 'A new week is a clean slate. One habit today begins a pattern your brain will want to continue.';
+    }
+    cards.push({ type: 'week', eye: 'This week', body: weekBody });
+  }
+
+  /* ── Card 5: Quote (rotates daily) ── */
+  const quoteIdx = (doy + totalLogged) % QUOTES.length;
+  const quote = QUOTES[quoteIdx];
+  cards.push({ type: 'quote', eye: "Today's thought", body: quote.body, attr: quote.attr });
+
+  /* ── Render all cards ── */
+  cards.forEach(card => {
+    const el = document.createElement('div');
+    el.className = 'coach-feed-card card-' + card.type;
+    el.innerHTML =
+      '<div class="coach-feed-eyebrow">' + card.eye + '</div>' +
+      '<div class="coach-feed-body">' + card.body + '</div>' +
+      (card.attr ? '<div class="coach-feed-attr">— ' + card.attr + '</div>' : '');
+    feed.appendChild(el);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CORE PIPS — 4 dots, one per category, filled when gate done
+   ═══════════════════════════════════════════════════════════ */
+function renderCorePips() {
+  const row = document.getElementById('corePipsRow');
+  if (!row) return;
+  row.innerHTML = '';
+  const catColors = { dopamine: '#c8712a', serotonin: '#4a9e82', oxytocin: '#b85070', endorphin: '#5a82c0' };
+  Object.keys(HABITS).forEach(type => {
+    const ok = foundationDone(type);
+    const dot = document.createElement('div');
+    dot.className = 'core-pip-dot';
+    dot.style.background = ok ? catColors[type] : 'var(--surface3)';
+    dot.style.border = ok ? 'none' : '1.5px solid var(--border2)';
+    row.appendChild(dot);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN COACH RENDER — replaces old renderCoach
+   ═══════════════════════════════════════════════════════════ */
 function renderCoach() {
-  const score = heroScore();
+  /* Brain phase */
+  const phase = brainPhase();
+  const svg = document.getElementById('brainvatarSvg');
+  drawBrainSvg(svg, phase, 96);
+  document.getElementById('brainvatarLabel').textContent = BRAIN_LABELS[phase];
+  document.getElementById('brainvatarSub').textContent   = BRAIN_SUBS[phase];
 
-  // ── Brainvatar ──────────────────────────────────────────────
-  renderBrainvatar(score);
+  /* Core Day Badge */
+  const { done: fdnDone, total: fdnTotal } = countFoundationals();
+  const fdnRate = fdnTotal > 0 ? fdnDone / fdnTotal : 0;
+  const allGatesDone = Object.keys(HABITS).every(t => foundationDone(t));
+  const badge = document.getElementById('coreDayBadge');
+  const nudge = document.getElementById('coreNudge');
+  const totalLogged = Object.values(appState[today] || {}).filter(v => v === true).length;
 
-  // ── Recovery bonus check ────────────────────────────────────
+  if (totalLogged === 0) {
+    badge.style.display = 'none'; nudge.style.display = 'none';
+  } else if (allGatesDone) {
+    badge.style.display = 'block'; nudge.style.display = 'none';
+  } else {
+    const quietCats = Object.keys(HABITS).filter(t => !foundationDone(t));
+    const catNames = { dopamine: 'Dopamine', serotonin: 'Serotonin', oxytocin: 'Oxytocin', endorphin: 'Endorphin' };
+    badge.style.display = 'none';
+    nudge.textContent = quietCats.map(t => catNames[t]).join(' and ') + ' core habit still to do';
+    nudge.style.display = 'block';
+  }
+
+  /* Core pips and NeuroCoach feed */
+  renderCorePips();
+  buildCoachFeed();
+
+  /* Recovery bonus */
   checkRecoveryBonus();
 
-  const titles = [
-    [90,  'Thriving',      'All four neurochemical systems fully active. Outstanding day.'],
-    [75,  'Strong',        'Strong across the board. Foundation complete.'],
-    [55,  'Building',      'Good foundation. Everything else is a bonus.'],
-    [35,  'Moving',        'Pick one more habit — you\'re closer than you think.'],
-    [15,  'Starting',      'One habit done is better than zero. Keep going.'],
-    [0,   'Rest day',      'Pick just one habit to begin. That\'s all.']
-  ];
-  const [, t, s] = titles.find(([min]) => score >= min) || titles[5];
-
-  // ── Improvement summary ──────────────────────────────────────
-  const catMeta = [
-    { type:'dopamine',  name:'Dopamine',  color:'#c8712a' },
-    { type:'serotonin', name:'Serotonin', color:'#4a9e82' },
-    { type:'oxytocin',  name:'Oxytocin',  color:'#b85070' },
-    { type:'endorphin', name:'Endorphin', color:'#5a82c0' },
-  ];
-  const catActions = {
-    dopamine:  { capped: 'Complete Deep Work or Morning Sunlight to unlock', 0: 'Start with 45+ min of focused work or get outside for sunlight', low: 'Add another deep work session or skill practice', high: 'One more habit to max out', max: 'Fully activated' },
-    serotonin: { capped: 'Complete Prayer or Sleep to unlock gauge', 0: 'Prioritise prayer or sleep hygiene tonight', low: 'Add a nature walk or breathwork', high: 'One more to reach full balance', max: 'Fully activated' },
-    oxytocin:  { capped: 'Complete Active Socialising or Appreciation to unlock', 0: 'Have one real 20-min conversation or express appreciation', low: 'Add a shared meal or a hug', high: 'One small act of kindness to finish', max: 'Fully activated' },
-    endorphin: { capped: 'Complete Exercise or log your Active Day steps to unlock', 0: 'Move your body — any intensity counts', low: 'Add cold shower or dancing', high: 'One more habit for full endorphin activation', max: 'Fully activated' },
-  };
-
-  const rows = catMeta.map(c => {
-    const eff    = catEffectivePct(c.type);
-    const raw    = catRawPct(c.type);
-    const fdnOk  = foundationDone(c.type);
-    const tier   = !fdnOk && raw > 0 ? 'capped' : eff >= 100 ? 'max' : eff >= 60 ? 'high' : eff > 0 ? 'low' : '0';
-    const action = catActions[c.type][tier];
-    const isDone = tier === 'max';
-    return { ...c, eff: Math.round(eff), action, isDone };
-  }).sort((a, b) => a.eff - b.eff); // weakest first
-
-  const allDone = rows.every(r => r.isDone);
-  const headText = allDone ? '🏆 Perfect day — all systems maxed' : `Next up — focus here`;
-
-  document.getElementById('improveSummary').innerHTML = `
-    <div class="improve-summary-head">${headText}</div>
-    ${rows.map(r => `
-      <div class="improve-row ${r.isDone ? 'improve-done' : ''}">
-        <div class="improve-dot" style="background:${r.color}"></div>
-        <div class="improve-body">
-          <strong>${r.name}</strong>
-          <span>${r.action}</span>
-        </div>
-        <div class="improve-pct" style="color:${r.isDone ? 'var(--serotonin)' : r.color}">${r.isDone ? '✓' : r.eff + '%'}</div>
-      </div>`).join('')}
-  `;
-
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const name = userData.name ? `, ${userData.name.split(' ')[0]}` : '';
-  document.getElementById('coachGreeting').textContent = `${greeting}${name} 🧠`;
-
-  // Good enough banner
-  document.getElementById('goodEnoughBanner').classList.toggle('show', score >= 55);
-
-  // Daily Focus Mode — top 3 incomplete foundational habits across all categories
-  const focusList = document.getElementById('focusHabitList');
-  const focusItems = [];
-  Object.keys(HABITS).forEach(type => {
-    HABITS[type].habits.forEach((h, i) => {
-      if (h.foundational) {
-        const key   = `${type}_${i}`;
-        const isDone = !!appState[today][key];
-        focusItems.push({ label: h.label, type, isDone, color: `var(--${type})` });
-      }
-    });
-  });
-  // Sort: undone first, then done
-  focusItems.sort((a, b) => a.isDone - b.isDone);
-  const top3 = focusItems.slice(0, 3);
-  focusList.innerHTML = top3.map(f =>
-    `<div class="focus-habit-item ${f.isDone ? 'done-focus' : ''}">
-      <div class="focus-habit-dot" style="background:${f.color}"></div>
-      <span>${f.label}</span>
-      ${f.isDone ? '<span style="margin-left:auto;font-size:11px;color:var(--muted)">✓ Done</span>' : ''}
-    </div>`
-  ).join('');
-
-  // Render all beta premium panels (only if panel is open)
+  /* Premium panels (if open) */
   const premBody = document.getElementById('premiumCollapseBody');
   if (premBody && premBody.style.display !== 'none') {
     renderWeeklyTrend();
@@ -2486,6 +2413,7 @@ function renderCoach() {
     renderAdvInsights();
   }
 }
+
 
 /* ═══════════════════════════════════════════════════════════
    BETA PREMIUM PANELS — live data renderers
@@ -2506,21 +2434,21 @@ function renderWeeklyTrend() {
     const key = d.toISOString().slice(0, 10);
     const isToday  = key === today;
     const isFuture = key > today;
-    const score = isToday ? Math.round(heroScore()) : (weekData[key] ?? 0);
+    const score = isToday ? (Object.values(appState[today]||{}).some(v=>v===true)?1:0) : ((weekData[key]??0)>0?1:0);
     return { label: labels[i], score, isFuture, isToday };
   });
 
-  const maxScore = Math.max(...days.map(d => d.score), 1);
+  // score-free: bars are binary active/inactive
 
   el.innerHTML = `
     <div class="live-chart-bars">
       ${days.map((d, i) => {
-        const h = d.isFuture ? 4 : Math.max(4, (d.score / 100) * 72);
+        const h = d.isFuture ? 4 : (d.score > 0 ? 56 : 4);
         const color = d.isFuture ? 'var(--border2)' : COLORS[i];
         const opacity = d.isFuture ? 0.3 : 0.85;
         return `
           <div class="live-bar-wrap">
-            <div class="live-bar-score">${d.isFuture ? '' : d.score > 0 ? d.score + '%' : ''}</div>
+            <div class="live-bar-score">${d.isFuture ? '' : d.score > 0 ? d.score > 0 ? '✓' : ''}</div>
             <div class="live-bar ${d.isToday ? 'today-bar' : ''}"
               style="height:${h}px;background:${color};opacity:${opacity};"></div>
           </div>`;
@@ -2616,9 +2544,9 @@ function renderMilestones() {
   const has21 = longestStreak >= 21;
 
   const milestones = [
-    { icon:'🥇', label:'Best Hero Score',    val: bestScore > 0 ? bestScore + '%' : '—',   sub: 'Highest single-day score' },
+    { icon:'🥇', label:'Best Day',           val: bestScore > 0 ? 'Day ' + bestScore : '—', sub: 'Most foundationals in one day' },
     { icon:'🔥', label:'Longest Streak',     val: longestStreak > 0 ? longestStreak + 'd' : '—', sub: 'Consecutive days ≥50%' },
-    { icon:'⭐', label:'Perfect Days',       val: perfectDays > 0 ? perfectDays : '—',     sub: '100% Hero Score days' },
+    { icon:'⭐', label:'Core Days',          val: perfectDays > 0 ? perfectDays : '—',     sub: 'Days with all 4 systems active' },
     { icon:'🧠', label:'21-Day Streak',      val: has21 ? '✓' : `${longestStreak}/21`,     sub: has21 ? 'Badge earned!' : 'Keep going — habit forming starts here' },
   ];
 
@@ -2744,16 +2672,16 @@ function renderAdvInsights() {
   if (score === 0) {
     insights.push({ icon:'🌅', text: `No habits tracked yet. Your brain is waiting. Even one completed habit today will activate a neurochemical pathway — start with whichever category feels most natural right now.` });
   } else if (score >= 80) {
-    insights.push({ icon:'🏆', text: `Outstanding day — ${score}% Hero Score. You're in the top tier of neurochemical activation. This is the kind of day your future self will thank you for.` });
+    insights.push({ icon:'🏆', text: `Outstanding day — all four systems active. Your neurochemical foundation is fully supported. This is the kind of day your future self will thank you for.` });
   } else if (score >= 50) {
-    insights.push({ icon:'📈', text: `Solid day at ${score}%. You've cleared the halfway mark which earns your streak. To push higher, focus on completing the foundational habit in your weakest category: ${catNames[weakest[0]]}.` });
+    insights.push({ icon:'📈', text: `Good day — you've activated most of your core systems. To deepen it, focus on completing the foundational habit in your quietest category: ${catNames[weakest[0]]}.` });
   } else {
-    insights.push({ icon:'⚠️', text: `Below 50% today (${score}%). Your streak is at risk. The fastest single move: complete the ⭐⭐⭐ habit in ${catNames[weakest[0]]} to unlock its full gauge.` });
+    insights.push({ icon:'💡', text: `Your core foundation is still building today. The fastest single move: complete the foundational habit in ${catNames[weakest[0]]} to activate that system.` });
   }
 
   // 2. Imbalance insight
   if (strongest[1] - weakest[1] > 35) {
-    insights.push({ icon:'⚖️', text: `Significant imbalance detected: ${catNames[strongest[0]]} is at ${strongest[1]}% while ${catNames[weakest[0]]} is only ${weakest[1]}%. A lopsided brain can mask deficits — even small wins in your weakest area compound quickly.` });
+    insights.push({ icon:'⚖️', text: `Noticeable imbalance today: ${catNames[strongest[0]]} is well activated while ${catNames[weakest[0]]} is quiet. A well-balanced brain supports all four systems — even one habit in your weakest area compounds quickly.` });
   }
 
   // 3. Streak insight
@@ -2765,10 +2693,10 @@ function renderAdvInsights() {
 
   // 4. Specific category nudge
   if (cats.serotonin < 40) {
-    insights.push({ icon:'🌸', text: `Low Serotonin detected (${cats.serotonin}%). This is your mood stabilisation system. Inadequate sleep is the most common culprit — prioritise it tonight. Even one night of 7–9 hrs can meaningfully shift tomorrow's baseline.` });
+    insights.push({ icon:'🌸', text: `Your Serotonin system is quiet today. This is your mood stabilisation system. Inadequate sleep is the most common culprit — prioritise it tonight. Even one good night shifts tomorrow's baseline.` });
   }
   if (cats.oxytocin < 30) {
-    insights.push({ icon:'🤝', text: `Oxytocin is your lowest system today at ${cats.oxytocin}%. Human connection is not a luxury — it's a physiological need. One meaningful conversation or physical touch before day's end can shift your stress chemistry significantly.` });
+    insights.push({ icon:'🤝', text: `Your Oxytocin system is quiet today. Human connection is not a luxury — it's a physiological need. One meaningful conversation or a moment of genuine appreciation before day's end shifts your stress chemistry.` });
   }
   if (cats.dopamine === 0) {
     insights.push({ icon:'⚡', text: `Dopamine is completely inactive today. Without at least one block of focused work, your brain's reward system has no anchor. Even 20 minutes of intentional effort on your most important task can break the inertia.` });
@@ -2780,9 +2708,9 @@ function renderAdvInsights() {
     const recent3 = dayScores.slice(-3).map(([,s]) => s);
     const trend   = recent3[2] - recent3[0];
     if (trend > 15) {
-      insights.push({ icon:'📊', text: `Your scores have been trending upward over the last 3 days (+${trend}%). Momentum is building. This is the most powerful time to commit to a new foundational habit.` });
+      insights.push({ icon:'📊', text: `Your activity has been trending upward over the last 3 days. Momentum is building — this is the most powerful time to commit to a new foundational habit.` });
     } else if (trend < -15) {
-      insights.push({ icon:'📊', text: `Your scores have declined over the last 3 days (${trend}%). This is a normal dip — but worth noticing. Check which category dropped first; that's usually the trigger.` });
+      insights.push({ icon:'📊', text: `Your activity has been lower over the last 3 days. This is a normal dip — worth noticing, not worrying about. Check which category went quiet first; that's usually the trigger.` });
     }
   }
 
@@ -2832,74 +2760,67 @@ function getBrainBalanceFeedback() {
 }
 
 function openShareModal() {
-  const score  = heroScore();
+  const phase  = brainPhase();
+  const labels = ['Ready','Awakening','Warming up','Foundation active','Thriving'];
   const now    = new Date();
   const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const grades = [[90,'S','#4a9e82'],[75,'A','#4a9e82'],[55,'B','#5a82c0'],[35,'C','#c8712a'],[15,'D','#b85070'],[0,'—','#7a7469']];
-  const [, g, c] = grades.find(([min]) => score >= min) || grades[5];
-
-  document.getElementById('shareDate').textContent    = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
-  document.getElementById('shareScoreNum').textContent = Math.round(score);
-  document.getElementById('shareScoreNum').style.color = c;
-  document.getElementById('shareGrade').textContent    = `Grade ${g} · ${gradeLabel(g)}`;
-  document.getElementById('shareGrade').style.color    = c;
-
-  // Brain balance bars
   const barColors = { dopamine: '#c8712a', serotonin: '#4a9e82', oxytocin: '#b85070', endorphin: '#5a82c0' };
   const barNames  = { dopamine: 'Dopamine', serotonin: 'Serotonin', oxytocin: 'Oxytocin', endorphin: 'Endorphin' };
+
+  document.getElementById('shareDate').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+  // Replace score number with brain phase label
+  const sn = document.getElementById('shareScoreNum');
+  if (sn) { sn.textContent = labels[phase]; sn.style.fontSize = '22px'; sn.style.color = '#e8e3d8'; }
+  const sg = document.getElementById('shareGrade');
+  if (sg) { sg.textContent = 'Brain State: ' + labels[phase]; sg.style.color = '#7a7469'; }
+
   document.getElementById('brainBars').innerHTML = Object.keys(HABITS).map(type => {
-    const pct = catEffectivePct(type);
-    return `
-      <div class="balance-row">
-        <div class="balance-name">${barNames[type]}</div>
-        <div class="balance-track"><div class="balance-fill" style="width:${pct}%;background:${barColors[type]}"></div></div>
-        <div class="balance-pct" style="color:${barColors[type]}">${Math.round(pct)}%</div>
-      </div>`;
+    const ok  = foundationDone(type);
+    const col = barColors[type];
+    return `<div class="balance-row">
+      <div class="balance-name">${barNames[type]}</div>
+      <div class="balance-track"><div class="balance-fill" style="width:${ok ? 100 : 30}%;background:${col}${ok ? '' : '55'}"></div></div>
+      <div class="balance-pct" style="color:${col}">${ok ? 'Active' : 'Building'}</div>
+    </div>`;
   }).join('');
 
-  // Brain balance feedback sentence (REVISION 6)
   document.getElementById('brainFeedback').textContent = getBrainBalanceFeedback();
 
-  // Category score tiles
   document.getElementById('shareCats').innerHTML = Object.keys(HABITS).map(type => {
-    const pct = catEffectivePct(type);
-    return `<div class="share-cat"><div class="share-cat-name">${barNames[type]}</div><div class="share-cat-score" style="color:${barColors[type]}">${Math.round(pct)}%</div></div>`;
+    const ok = foundationDone(type);
+    return `<div class="share-cat">
+      <div class="share-cat-name">${barNames[type]}</div>
+      <div class="share-cat-score" style="color:${barColors[type]}">${ok ? 'Active' : 'Building'}</div>
+    </div>`;
   }).join('');
 
   openModal('shareOverlay');
 }
 
-function gradeLabel(g) {
-  const map = { 'S': 'Thriving', 'A': 'Strong', 'B': 'Building', 'C': 'Moving', 'D': 'Starting', '—': 'Rest day' };
-  return map[g] || '';
-}
-
 function buildShareText() {
-  const score = Math.round(heroScore());
-  const grades = [[90,'S'],[75,'A'],[55,'B'],[35,'C'],[15,'D'],[0,'—']];
-  const [, g] = grades.find(([min]) => score >= min) || grades[5];
-  const now   = new Date();
-  const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const phase  = brainPhase();
+  const labels = ['Ready','Awakening','Warming up','Foundation active','Thriving'];
+  const now    = new Date();
+  const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const catNames = { dopamine:'Dopamine', serotonin:'Serotonin', oxytocin:'Oxytocin', endorphin:'Endorphin' };
-  const lines = Object.keys(HABITS).map(t => `  ${catNames[t]}: ${Math.round(catEffectivePct(t))}%`).join('\n');
-
-  return `🧠 NeuroHabit — ${days[now.getDay()]}\n\nHero Score: ${score}%  |  Grade: ${g}\n\n${lines}\n\n${getBrainBalanceFeedback()}\n\nTracked with NeuroHabit by The Aufthority`;
+  const lines = Object.keys(HABITS).map(t => `  ${catNames[t]}: ${foundationDone(t) ? 'Active' : 'Building'}`).join('\n');
+  return `🧠 NeuroHabit — ${days[now.getDay()]}\n\nBrain State: ${labels[phase]}\n\n${lines}\n\n${getBrainBalanceFeedback()}\n\nTracked with NeuroHabit by The Aufthority`;
 }
 
 function copyShareText() {
   navigator.clipboard.writeText(buildShareText())
-    .then(() => showToast('Score copied to clipboard!', 'success'))
+    .then(() => showToast('Copied to clipboard!', 'success'))
     .catch(() => showToast(buildShareText(), 'info'));
 }
 
 function nativeShare() {
   const text = buildShareText();
   if (navigator.share) {
-    navigator.share({ title: 'My NeuroHabit Score', text }).catch(() => {});
+    navigator.share({ title: 'My NeuroHabit Day', text }).catch(() => {});
   } else {
     navigator.clipboard.writeText(text)
-      .then(() => showToast('Score copied to clipboard!', 'success'))
+      .then(() => showToast('Copied to clipboard!', 'success'))
       .catch(() => showToast('Could not copy. Try sharing manually.', 'error'));
   }
 }
@@ -2915,9 +2836,9 @@ async function generateShareImage() {
   const months    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dateStr   = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
 
-  const grades     = [[90,'S','#4a9e82'],[75,'A','#4a9e82'],[55,'B','#5a82c0'],[35,'C','#c8712a'],[15,'D','#b85070'],[0,'—','#7a7469']];
-  const [, grade, gradeColor] = grades.find(([min]) => score >= min) || grades[5];
-  const gradeText  = { 'S':'Perfect Day','A':'Excellent','B':'Good','C':'Okay','D':'Low','—':'Just Starting' }[grade];
+  // Score-free: use brain phase for all display
+  const _phaseColMap = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82'];
+  const phaseAccentColor = _phaseColMap[phase];
 
   const catData = [
     { name:'Dopamine',  pct: Math.round(catEffectivePct('dopamine')),  color:'#c8712a' },
@@ -2927,7 +2848,10 @@ async function generateShareImage() {
   ];
 
   // ── Build brainvatar SVG at 400×400 for canvas ──────────────
-  const tier = getBrainvatarTier(score);
+  const phase = brainPhase();
+  const phaseLabels = ['Ready','Awakening','Warming up','Foundation Active','Thriving'];
+  const phaseCols = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82'];
+  const tier = ['zero','low','mid','good','elite'][phase];
   const palettes = {
     elite: { primary: '#4a9e82', secondary: '#5a82c0', glow: 'rgba(74,158,130,0.35)', aura: true  },
     good:  { primary: '#c8712a', secondary: '#7c6ab8', glow: 'rgba(200,113,42,0.2)',  aura: false },
@@ -2991,7 +2915,7 @@ async function generateShareImage() {
 
   // Subtle glow
   const bgGrd = ctx.createRadialGradient(W * 0.5, H * 0.38, 60, W * 0.5, H * 0.38, 520);
-  bgGrd.addColorStop(0, `${gradeColor}18`);
+  bgGrd.addColorStop(0, phaseAccentColor + '18');
   bgGrd.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = bgGrd;
   ctx.fillRect(0, 0, W, H);
@@ -3046,26 +2970,15 @@ async function generateShareImage() {
     img.src = url;
   });
 
-  // Score number overlaid on brainvatar centre
-  const scoreStr = `${score}%`;
+  // Brain phase label (no score shown)
   ctx.textAlign = 'center';
-  ctx.font = `300 108px system-ui, sans-serif`;
-  ctx.fillStyle = gradeColor;
-  ctx.fillText(scoreStr, W / 2, 420);
-
-  // State label
-  ctx.font = '600 22px system-ui, sans-serif';
-  ctx.fillStyle = '#7a7469';
-  ctx.fillText(BRAINVATAR_CONTENT[tier].label.toUpperCase(), W / 2, 456);
+  ctx.font = '500 32px system-ui, sans-serif';
+  ctx.fillStyle = phaseCols[phase];
+  ctx.fillText(phaseLabels[phase].toUpperCase(), W / 2, 432);
   ctx.textAlign = 'left';
 
-  // Grade pill area
+  // Divider placeholder (shifted up)
   const pillY = 590;
-  ctx.fillStyle = gradeColor;
-  ctx.font = '600 28px system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(`Grade ${grade}  ·  ${gradeText}`, W / 2, pillY);
-  ctx.textAlign = 'left';
 
   // Divider
   ctx.strokeStyle = '#3d3a33'; ctx.lineWidth = 1;
@@ -3392,9 +3305,12 @@ function renderProfile() {
   document.getElementById('profileName').textContent   = name.charAt(0).toUpperCase() + name.slice(1);
   document.getElementById('profileEmail').textContent  = email;
   document.getElementById('profilePlanBadge').textContent = userData.skipAuth ? 'Guest' : 'Free';
-  document.getElementById('statHeroScore').textContent = score + '%';
+  const phase = brainPhase();
+  const phaseLabels = ['Ready','Awakening','Warming up','Active','Thriving'];
+  document.getElementById('statHeroScore').textContent = phaseLabels[phase];
   document.getElementById('statStreak').textContent    = streak.count || 0;
-  document.getElementById('statGrade').textContent     = g;
+  const { done: fdnD, total: fdnT } = countFoundationals();
+  document.getElementById('statGrade').textContent = fdnD + ' / ' + fdnT + ' done';
 }
 
 function editProfile() {
