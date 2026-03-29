@@ -4,7 +4,7 @@
    — Firebase/Fonts cached for offline use
    ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'neurohabit-v15';
+const CACHE_NAME = 'neurohabit-v16';
 
 const PRECACHE = [
   '/nh-tracker-alpha/manifest.json',
