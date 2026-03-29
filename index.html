@@ -4086,18 +4086,15 @@ function proceedToAvatarStep() {
 }
 
 function finishOnboarding() {
-  /* Validate: at least one core per category */
-  const invalid = CAT_META.filter(function(meta) {
-    const fdnIds = HABITS[meta.type].foundationalIds;
-    return !tempConfig[meta.type].selected.some(function(id) { return fdnIds.includes(id); });
-  });
-  if (invalid.length > 0) {
-    document.getElementById('onboardError').classList.add('show');
-    return;
-  }
+  /* Habit validation already done in proceedToAvatarStep().
+     Just commit config, init lock, and launch the app. */
+  if (!tempConfig) return; // safety guard — should never happen
   userHabitConfig = tempConfig;
   sv(HCK, userHabitConfig);
   initHabitLock(userHabitConfig);
+  // Hide avatar screen before launching
+  var avScreen = document.getElementById('screen-avatar');
+  if (avScreen) { avScreen.classList.remove('screen-active'); avScreen.style.display = 'none'; }
   showMainApp();
 }
 
