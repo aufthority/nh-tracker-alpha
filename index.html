@@ -11,6 +11,21 @@
 <link rel="manifest" href="/nh-tracker-alpha/manifest.json">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%231c1a17'/><text y='128' x='90' text-anchor='middle' font-size='100'>🧠</text></svg>">
 <title>NeuroHabit</title>
+<script>
+/* Theme flash prevention — runs before CSS renders */
+(function() {
+  var stored = localStorage.getItem('nh_theme');
+  if (stored === 'light') {
+    document.documentElement.classList.add('light-theme');
+  } else if (!stored) {
+    /* First visit — respect OS preference */
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      document.documentElement.classList.add('light-theme');
+      localStorage.setItem('nh_theme', 'light');
+    }
+  }
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -57,6 +72,21 @@
   --radius-sm: 10px;
   --radius:    16px;
   --radius-lg: 22px;
+}
+
+/* ═══ LIGHT THEME ════════════════════════════════════════════ */
+/* Applied via .light-theme on <html>. Accent colours unchanged. */
+.light-theme {
+  --bg:        #f5f0e8;
+  --surface:   #ffffff;
+  --surface2:  #eeeadf;
+  --surface3:  #e5e0d5;
+  --border:    #d8d2c8;
+  --border2:   #c8c0b4;
+  --text:      #1c1a17;
+  --muted:     #6b6256;
+  --subtle:    #a09890;
+  --coach:     #6a58a6;  /* slightly deeper for contrast on light bg */
 }
 
 /* ═══ RESET ══════════════════════════════════════════════════ */
@@ -914,6 +944,17 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
 .trend-day-label.today { fill: var(--text); font-weight: 600; }
 .trend-active-dot { transition: r 0.2s; }
 
+/* ═══ THEME TOGGLE ══════════════════════════════════════════ */
+.theme-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
+.theme-toggle-left { display: flex; align-items: center; gap: 12px; }
+.theme-toggle-icon { font-size: 18px; line-height: 1; }
+.theme-toggle-body strong { display: block; font-size: 14px; font-weight: 500; color: var(--text); }
+.theme-toggle-body span { font-size: 12px; color: var(--muted); }
+.theme-pill { position: relative; width: 44px; height: 26px; border-radius: 13px; border: none; cursor: pointer; transition: background 0.25s; flex-shrink: 0; background: var(--border2); }
+.theme-pill.on { background: var(--coach); }
+.theme-pill-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform 0.25s cubic-bezier(.34,1.56,.64,1); }
+.theme-pill.on .theme-pill-thumb { transform: translateX(18px); }
+
 /* ═══ AVATAR PICKER ══════════════════════════════════════════ */
 .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
 .avatar-option { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 6px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.15s; text-align: center; }
@@ -1335,6 +1376,17 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
         <!-- App section -->
         <div class="profile-section-label">App</div>
         <div class="profile-rows">
+          <!-- Light mode toggle -->
+          <div class="profile-row theme-toggle-row" style="cursor:default">
+            <div class="theme-toggle-left">
+              <div class="theme-toggle-icon" id="themeToggleIcon">☀️</div>
+              <div class="theme-toggle-body">
+                <strong>Light Mode</strong>
+                <span id="themeToggleLabel">Currently dark — tap to switch</span>
+              </div>
+            </div>
+            <button class="theme-pill" id="themePill" onclick="toggleTheme()" aria-label="Toggle light mode"></button>
+          </div>
           <div class="profile-row" onclick="showScreen('screen-grade')">
             <div class="profile-row-icon">📊</div>
             <div class="profile-row-body">
@@ -2387,29 +2439,56 @@ function updateCatUI(type) {
    HEADER UPDATE
    ═══════════════════════════════════════════════════════════ */
 /* ── Brain phase helpers ── */
+/* ── Graduated contribution of a core habit based on session depth ──────
+ * Binary habits (no multiSession tiers): 0 or 1.
+ * Tiered habits: 0 if not done, else tierIdx / maxTiers.
+ *   Tier 1 of 3 = 0.33, Tier 2 of 3 = 0.67, Tier 3 of 3 = 1.0
+ *   Tier 1 of 1 = 1.0 (single-tier flex habits treated as binary)
+ * This gives a smooth 0–1 value reflecting both completion and session depth.
+ */
+function coreHabitContribution(type, h, i) {
+  var done = !!appState[today][type + '_' + i];
+  if (!done) return 0;
+  if (h.flex && h.flex.multiSession && h.flex.tiers && h.flex.tiers.length > 1) {
+    var tierKey = type + '_' + i + '_tier';
+    var tierIdx = appState[today][tierKey] || 0;
+    var maxTiers = h.flex.tiers.length;
+    // If habit is marked done but no tier set, count as tier 1
+    var effectiveTier = tierIdx > 0 ? tierIdx : 1;
+    return effectiveTier / maxTiers;
+  }
+  return 1;  // binary or single-tier: done = full contribution
+}
+
 function countFoundationals() {
-  let done = 0, total = 0;
-  Object.keys(HABITS).forEach(type => {
-    const selFdns = getSelectedFoundationals(type);
+  var contributions = [];
+  var done = 0, total = 0;
+  Object.keys(HABITS).forEach(function(type) {
+    var selFdns = getSelectedFoundationals(type);
     total += selFdns.length;
-    selFdns.forEach(h => {
-      const i = HABITS[type].habits.indexOf(h);
+    selFdns.forEach(function(h) {
+      var i = HABITS[type].habits.indexOf(h);
+      var contrib = coreHabitContribution(type, h, i);
+      contributions.push(contrib);
       if (!!appState[today][type + '_' + i]) done++;
     });
   });
-  return { done, total };
+  var rate = contributions.length > 0
+    ? contributions.reduce(function(s, v) { return s + v; }, 0) / contributions.length
+    : 0;
+  return { done: done, total: total, rate: rate };
 }
 
 function brainPhase() {
-  const totalHabits = Object.values(appState[today] || {}).filter(v => v === true).length;
+  var totalHabits = Object.values(appState[today] || {}).filter(function(v) { return v === true; }).length;
   if (totalHabits === 0) return 0;
-  const { done, total } = countFoundationals();
-  const rate = total > 0 ? done / total : 0;
-  if (rate >= 1.0) return 5;  // Enlightened — every selected core habit done
-  if (rate >= 0.75) return 4;
-  if (rate >= 0.50) return 3;
-  if (rate >= 0.25) return 2;
-  return 1;
+  var cf = countFoundationals();
+  var rate = cf.rate;
+  if (rate >= 1.0) return 5;  // Enlightened — all core habits at max session tier
+  if (rate >= 0.75) return 4; // Thriving — 75% weighted completion
+  if (rate >= 0.50) return 3; // Foundation Active — 50% weighted
+  if (rate >= 0.25) return 2; // Warming Up — 25% weighted
+  return 1;                   // Awakening — habits logged but low core completion
 }
 
 const BRAIN_PHASE_COLS   = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82','#7c6ab8'];
@@ -2598,8 +2677,7 @@ function buildCoachFeed() {
   const feed = document.getElementById('coachFeed');
   if (!feed) return;
   feed.innerHTML = '';
-  const { done: fdnDone, total: fdnTotal } = countFoundationals();
-  const fdnRate = fdnTotal > 0 ? fdnDone / fdnTotal : 0;
+  const { done: fdnDone, total: fdnTotal, rate: fdnRate } = countFoundationals();
   const totalLogged = Object.values(appState[today] || {}).filter(v => v === true).length;
   const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
   const catNames = { dopamine: 'Dopamine', serotonin: 'Serotonin', oxytocin: 'Oxytocin', endorphin: 'Endorphin' };
@@ -2734,7 +2812,7 @@ function renderCoach() {
   document.getElementById('brainvatarSub').textContent   = BRAIN_SUBS[phase];
 
   // Core day badge
-  const { done: fdnDone } = countFoundationals();
+  const { done: fdnDone, rate: fdnRateCoach } = countFoundationals();
   const allGatesDone = Object.keys(HABITS).every(t => foundationDone(t));
   const totalLogged  = Object.values(appState[today] || {}).filter(v => v === true).length;
   const badge = document.getElementById('coreDayBadge');
@@ -2796,7 +2874,7 @@ function renderWeeklyTrend() {
       : (weekData[key] || 0) > 0;
     const fdnRate = isToday ? (function() {
       var cf = countFoundationals();
-      return cf.total > 0 ? cf.done / cf.total : 0;
+      return cf.rate;  // weighted rate includes session depth
     })() : (weekData[key] ? Math.min((weekData[key] / 100), 1) : 0);
     return { label: labels[i], active: active, fdnRate: fdnRate, isFuture: isFuture, isToday: isToday };
   });
@@ -3643,7 +3721,7 @@ document.querySelectorAll('.nav-tab').forEach(btn => {
     btn.classList.add('active');
     document.getElementById(`page-${tab}`).classList.add('page-active');
     document.getElementById(`page-${tab}`).scrollTop = 0;
-    if (tab === 'profile') renderProfile();
+    if (tab === 'profile') { renderProfile(); updateThemeUI(); }
     // Advance thought bubble category each time user returns to coach tab
     if (tab === 'coach') {
       _categoryCounters[_categoryOrder[_catTapIdx % _categoryOrder.length]]++;
@@ -3736,18 +3814,21 @@ function showAvatarPicker() {
    AVATAR SYSTEM — relatable character identities
    ═══════════════════════════════════════════════════════════ */
 const AVATARS = [
-  { id: 'tired-carer',    emoji: '😪', label: 'Tired Carer',          desc: 'Running on love and coffee' },
-  { id: 'shift-worker',   emoji: '🥱', label: 'Shift Worker',          desc: 'My schedule is a mystery' },
-  { id: 'neurodivergent', emoji: '🤔', label: 'Neurodivergent',        desc: 'My brain works differently' },
-  { id: 'perp-student',   emoji: '😅', label: 'Perpetual Student',     desc: 'Deadline? What deadline?' },
-  { id: 'gamer',          emoji: '😎', label: 'The Gamer',             desc: 'One more round, I promise' },
-  { id: 'late-bloomer',   emoji: '😜', label: 'Late Bloomer',          desc: 'Adulting is still loading' },
-  { id: 'meat-lover',     emoji: '😋', label: 'Meat Lover',            desc: 'Plants are for decoration' },
-  { id: 'overachiever',   emoji: '😬', label: 'The Overachiever',      desc: 'Sleep is for the weekend' },
-  { id: 'overthinker',    emoji: '😰', label: 'The Overthinker',       desc: 'Overthinking this choice right now' },
-  { id: 'introvert',      emoji: '🙂', label: 'Proud Introvert',       desc: 'People are exhausting' },
-  { id: 'gym-devotee',    emoji: '😤', label: 'Gym Devotee',           desc: 'Did I mention I lift?' },
-  { id: 'creative',       emoji: '🤩', label: 'The Creative',          desc: 'Living in my own world' },
+  { id: 'tired-carer',       emoji: '😪', label: 'Tired Carer',          desc: 'Running on love and coffee' },
+  { id: 'shift-worker',      emoji: '🥱', label: 'Shift Worker',          desc: 'My schedule is a mystery' },
+  { id: 'neurodivergent',    emoji: '🤔', label: 'Neurodivergent',        desc: 'My brain works differently' },
+  { id: 'busy-student',      emoji: '😅', label: 'Busy Student',          desc: 'Deadline? What deadline?' },
+  { id: 'gamer',             emoji: '😎', label: 'The Gamer',             desc: 'One more round, I promise' },
+  { id: 'outdoor-junkie',    emoji: '😄', label: 'Outdoor Junkie',        desc: 'If there is no trail, I make one' },
+  { id: 'corp-survivor',     emoji: '😬', label: 'Corporate Survivor',    desc: 'Meetings that could be emails' },
+  { id: 'overachiever',      emoji: '🤩', label: 'The Overachiever',      desc: 'Sleep is for the weekend' },
+  { id: 'overthinker',       emoji: '😰', label: 'The Overthinker',       desc: 'Overthinking this choice right now' },
+  { id: 'introvert',         emoji: '🙂', label: 'Proud Introvert',       desc: 'People are exhausting' },
+  { id: 'gym-devotee',       emoji: '😤', label: 'Gym Devotee',           desc: 'Did I mention I lift?' },
+  { id: 'runner',            emoji: '🥵', label: 'The Runner',            desc: 'One more kilometre' },
+  { id: 'extrovert',         emoji: '😁', label: 'The Extrovert',         desc: 'I made friends in the queue' },
+  { id: 'homemaker',         emoji: '🤗', label: 'Home Maker',            desc: 'The house runs because of me' },
+  { id: 'creative',          emoji: '😋', label: 'The Creative',          desc: 'Living in my own world' },
 ];
 
 const AVK = 'nh_pwa_avatar'; // localStorage key
@@ -4030,9 +4111,9 @@ function renderPhaseGuide() {
     { phase: 0, name: 'Dormant',            desc: 'No habits logged yet today. Your brain is resting.', trigger: 'No habits logged', col: '#4a4640' },
     { phase: 1, name: 'Awakening',          desc: 'Habits are being logged but no core habit is complete yet. Your brain is starting to respond.', trigger: '1 or more habits logged, no core complete', col: '#6b6560' },
     { phase: 2, name: 'Warming Up',         desc: 'Some core habits done across your categories. Neurochemical activity is building.', trigger: '25% or more of your core habits complete', col: '#c8712a' },
-    { phase: 3, name: 'Foundation Active',  desc: 'At least 50% of your chosen core habits are done. The evidence says this is a genuinely good day for your brain.', trigger: '50% or more of your core habits complete', col: '#b85070' },
-    { phase: 4, name: 'Thriving',           desc: 'All four systems are well supported. Your brain is fully activated today.', trigger: '75% or more of your core habits complete', col: '#4a9e82' },
-    { phase: 5, name: 'Enlightened',        desc: 'Every single core habit you chose is complete. A rare and exceptional day — all four neurochemical systems are fully anchored.', trigger: '100% of your core habits complete', col: '#7c6ab8' },
+    { phase: 3, name: 'Foundation Active',  desc: 'At least 50% of your core habit session target is reached. Session depth counts — tier 1 is a start, max tier is the goal.', trigger: '50% weighted core completion (session depth counts)', col: '#b85070' },
+    { phase: 4, name: 'Thriving',           desc: 'Strong session depth across most of your core habits. Your brain is firing across all four neurochemical systems.', trigger: '75% weighted core completion', col: '#4a9e82' },
+    { phase: 5, name: 'Enlightened',        desc: 'Every selected core habit completed at maximum session depth. All four neurochemical systems fully anchored. A genuinely rare achievement.', trigger: 'All core habits at maximum session tier', col: '#7c6ab8' },
   ];
 
   el.innerHTML = phases.map(function(p) {
@@ -4244,6 +4325,8 @@ function initApp() {
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('headerDate').textContent = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()];
+  updateThemeUI();        // sync toggle pill state with current theme
+  updateThemeMetaTag();   // sync iOS PWA status bar colour
   renderLockStatusBars();
   Object.keys(HABITS).forEach(function(t) { renderSection(t); });
   updateHeader(); renderCoach(); renderWeek(); checkStreak(); renderProfile();
@@ -4423,6 +4506,7 @@ window.showScreen         = showScreen;
 window.hideScreen         = hideScreen;
 window.showOnboarding      = showOnboarding;
 window.showAvatarPicker    = showAvatarPicker;
+window.toggleTheme         = toggleTheme;
 window.renderPhaseGuide    = renderPhaseGuide;
 window.finishOnboarding    = finishOnboarding;
 window.proceedToAvatarStep = proceedToAvatarStep;
@@ -4431,7 +4515,42 @@ window.removeHabitFromSet  = removeHabitFromSet;
 window.showMainApp         = showMainApp;
 window.openShareModal     = openShareModal;
 window.generateShareImage = generateShareImage;
+
 window.nativeShare        = nativeShare;
+
+/* Theme */
+var THEME_KEY = 'nh_theme';
+function isLightMode() { return document.documentElement.classList.contains('light-theme'); }
+function toggleTheme() {
+  if (isLightMode()) {
+    document.documentElement.classList.remove('light-theme');
+    localStorage.setItem(THEME_KEY, 'dark');
+  } else {
+    document.documentElement.classList.add('light-theme');
+    localStorage.setItem(THEME_KEY, 'light');
+  }
+  updateThemeUI();
+  updateThemeMetaTag();
+}
+function updateThemeMetaTag() {
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', isLightMode() ? '#f5f0e8' : '#1c1a17');
+}
+function updateThemeUI() {
+  var pill = document.getElementById('themePill');
+  var icon = document.getElementById('themeToggleIcon');
+  var lbl  = document.getElementById('themeToggleLabel');
+  if (!pill) return;
+  var light = isLightMode();
+  pill.classList.toggle('on', light);
+  if (!pill.querySelector('.theme-pill-thumb')) {
+    var t = document.createElement('div');
+    t.className = 'theme-pill-thumb'; pill.appendChild(t);
+  }
+  if (icon) icon.textContent  = light ? '🌝' : '☀️';
+  if (lbl)  lbl.textContent   = light ? 'Currently light — tap to switch' : 'Currently dark — tap to switch';
+}
+window.toggleTheme = toggleTheme;
 </script>
 </body>
 </html>
