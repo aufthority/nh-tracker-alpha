@@ -458,6 +458,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Geist', system-u
   border-radius: var(--radius); padding: 18px;
   margin-bottom: 10px;
 }
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 .profile-avatar {
   width: 56px; height: 56px; border-radius: 50%;
   background: linear-gradient(135deg, var(--coach), var(--dopamine));
@@ -1621,6 +1622,13 @@ const HABITS = {
         info: { body: "Eating a meal containing tyrosine-rich foods — the dietary precursor to dopamine.", examples: ["Eggs with protein at breakfast", "Chicken or beef with lunch or dinner", "Almonds, pumpkin seeds, or walnuts as a snack"] },
         tooltip: { icon: "🥚", title: "Feed your Dopamine system", body: "Tyrosine is the amino acid your brain converts into dopamine." }
       },
+      {
+        id: 'fast',
+        label: 'Fasting (Eating Window)',
+        weight: 1, foundational: false, type: 'secondary', flex: null,
+        info: { body: "Maintaining a consistent daily eating window — typically 8 to 10 hours. Known as Time-Restricted Eating (TRE) in research. Included here for its behaviour-correcting effects: a consistent eating window improves self-regulatory discipline that spills over into other habits, and stabilises blood sugar to protect dopamine receptor sensitivity.", examples: ["Eating between 8am and 6pm only", "Skipping late-night snacking consistently", "First meal at noon, last meal by 8pm (16:8 pattern)"] },
+        tooltip: { icon: "⏱", title: "Fasting protects your Dopamine system", body: "Stable blood sugar from a consistent eating window prevents the dopamine receptor blunting caused by glucose spikes. Research also shows TRE creates spillover self-regulation — one committed boundary strengthens others (Lowe et al. Obesity Reviews 2020)." }
+      },
     ]
   },
 
@@ -2175,7 +2183,7 @@ function renderSection(type) {
         '<span class="habit-label">' + displayLabel + '</span>' +
         '<div class="habit-meta">' +
           '<span class="habit-type-tag">' + typeMap[h.type] + '</span>' +
-          (h.foundational ? '<span class="habit-core-tag" style="background:var(--' + type + ')22;color:var(--' + type + ')">Core</span>' : '') +
+
           (isFlex ? '<span class="flex-tag show">' + (isMulti ? 'SESSIONS' : 'FLEX') + '</span>' : '') +
         '</div>' +
       '</div>' +
@@ -2397,31 +2405,55 @@ function brainPhase() {
   if (totalHabits === 0) return 0;
   const { done, total } = countFoundationals();
   const rate = total > 0 ? done / total : 0;
+  if (rate >= 1.0) return 5;  // Enlightened — every selected core habit done
   if (rate >= 0.75) return 4;
   if (rate >= 0.50) return 3;
   if (rate >= 0.25) return 2;
   return 1;
 }
 
-const BRAIN_PHASE_COLS   = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82'];
-const BRAIN_PHASE_EYECOL = ['#2e2b24','#3d3a33','#7a3800','#7a3800','#085041'];
-const BRAIN_LABELS = ['Ready','Awakening','Warming up','Foundation active','Thriving'];
+const BRAIN_PHASE_COLS   = ['#4a4640','#6b6560','#c8712a','#b85070','#4a9e82','#7c6ab8'];
+const BRAIN_PHASE_EYECOL = ['#2e2b24','#3d3a33','#7a3800','#7a3800','#085041','#3b2d6e'];
+const BRAIN_LABELS = ['Ready','Awakening','Warming up','Foundation active','Thriving','Enlightened'];
 const BRAIN_SUBS   = [
   'Log your first habit to begin',
   'Your brain is responding — keep going',
   'Building momentum — some core habits done',
   'Foundation active — your brain is set for the day',
-  'All systems firing — outstanding day'
+  'All systems firing — outstanding day',
+  'Every core habit complete. A rare and exceptional day.'
 ];
 
 function drawBrainSvg(svgEl, phase) {
   if (!svgEl) return;
   const c  = BRAIN_PHASE_COLS[phase];
   const ey = BRAIN_PHASE_EYECOL[phase];
-  const glow   = phase >= 2 ? '<ellipse cx="48" cy="54" rx="34" ry="26" fill="' + c + '28"/>' : '';
+  const glow = phase >= 2
+    ? '<ellipse cx="48" cy="54" rx="34" ry="26" fill="' + c + '28"/>'
+    : '';
+  const outerGlow = phase === 5
+    ? '<ellipse cx="48" cy="48" rx="44" ry="44" fill="none" stroke="' + c + '" stroke-width="1.5" opacity=".25"/>'
+      + '<ellipse cx="48" cy="48" rx="40" ry="40" fill="' + c + '" opacity=".06"/>'
+    : '';
   let deco = '';
-  if (phase === 3) deco = '<path d="M72 18 Q74 22 70 24" fill="none" stroke="' + c + '" stroke-width="1.5" stroke-linecap="round" opacity=".7"/><path d="M16 26 Q14 30 18 31" fill="none" stroke="' + c + '" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>';
-  if (phase === 4) deco = '<circle cx="74" cy="17" r="2.5" fill="' + c + '" opacity=".85"/><circle cx="15" cy="25" r="2" fill="' + c + '" opacity=".75"/><circle cx="52" cy="8" r="1.8" fill="' + c + '" opacity=".7"/><path d="M76 34 L72 41 L75 41 L71 50 L78 41 L74 41 Z" fill="#c8712a" opacity=".85"/>';
+  if (phase === 3) {
+    deco = '<path d="M72 18 Q74 22 70 24" fill="none" stroke="' + c + '" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>'
+         + '<path d="M16 26 Q14 30 18 31" fill="none" stroke="' + c + '" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>';
+  } else if (phase === 4) {
+    deco = '<circle cx="74" cy="17" r="2.5" fill="' + c + '" opacity=".85"/>'
+         + '<circle cx="15" cy="25" r="2" fill="' + c + '" opacity=".75"/>'
+         + '<circle cx="52" cy="8" r="1.8" fill="' + c + '" opacity=".7"/>'
+         + '<path d="M76 34 L72 41 L75 41 L71 50 L78 41 L74 41 Z" fill="#c8712a" opacity=".85"/>';
+  } else if (phase === 5) {
+    // Sparkle constellation around the brain for Enlightened
+    deco = '<circle cx="76" cy="16" r="3" fill="' + c + '" opacity=".9"/>'
+         + '<circle cx="14" cy="22" r="2.2" fill="' + c + '" opacity=".8"/>'
+         + '<circle cx="52" cy="6" r="2" fill="' + c + '" opacity=".75"/>'
+         + '<circle cx="82" cy="44" r="1.8" fill="' + c + '" opacity=".65"/>'
+         + '<circle cx="8" cy="50" r="1.5" fill="' + c + '" opacity=".6"/>'
+         + '<path d="M72 10 L73.5 14 L77.5 14 L74.5 16.5 L75.5 20.5 L72 18 L68.5 20.5 L69.5 16.5 L66.5 14 L70.5 14 Z" fill="' + c + '" opacity=".9"/>'
+         + '<path d="M18 12 L19 15 L22 15 L19.8 17 L20.5 20 L18 18.5 L15.5 20 L16.2 17 L14 15 L17 15 Z" fill="' + c + '" opacity=".7"/>';
+  }
   const zzz = phase === 0 ? '<text x="60" y="26" font-size="9" fill="#504c45" font-family="sans-serif" opacity=".6">z</text><text x="66" y="18" font-size="11" fill="#504c45" font-family="sans-serif" opacity=".4">z</text>' : '';
   let lEye, rEye;
   if (phase === 0) {
@@ -2434,14 +2466,17 @@ function drawBrainSvg(svgEl, phase) {
     lEye = '<ellipse cx="32" cy="51" rx="3" ry="3.5" fill="' + ey + '"/>';
     rEye = '<ellipse cx="60" cy="51" rx="3" ry="3.5" fill="' + ey + '"/>';
   }
-  const shine = phase === 4 ? '<circle cx="33.5" cy="49.5" r="1" fill="white" opacity=".7"/><circle cx="61.5" cy="49.5" r="1" fill="white" opacity=".7"/>' : '';
+  const shine = phase >= 4
+    ? '<circle cx="33.5" cy="49.5" r="1" fill="white" opacity=".7"/><circle cx="61.5" cy="49.5" r="1" fill="white" opacity=".7"/>'
+    : '';
   let mouth;
   if (phase === 0)      mouth = '<path d="M38 62 Q48 60 58 62" fill="none" stroke="' + ey + '" stroke-width="1.2" stroke-linecap="round" opacity=".4"/>';
   else if (phase === 1) mouth = '<path d="M40 62 Q48 63 56 62" fill="none" stroke="' + ey + '" stroke-width="1.3" stroke-linecap="round" opacity=".55"/>';
   else if (phase <= 3)  mouth = '<path d="M40 61 Q48 66 56 61" fill="none" stroke="' + ey + '" stroke-width="1.5" stroke-linecap="round"/>';
-  else                  mouth = '<path d="M39 60 Q48 68 57 60" fill="none" stroke="' + ey + '" stroke-width="1.8" stroke-linecap="round"/>';
+  else if (phase === 4) mouth = '<path d="M39 60 Q48 68 57 60" fill="none" stroke="' + ey + '" stroke-width="1.8" stroke-linecap="round"/>';
+  else                  mouth = '<path d="M38 59 Q48 70 58 59" fill="none" stroke="' + ey + '" stroke-width="2" stroke-linecap="round"/>';
   const highlight = phase >= 3 ? '<ellipse cx="38" cy="33" rx="7" ry="5" fill="white" opacity=".1"/>' : '';
-  svgEl.innerHTML = glow + deco + zzz
+  svgEl.innerHTML = outerGlow + glow + deco + zzz
     + '<path d="M48 22 C34 22 22 31 22 45 C22 53 26 59 32 63 L32 72 L64 72 L64 63 C70 59 74 53 74 45 C74 31 62 22 48 22 Z" fill="' + c + '"/>'
     + '<path d="M32 63 L64 63 L64 69 Q48 75 32 69 Z" fill="' + c + '" opacity=".7"/>'
     + '<path d="M29 33 Q25 41 27 51" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity=".18"/>'
@@ -3701,18 +3736,18 @@ function showAvatarPicker() {
    AVATAR SYSTEM — relatable character identities
    ═══════════════════════════════════════════════════════════ */
 const AVATARS = [
-  { id: 'tired-parent',   emoji: '😪', label: 'Tired Parent',        desc: 'Running on love and coffee' },
-  { id: 'shift-worker',   emoji: '🥱', label: 'Shift Worker',         desc: 'My schedule is a mystery' },
-  { id: 'neurodivergent', emoji: '🤔', label: 'Neurodivergent',       desc: 'My brain works differently' },
-  { id: 'messy-student',  emoji: '😅', label: 'Messy Student',        desc: 'Deadline? What deadline?' },
-  { id: 'gamer',          emoji: '😎', label: 'The Gamer',            desc: 'One more round, I promise' },
-  { id: 'man-child',      emoji: '😜', label: 'Man Child',            desc: 'Adulting is hard, okay?' },
-  { id: 'non-veggie',     emoji: '😋', label: 'Non-Veg Eater',        desc: 'Plants are for decoration' },
-  { id: 'workaholic',     emoji: '😬', label: 'Workaholic',           desc: 'Sleep is overrated, right?' },
-  { id: 'anxious-one',    emoji: '😰', label: 'The Anxious One',      desc: 'Overthinking everything' },
-  { id: 'introvert',      emoji: '🙂', label: 'Proud Introvert',      desc: 'People are exhausting' },
-  { id: 'gym-bro',        emoji: '😤', label: 'Gym Bro',              desc: 'Did I mention I lift?' },
-  { id: 'creative',       emoji: '🤩', label: 'The Creative',         desc: 'Living in my own world' },
+  { id: 'tired-carer',    emoji: '😪', label: 'Tired Carer',          desc: 'Running on love and coffee' },
+  { id: 'shift-worker',   emoji: '🥱', label: 'Shift Worker',          desc: 'My schedule is a mystery' },
+  { id: 'neurodivergent', emoji: '🤔', label: 'Neurodivergent',        desc: 'My brain works differently' },
+  { id: 'perp-student',   emoji: '😅', label: 'Perpetual Student',     desc: 'Deadline? What deadline?' },
+  { id: 'gamer',          emoji: '😎', label: 'The Gamer',             desc: 'One more round, I promise' },
+  { id: 'late-bloomer',   emoji: '😜', label: 'Late Bloomer',          desc: 'Adulting is still loading' },
+  { id: 'meat-lover',     emoji: '😋', label: 'Meat Lover',            desc: 'Plants are for decoration' },
+  { id: 'overachiever',   emoji: '😬', label: 'The Overachiever',      desc: 'Sleep is for the weekend' },
+  { id: 'overthinker',    emoji: '😰', label: 'The Overthinker',       desc: 'Overthinking this choice right now' },
+  { id: 'introvert',      emoji: '🙂', label: 'Proud Introvert',       desc: 'People are exhausting' },
+  { id: 'gym-devotee',    emoji: '😤', label: 'Gym Devotee',           desc: 'Did I mention I lift?' },
+  { id: 'creative',       emoji: '🤩', label: 'The Creative',          desc: 'Living in my own world' },
 ];
 
 const AVK = 'nh_pwa_avatar'; // localStorage key
@@ -3727,7 +3762,24 @@ function getAvatarEmoji() {
 function renderProfileAvatar() {
   const el = document.getElementById('profileAvatar');
   if (!el) return;
-  if (userAvatar) {
+  // Priority: Google photo > chosen emoji avatar > initials
+  if (userData && userData.photo && !userData.skipAuth) {
+    var img = document.createElement('img');
+    img.src = userData.photo;
+    img.alt = userData.name || 'Profile';
+    img.referrerPolicy = 'no-referrer'; // required for Google photo URLs
+    img.onerror = function() {
+      // Fallback to emoji or initials if photo fails to load
+      el.innerHTML = '';
+      if (userAvatar) {
+        el.innerHTML = '<span class="profile-avatar-emoji">' + userAvatar.emoji + '</span>';
+      } else {
+        el.textContent = userData.name ? userData.name.slice(0, 2).toUpperCase() : '?';
+      }
+    };
+    el.innerHTML = '';
+    el.appendChild(img);
+  } else if (userAvatar) {
     el.innerHTML = '<span class="profile-avatar-emoji">' + userAvatar.emoji + '</span>';
     el.style.fontSize = '32px';
   } else {
@@ -3980,6 +4032,7 @@ function renderPhaseGuide() {
     { phase: 2, name: 'Warming Up',         desc: 'Some core habits done across your categories. Neurochemical activity is building.', trigger: '25% or more of your core habits complete', col: '#c8712a' },
     { phase: 3, name: 'Foundation Active',  desc: 'At least 50% of your chosen core habits are done. The evidence says this is a genuinely good day for your brain.', trigger: '50% or more of your core habits complete', col: '#b85070' },
     { phase: 4, name: 'Thriving',           desc: 'All four systems are well supported. Your brain is fully activated today.', trigger: '75% or more of your core habits complete', col: '#4a9e82' },
+    { phase: 5, name: 'Enlightened',        desc: 'Every single core habit you chose is complete. A rare and exceptional day — all four neurochemical systems are fully anchored.', trigger: '100% of your core habits complete', col: '#7c6ab8' },
   ];
 
   el.innerHTML = phases.map(function(p) {
@@ -4048,6 +4101,7 @@ auth.onAuthStateChanged((user) => {
   if (user) {
     userData.name     = user.displayName || user.email.split('@')[0];
     userData.email    = user.email;
+    userData.photo    = user.photoURL || null;
     userData.skipAuth = false;
     sv(UK, userData);
     if (!appLaunched) launchApp();
