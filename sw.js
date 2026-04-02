@@ -4,7 +4,7 @@
    — Firebase/Fonts cached for offline use
    ═══════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'neurohabit-v16';
+const CACHE_NAME = 'neurohabit-v23';
 
 const PRECACHE = [
   '/nh-tracker-alpha/manifest.json',
@@ -12,6 +12,7 @@ const PRECACHE = [
   '/nh-tracker-alpha/icon-512.png',
   'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js',
+  'https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js',
   'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap',
 ];
 
